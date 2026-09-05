@@ -1,0 +1,37 @@
+name: NUGU RADAR Frontend QA
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Required deploy files
+        run: |
+          set -euo pipefail
+          for f in index.html styles.css app.js config.js platforms.js seed-fallback.js privacy.html terms.html CNAME .nojekyll; do test -f "$f"; done
+          test "$(cat CNAME)" = "nuguradar.suaveforge.com"
+      - name: JavaScript syntax
+        run: |
+          node --check app.js
+          node --check config.js
+          node --check platforms.js
+          node --check seed-fallback.js
+      - name: Runtime contract
+        run: |
+          grep -q 'styles.css' index.html
+          grep -q 'seed-fallback.js' index.html
+          grep -q 'DATA WARM-UP' app.js
+          grep -q 'RESCENE' seed-fallback.js
+          grep -q 'YOUNG POSSE' seed-fallback.js
+          grep -q '8TURN' seed-fallback.js
+          grep -q 'ALL(H)OURS' seed-fallback.js
+          grep -q 'privacy.html' index.html
+          grep -q 'terms.html' index.html
+          echo NUGURADAR_FRONTEND_QA=PASS
