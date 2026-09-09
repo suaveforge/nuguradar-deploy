@@ -132,10 +132,6 @@
     const push=u=>{u=safeYoutube(u);if(u&&!candidates.includes(u))candidates.push(u)};
     push(leader.image_url);
     for(const c of leader.content||[])push(c.thumbnail_url);
-    for(const a of (data.artists||[]).filter(a=>a.slug!==leader.slug).sort((x,y)=>Number(x.rank||999)-Number(y.rank||999))){
-      push(a.image_url);
-      if(candidates.length>=12)break;
-    }
     for(const url of candidates){
       if(await preload(url)){
         if(seq!==heroSeq)return;
@@ -145,7 +141,11 @@
         return;
       }
     }
-    if(seq===heroSeq)media.dataset.heroImage='unavailable';
+    if(seq===heroSeq){
+      media.style.backgroundImage='none';
+      media.dataset.heroImage='unavailable';
+      media.dataset.heroArtist=leader.slug;
+    }
   }
   async function load(){
     let data=window.NUGU_FALLBACK||{artists:[]};
