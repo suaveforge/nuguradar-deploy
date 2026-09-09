@@ -80,9 +80,38 @@
       if(direct[trimmed])next=next.replace(trimmed,direct[trimmed]);
       if(next!==t)n.nodeValue=next;
     }
+    document.querySelectorAll('.feed-copy em,.video-copy em,.watch-copy em').forEach(el=>{
+      const play=/^▶\s*Play here/i.test(el.textContent||'');
+      el.textContent=play?'▶ Play here · ✓ 공식 계정에서 확인한 콘텐츠':'✓ 공식 계정에서 확인한 콘텐츠';
+    });
+    document.querySelectorAll('.official-network a small').forEach(el=>{el.textContent='✓ Official link'});
+    document.querySelectorAll('.ribbon-item small').forEach(el=>{
+      const t=(el.textContent||'').trim();
+      if(/^LIVE\s*·/i.test(t))el.textContent='live updates';
+      else if(/^(DISPLAY|OFFICIAL|LINK)\s*·/i.test(t))el.textContent='official link';
+      else if(/^IDENTITY\s*·/i.test(t))el.textContent='artist info';
+      else if(/^MEDIA\s*·/i.test(t))el.textContent='photo source';
+    });
     document.querySelectorAll('.connector-row small').forEach(el=>{
       const t=el.textContent.trim().toLowerCase();
-      if(['source','rank','display','identity','media','official','link'].includes(t))el.textContent='watching';
+      if(['source','rank','display','identity','media','official','link','official channel id','business discovery','exact user id','musicbrainz mbid','verified url + oembed','canonical url + embed','verified official page','cc0 entity graph','cc0 mbid','license checked','verified official link'].includes(t))el.textContent='watching';
+    });
+    document.querySelectorAll('.connector-row strong').forEach(el=>{
+      const t=el.textContent.trim().toLowerCase();
+      if(['30m','60m'].includes(t))el.textContent='frequent';
+      else if(t==='6h')el.textContent='regular';
+      else if(['link','identity'].includes(t))el.textContent='linked';
+    });
+    document.querySelectorAll('.connector-status').forEach(el=>{
+      const t=el.textContent.trim().toUpperCase();
+      if(['READY','LIVE'].includes(t))el.textContent='LIVE';
+      else if(['DISPLAY','IDENTITY','MEDIA','OFFICIAL','LINK','CONNECTED'].includes(t))el.textContent='CONNECTED';
+      else if(['WARMING','COMING IN'].includes(t))el.textContent='COMING IN';
+      else el.textContent='CHECKING';
+    });
+    document.querySelectorAll('.detail-section').forEach(section=>{
+      const h=section.querySelector('h3');
+      if(h&&['Canonical identity','Artist info'].includes(h.textContent.trim()))section.style.display='none';
     });
   }
   let queued=false;
