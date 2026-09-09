@@ -53,7 +53,19 @@
     [/API configuration unavailable\./g,'Hall of Fame is taking a short break.'],
     [/Loading real graduates…/g,'불러오는 중…'],
     [/Hall of Fame data unavailable\./g,'지금은 명예의 전당을 불러오지 못했어요.'],
-    [/다시 연결되면 실제 졸업 기록만 표시됩니다\./g,'잠시 후 다시 확인해 주세요.']
+    [/다시 연결되면 실제 졸업 기록만 표시됩니다\./g,'잠시 후 다시 확인해 주세요.'],
+    [/Verified artist room/g,'A room for early fans'],
+    [/This act crossed the discovery gate\. Its early-room history stays readable, but new Radar Time, Glow and posts are paused\./g,'이 팀은 이제 Radar를 졸업했어요. 먼저 좋아했던 기록은 그대로 남아 있고, 이 방은 추억을 보는 공간으로 남습니다.'],
+    [/Community Glow never changes Momentum Rank/g,'Community Glow는 팬들의 응원이고, Momentum은 팀이 얼마나 빠르게 커지는지를 보여줘요'],
+    [/This act graduated from the discovery pool\. Existing early-support records stay preserved\./g,'이 팀은 Radar를 졸업했어요. 먼저 좋아했던 기록은 그대로 남습니다.'],
+    [/Visible, active room time earns up to one minute per minute\. Idle or hidden tabs stop earning\./g,'이 방에서 실제로 보고 놀고 있는 시간만 Radar Time으로 차곡차곡 쌓여요.'],
+    [/account synced/g,'saved to your account'],
+    [/Outside Radar — history preserved\./g,'Radar graduate — your memories stay.'],
+    [/Earliest supporters keep their original timestamp\. You cannot buy or backdate this\./g,'먼저 좋아했던 사람의 자리는 그대로 남아요. 나중에 돈으로 살 수도, 시간을 되돌릴 수도 없어요.'],
+    [/Name comes from your AuthHub account/g,'Name comes from your signed-in profile'],
+    [/This act has crossed the NUGU RADAR mainstream gate\./g,'이 팀은 이제 Radar를 졸업했어요.'],
+    [/This room has graduated outside the Radar\./g,'이 방의 팀은 이제 Radar를 졸업했어요.'],
+    [/Archived room · new posts paused/g,'Hall of Fame room · 추억만 남겨두는 공간이에요']
   ];
   const direct={READY:'LIVE',WARMING:'COMING IN',IDENTITY:'CONNECTED',DISPLAY:'CONNECTED',MEDIA:'CONNECTED',OFFICIAL:'CONNECTED',LINK:'CONNECTED',UNKNOWN:'CHECKING'};
   function polishText(root=document.body){
