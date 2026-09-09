@@ -1,13 +1,13 @@
 (()=>{
   const style=document.createElement('style');
-  style.textContent='.nugu-image-unavailable{position:absolute;inset:0;display:grid;place-items:center;padding:12px;background:linear-gradient(135deg,#111,#1b1b1b);color:#9b9b9b;font:600 11px/1.2 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;text-align:center}.feed-thumb,.watch-thumb,.artist-card,.breakout-card,.compact-artist,.detail-hero,.watch-artist{position:relative}';
+  style.textContent='.nugu-image-unavailable{position:absolute;inset:0;display:grid;place-items:center;padding:12px;background:linear-gradient(135deg,#111,#1b1b1b);color:#9b9b9b;font:600 11px/1.2 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;text-align:center}.feed-thumb,.watch-thumb,.artist-card,.breakout-card,.compact-artist,.detail-hero,.watch-artist,.community-card,.spotlight-card,.room-hero{position:relative}';
   document.head.appendChild(style);
   const cfg=window.NUGU_CONFIG||{};
   const api=String(cfg.apiBase||'').replace(/\/$/,'');
   let fallbackPromise=null;
   const fallbacks=new Map();
 
-  const isArtistImage=img=>Boolean(img.closest('.artist-card,.breakout-card,.compact-artist,.detail-hero,.watch-artist'));
+  const isArtistImage=img=>Boolean(img.closest('.artist-card,.breakout-card,.compact-artist,.detail-hero,.watch-artist,.community-card,.spotlight-card,.room-hero'));
   const isContentImage=img=>Boolean(img.closest('.feed-thumb,.video-row,.watch-thumb'));
   const youtubeSafe=url=>{
     const s=String(url||'');
@@ -32,6 +32,12 @@
     })();
     return fallbackPromise;
   }
+  function artistSlugFor(img){
+    const direct=img.closest('[data-slug]')?.dataset.slug;if(direct)return direct;
+    const link=img.closest('a[href*="room.html?artist="]');if(link){try{return new URL(link.href,location.href).searchParams.get('artist')||''}catch{}}
+    if(img.closest('.room-hero'))return new URLSearchParams(location.search).get('artist')||'';
+    return '';
+  }
   function hideBroken(img,label=''){
     img.dataset.nuguImageFinal='1';
     img.style.visibility='hidden';
@@ -52,7 +58,7 @@
       if(isArtistImage(img)){
         const local=img.closest('.watch-card')?.querySelector('.watch-thumb img')||img.closest('#dialogBody')?.querySelector('.video-row img');
         if(local&&local!==img&&local.src&&local.src!==current){img.dataset.nuguImageStage='local-content';img.src=local.src;return}
-        const slug=img.closest('[data-slug]')?.dataset.slug;
+        const slug=artistSlugFor(img);
         if(slug){await ensureFallbacks();const src=itemSrc(fallbacks.get(slug));if(src&&src!==current){img.dataset.nuguImageStage='artist-content';img.src=src;return}}
         hideBroken(img,'Verified media pending');return;
       }
