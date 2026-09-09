@@ -8,7 +8,7 @@
   if(!window.AuthHubClient||!window.NUGU_AUTH)return;
   const client=new window.AuthHubClient({apiBase:API,project:PROJECT,environment:ENV});
 
-  function claims(token){try{const p=String(token||'').split('.')[1];return p?JSON.parse(atob(p.replace(/-/g,'+').replace(/_/g,'/'))):null}catch{return null}}
+  function claims(token){try{const raw=String(token||'').split('.')[1];if(!raw)return null;let p=raw.replace(/-/g,'+').replace(/_/g,'/');p=p.padEnd(Math.ceil(p.length/4)*4,'=');return JSON.parse(atob(p))}catch{return null}}
   function cachedProfile(){try{return JSON.parse(localStorage.getItem(PROFILE_KEY)||'null')}catch{return null}}
   function profileName(profile,sessionClaims){
     const name=String(profile?.displayName||profile?.user?.displayName||'').trim();if(name)return name.slice(0,20);
