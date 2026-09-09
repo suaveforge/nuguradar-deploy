@@ -2,53 +2,184 @@
   const player=document.getElementById('watchPlayer');
   const playerBody=document.getElementById('playerBody');
   const feed=document.getElementById('watchFeed');
-  let portraitNext=false,latestTime=0,savedScrollY=0,pageLocked=false;
+  if(!player||!playerBody)return;
 
-  const ytId=url=>{const s=String(url||'');let m=s.match(/(?:i\.ytimg\.com|img\.youtube\.com)\/vi\/([^/]+)\//i);if(m)return m[1];m=s.match(/[?&]v=([^&#]+)/i);if(m)return m[1];m=s.match(/youtu\.be\/([^?&#/]+)/i);return m?m[1]:''};
-  function qualityCandidates(img){const original=img.dataset.direct||img.getAttribute('src')||'';const id=ytId(original)||ytId(img.getAttribute('src'));const rows=[];const push=u=>{if(u&&!rows.includes(u))rows.push(u)};if(id){push(`https://i.ytimg.com/vi/${encodeURIComponent(id)}/maxresdefault.jpg`);push(`https://i.ytimg.com/vi/${encodeURIComponent(id)}/sddefault.jpg`);push(`https://i.ytimg.com/vi/${encodeURIComponent(id)}/hqdefault.jpg`)}push(original);push(img.dataset.fallback);return rows}
-  function upgradeThumb(img){if(!img||img.dataset.qualityWired)return;img.dataset.qualityWired='1';const candidates=qualityCandidates(img);if(!candidates.length)return;let idx=0;const apply=()=>{if(idx>=candidates.length){img.dataset.quality='fallback';return}img.src=candidates[idx];img.dataset.quality=idx===0?'max':idx===1?'sd':idx===2?'hq':'fallback'};img.addEventListener('error',()=>{idx++;apply()});img.addEventListener('load',()=>{if(img.naturalWidth&&img.naturalWidth<480&&idx<candidates.length-1){idx++;apply()}});apply()}
-  function scanThumbs(root){if(!root)return;if(root.matches?.('.watch-thumb img'))upgradeThumb(root);root.querySelectorAll?.('.watch-thumb img').forEach(upgradeThumb)}
-  function cardLooksPortrait(card){if(!card)return false;const kind=(card.querySelector('.watch-artist small')?.textContent||'').toLowerCase();const title=(card.querySelector('.watch-copy h2')?.textContent||'').toLowerCase();return kind.includes('shorts')||title.includes('#shorts')||title.includes(' shorts')}
-  document.addEventListener('pointerdown',e=>{const card=e.target.closest?.('.watch-card');if(card)portraitNext=cardLooksPortrait(card)},true);
-  document.addEventListener('keydown',e=>{if(e.key!=='Enter'&&e.key!==' ')return;const card=e.target.closest?.('.watch-card');if(card)portraitNext=cardLooksPortrait(card)},true);
+  let portraitNext=false;
+  let latestTime=0;
 
-  const playerIframe=()=>playerBody?.querySelector('.player-frame iframe')||null;
-  const playerFrame=()=>playerBody?.querySelector('.player-frame')||null;
-  function sendYoutube(func,args=[]){const frame=playerIframe();if(!frame?.contentWindow)return;try{frame.contentWindow.postMessage(JSON.stringify({event:'command',func,args}),'*')}catch{}}
-  function enableYoutubeApi(){const frame=playerIframe();if(!frame||frame.dataset.nuguApiReady)return;frame.dataset.nuguApiReady='1';const listen=()=>{try{frame.contentWindow?.postMessage(JSON.stringify({event:'listening',id:'nugu-radar-watch'}),'*')}catch{}};frame.addEventListener('load',listen);setTimeout(listen,0)}
-  const preciseTimeLabel=s=>{const n=Math.max(0,Number(s)||0),m=Math.floor(n/60),sec=n-m*60;return`${m}:${sec.toFixed(1).padStart(4,'0')}`};
-  function updateSceneTime(){const el=playerBody?.querySelector('#frameTopkkuTime');if(el)el.textContent=preciseTimeLabel(latestTime)}
-  window.addEventListener('message',e=>{const frame=playerIframe();if(!frame||e.source!==frame.contentWindow)return;let data=e.data;try{if(typeof data==='string')data=JSON.parse(data)}catch{return}const t=Number(data?.info?.currentTime);if(Number.isFinite(t)&&t>=0){latestTime=t;updateSceneTime()}});
+  const ytId=url=>{
+    const s=String(url||'');
+    let m=s.match(/(?:i\.ytimg\.com|img\.youtube\.com)\/vi\/([^/]+)\//i);
+    if(m)return m[1];
+    m=s.match(/[?&]v=([^&#]+)/i);
+    if(m)return m[1];
+    m=s.match(/youtu\.be\/([^?&#/]+)/i);
+    return m?m[1]:'';
+  };
+
+  function qualityCandidates(img){
+    const original=img.dataset.direct||img.getAttribute('src')||'';
+    const id=ytId(original)||ytId(img.getAttribute('src'));
+    const rows=[];
+    const push=u=>{if(u&&!rows.includes(u))rows.push(u)};
+    if(id){
+      push(`https://i.ytimg.com/vi/${encodeURIComponent(id)}/maxresdefault.jpg`);
+      push(`https://i.ytimg.com/vi/${encodeURIComponent(id)}/sddefault.jpg`);
+      push(`https://i.ytimg.com/vi/${encodeURIComponent(id)}/hqdefault.jpg`);
+    }
+    push(original);
+    push(img.dataset.fallback);
+    return rows;
+  }
+
+  function upgradeThumb(img){
+    if(!img||img.dataset.qualityWired)return;
+    img.dataset.qualityWired='1';
+    const candidates=qualityCandidates(img);
+    if(!candidates.length)return;
+    let idx=0;
+    const apply=()=>{
+      if(idx>=candidates.length){img.dataset.quality='fallback';return}
+      img.src=candidates[idx];
+      img.dataset.quality=idx===0?'max':idx===1?'sd':idx===2?'hq':'fallback';
+    };
+    img.addEventListener('error',()=>{idx++;apply()});
+    img.addEventListener('load',()=>{
+      if(img.naturalWidth&&img.naturalWidth<480&&idx<candidates.length-1){idx++;apply()}
+    });
+    apply();
+  }
+
+  function scanThumbs(root){
+    if(!root)return;
+    if(root.matches?.('.watch-thumb img'))upgradeThumb(root);
+    root.querySelectorAll?.('.watch-thumb img').forEach(upgradeThumb);
+  }
+
+  function cardLooksPortrait(card){
+    if(!card)return false;
+    const kind=(card.querySelector('.watch-artist small')?.textContent||'').toLowerCase();
+    const title=(card.querySelector('.watch-copy h2')?.textContent||'').toLowerCase();
+    return kind.includes('shorts')||title.includes('#shorts')||title.includes(' shorts');
+  }
+
+  document.addEventListener('pointerdown',e=>{
+    const card=e.target.closest?.('.watch-card');
+    if(card)portraitNext=cardLooksPortrait(card);
+  },true);
+
+  document.addEventListener('keydown',e=>{
+    if(e.key!=='Enter'&&e.key!==' ')return;
+    const card=e.target.closest?.('.watch-card');
+    if(card)portraitNext=cardLooksPortrait(card);
+  },true);
+
+  const playerIframe=()=>playerBody.querySelector('.player-frame iframe');
+
+  function sendYoutube(func,args=[]){
+    const frame=playerIframe();
+    if(!frame?.contentWindow)return;
+    try{frame.contentWindow.postMessage(JSON.stringify({event:'command',func,args}),'*')}catch{}
+  }
+
+  function enableYoutubeApi(){
+    const frame=playerIframe();
+    if(!frame||frame.dataset.nuguApiReady)return;
+    frame.dataset.nuguApiReady='1';
+    const listen=()=>{
+      try{frame.contentWindow?.postMessage(JSON.stringify({event:'listening',id:'nugu-radar-watch'}),'*')}catch{}
+    };
+    frame.addEventListener('load',listen);
+    setTimeout(listen,0);
+  }
+
+  const preciseTimeLabel=s=>{
+    const n=Math.max(0,Number(s)||0),m=Math.floor(n/60),sec=n-m*60;
+    return `${m}:${sec.toFixed(1).padStart(4,'0')}`;
+  };
+
+  function updateSceneTime(){
+    const el=playerBody.querySelector('#frameTopkkuTime');
+    if(el)el.textContent=preciseTimeLabel(latestTime);
+  }
+
+  function captureMessage(text,state=''){
+    const el=playerBody.querySelector('#frameTopkkuState');
+    if(el){el.textContent=text;el.dataset.state=state}
+  }
+
+  window.addEventListener('message',e=>{
+    const frame=playerIframe();
+    if(!frame||e.source!==frame.contentWindow)return;
+    let data=e.data;
+    try{if(typeof data==='string')data=JSON.parse(data)}catch{return}
+    const t=Number(data?.info?.currentTime);
+    if(Number.isFinite(t)&&t>=0){latestTime=t;updateSceneTime()}
+  });
+
   const wait=ms=>new Promise(r=>setTimeout(r,ms));
-  async function nudgeFrame(delta){const buttons=playerBody?.querySelectorAll('.frame-nudge button')||[];buttons.forEach(b=>b.disabled=true);try{const next=Math.max(0,Math.round((Number(latestTime||0)+Number(delta||0))*10)/10);latestTime=next;sendYoutube('pauseVideo');sendYoutube('seekTo',[next,true]);updateSceneTime();await wait(120);sendYoutube('pauseVideo');captureMessage(`${preciseTimeLabel(next)} 장면을 골랐어요. 더 미세하게 맞추거나 바로 탑꾸해보세요.`,'picked')}finally{buttons.forEach(b=>b.disabled=false)}}
 
-  async function videoFromStream(stream){const v=document.createElement('video');v.muted=true;v.playsInline=true;v.srcObject=stream;await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('capture_timeout')),6000);v.onloadedmetadata=()=>{clearTimeout(timer);resolve()};v.onerror=()=>{clearTimeout(timer);reject(new Error('capture_video_error'))}});await v.play();await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));return v}
-  function frameCanvas(video){const c=document.createElement('canvas');c.width=video.videoWidth;c.height=video.videoHeight;c.getContext('2d').drawImage(video,0,0);return c}
-  function drawCanvas(source,x,y,w,h,maxSide=1400){if(!w||!h)throw new Error('capture_scale');const scale=Math.min(1,maxSide/Math.max(w,h));const out=document.createElement('canvas');out.width=Math.max(1,Math.round(w*scale));out.height=Math.max(1,Math.round(h*scale));const c=out.getContext('2d');c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';c.drawImage(source,x,y,w,h,0,0,out.width,out.height);return out}
-  function fallbackCrop(video){const frame=playerFrame();if(!frame)throw new Error('player_missing');const r=frame.getBoundingClientRect();const vw=document.documentElement.clientWidth||innerWidth,vh=document.documentElement.clientHeight||innerHeight;const sx=video.videoWidth/vw,sy=video.videoHeight/vh;const x=Math.max(0,r.left*sx),y=Math.max(0,r.top*sy),w=Math.min(video.videoWidth-x,r.width*sx),h=Math.min(video.videoHeight-y,r.height*sy);return drawCanvas(frameCanvas(video),x,y,w,h,1600)}
-  async function cropTrackToPlayer(track){const Crop=globalThis.CropTarget,host=playerFrame();if(!Crop?.fromElement||typeof track?.cropTo!=='function'||!host)return false;try{const target=await Crop.fromElement(host);await Promise.race([track.cropTo(target),new Promise((_,reject)=>setTimeout(()=>reject(new Error('crop_timeout')),1400))]);await wait(120);return true}catch(e){console.warn('Region Crop unavailable; using geometry fallback',e);return false}}
+  async function nudgeFrame(delta){
+    const buttons=[...playerBody.querySelectorAll('.frame-nudge button')];
+    buttons.forEach(b=>b.disabled=true);
+    try{
+      const next=Math.max(0,Math.round((Number(latestTime||0)+Number(delta||0))*10)/10);
+      latestTime=next;
+      sendYoutube('pauseVideo');
+      sendYoutube('seekTo',[next,true]);
+      updateSceneTime();
+      await wait(140);
+      sendYoutube('pauseVideo');
+      captureMessage(`${preciseTimeLabel(next)} 장면을 골랐어요. 더 미세하게 맞추거나 바로 탑꾸해보세요.`,'picked');
+    }finally{
+      buttons.forEach(b=>b.disabled=false);
+    }
+  }
 
-  function darkRatioColumn(data,w,h,x,y0,y1){let dark=0,n=0;const step=Math.max(1,Math.floor((y1-y0)/140));for(let y=y0;y<y1;y+=step){const i=(y*w+x)*4,l=(data[i]+data[i+1]+data[i+2])/3;n++;if(l<28)dark++}return n?dark/n:0}
-  function darkRatioRow(data,w,h,y,x0,x1){let dark=0,n=0;const step=Math.max(1,Math.floor((x1-x0)/140));for(let x=x0;x<x1;x+=step){const i=(y*w+x)*4,l=(data[i]+data[i+1]+data[i+2])/3;n++;if(l<28)dark++}return n?dark/n:0}
-  function trimLetterbox(canvas,portrait){const w=canvas.width,h=canvas.height;if(w<180||h<180)return canvas;const ctx=canvas.getContext('2d',{willReadFrequently:true}),data=ctx.getImageData(0,0,w,h).data;let left=0,right=w-1,top=0,bottom=h-1;const y0=Math.floor(h*.12),y1=Math.ceil(h*.88);while(left<w*.42&&darkRatioColumn(data,w,h,left,y0,y1)>.9)left+=2;while(right>w*.58&&darkRatioColumn(data,w,h,right,y0,y1)>.9)right-=2;const x0=Math.max(left,Math.floor(w*.2)),x1=Math.min(right,Math.ceil(w*.8));while(top<h*.18&&darkRatioRow(data,w,h,top,x0,x1)>.92)top+=2;while(bottom>h*.82&&darkRatioRow(data,w,h,bottom,x0,x1)>.92)bottom-=2;let cw=right-left+1,ch=bottom-top+1;if(cw<w*.42||ch<h*.55){left=0;right=w-1;top=0;bottom=h-1;cw=w;ch=h}if(portrait&&cw/ch>.7){const target=Math.min(cw,ch*9/16),cx=(left+right)/2;left=Math.max(left,cx-target/2);right=Math.min(right,cx+target/2);cw=right-left+1}return drawCanvas(canvas,left,top,cw,bottom-top+1,1600)}
-  function rowEdgeScore(data,w,y,x0,x1){let edges=0,n=0;for(let x=x0+2;x<x1-2;x+=2){const i=(y*w+x)*4,j=(y*w+x-2)*4;const l=(data[i]+data[i+1]+data[i+2])/3,p=(data[j]+data[j+1]+data[j+2])/3;n++;if(Math.abs(l-p)>72&&Math.max(data[i],data[i+1],data[i+2])>150)edges++}return n?edges/n:0}
-  function trimCutEdgeText(canvas){const w=canvas.width,h=canvas.height;if(w<220||h<260)return canvas;const ctx=canvas.getContext('2d',{willReadFrequently:true}),data=ctx.getImageData(0,0,w,h).data;const x0=Math.floor(w*.04),x1=Math.floor(w*.82),start=Math.floor(h*.91);let noisy=0,first=h;for(let y=start;y<h;y+=2){if(rowEdgeScore(data,w,y,x0,x1)>.055){noisy++;first=Math.min(first,y)}}if(noisy<3||first>h*.97)return canvas;const trim=Math.min(h*.075,Math.max(0,h-first+5));return trim>=5?drawCanvas(canvas,0,0,w,h-trim,1600):canvas}
-  function trimPlayerControlEdge(canvas){const w=canvas.width,h=canvas.height;if(w<200||h<200)return canvas;const ctx=canvas.getContext('2d',{willReadFrequently:true}),d=ctx.getImageData(0,0,w,h).data;let bright=0,red=0,n=0;const y0=Math.floor(h*.972);for(let y=y0;y<h;y+=2)for(let x=0;x<w;x+=4){const i=(y*w+x)*4,r=d[i],g=d[i+1],b=d[i+2];n++;if(r>175&&g>175&&b>175)bright++;if(r>150&&r>g*1.45&&r>b*1.45)red++}if(n&&(bright/n>.08||red/n>.02))return drawCanvas(canvas,0,0,w,Math.floor(h*.965),1600);return canvas}
+  function wireFrameAction(){
+    const title=playerBody.querySelector('.player-title');
+    if(!title||title.querySelector('#frameTopkkuButton'))return;
+    enableYoutubeApi();
+    const wrap=document.createElement('div');
+    wrap.className='frame-topkku-action';
+    wrap.innerHTML=`<div class="frame-scene-head"><b>딱 이 표정으로</b><strong id="frameTopkkuTime">${preciseTimeLabel(latestTime)}</strong></div><div class="frame-nudge" aria-label="장면 미세 선택"><button type="button" data-step="-0.2">−0.2초</button><button type="button" data-step="-0.1">−0.1초</button><button type="button" data-step="0.1">+0.1초</button><button type="button" data-step="0.2">+0.2초</button></div><button id="frameTopkkuButton" type="button">✨ 이 장면 탑꾸</button><span id="frameTopkkuState">원하는 표정에 맞춘 뒤 눌러보세요. 실제 영상 영역만 가져와요.</span>`;
+    title.appendChild(wrap);
+    wrap.querySelectorAll('.frame-nudge button').forEach(b=>b.addEventListener('click',()=>nudgeFrame(Number(b.dataset.step))));
+    updateSceneTime();
+  }
 
-  const canvasDataUrl=(canvas,quality=.91)=>new Promise((resolve,reject)=>{canvas.toBlob(blob=>{if(!blob)return reject(new Error('capture_encode'));const reader=new FileReader();reader.onload=()=>resolve(String(reader.result||''));reader.onerror=()=>reject(new Error('capture_encode'));reader.readAsDataURL(blob)},'image/jpeg',quality)});
-  async function storeIncoming(canvas,meta){let image=await canvasDataUrl(canvas,.91);let payload={version:6,source:'watch',image,artist:meta.artist,title:meta.title,contentUrl:meta.contentUrl,time:meta.time,capturedAt:new Date().toISOString(),cleanCapture:true,finePicked:true,videoOnly:true,captureMode:meta.captureMode};try{sessionStorage.setItem('nuguTopkkuIncoming',JSON.stringify(payload));return}catch{}const compact=document.createElement('canvas'),ratio=Math.min(1,960/Math.max(canvas.width,canvas.height));compact.width=Math.max(1,Math.round(canvas.width*ratio));compact.height=Math.max(1,Math.round(canvas.height*ratio));compact.getContext('2d').drawImage(canvas,0,0,compact.width,compact.height);payload.image=await canvasDataUrl(compact,.82);sessionStorage.setItem('nuguTopkkuIncoming',JSON.stringify(payload))}
-  function captureMessage(text,state=''){const el=playerBody?.querySelector('#frameTopkkuState');if(el){el.textContent=text;el.dataset.state=state}}
+  function syncPlayer(){
+    if(!player.open)return;
+    const title=(playerBody.querySelector('.player-title h2')?.textContent||'').toLowerCase();
+    const portrait=portraitNext||title.includes('#shorts')||title.includes(' shorts');
+    player.classList.toggle('is-vertical',portrait);
+    wireFrameAction();
+    enableYoutubeApi();
+    updateSceneTime();
+  }
 
-  async function captureFrame(){const button=playerBody?.querySelector('#frameTopkkuButton');if(!button)return;if(!navigator.mediaDevices?.getDisplayMedia){captureMessage('이 브라우저는 바로 캡처를 지원하지 않아요.','error');return}const controls=playerBody?.querySelectorAll('.frame-topkku-action button')||[];controls.forEach(b=>b.disabled=true);const title=playerBody?.querySelector('.player-title h2')?.textContent?.trim()||'NUGU RADAR Watch';const metaLine=playerBody?.querySelector('.player-title p')?.textContent?.trim()||'';const artist=metaLine.split('·')[0]?.trim()||'';const sourceLink=playerBody?.querySelector('.player-title a')?.href||'';const clickedTime=Math.max(0,Number(latestTime)||0);let stream=null;try{captureMessage(`${preciseTimeLabel(clickedTime)} 장면에서 영상만 가져올게요. “현재 탭”을 허용해 주세요.`,'working');stream=await navigator.mediaDevices.getDisplayMedia({video:true,audio:false,preferCurrentTab:true,selfBrowserSurface:'include'});const track=stream.getVideoTracks()[0],surface=track?.getSettings?.().displaySurface;if(surface&&surface!=='browser')throw new Error('choose_current_tab');const cropped=await cropTrackToPlayer(track);const video=await videoFromStream(stream);const targetTime=clickedTime,warmStart=Math.max(0,targetTime-.35);sendYoutube('seekTo',[warmStart,true]);sendYoutube('playVideo');await wait(900);let canvas=cropped?frameCanvas(video):fallbackCrop(video);sendYoutube('pauseVideo');sendYoutube('seekTo',[targetTime,true]);latestTime=targetTime;updateSceneTime();canvas=trimLetterbox(canvas,player?.classList.contains('is-vertical'));canvas=trimPlayerControlEdge(canvas);canvas=trimCutEdgeText(canvas);await storeIncoming(canvas,{artist,title,contentUrl:sourceLink,time:targetTime,captureMode:cropped?'region':'geometry'});captureMessage(`${preciseTimeLabel(targetTime)} 장면에서 영상만 가져왔어요 ✨`,'success');setTimeout(()=>{location.href='topkku.html?from=watch'},180)}catch(err){console.warn('frame to topkku failed',err);sendYoutube('pauseVideo');sendYoutube('seekTo',[clickedTime,true]);latestTime=clickedTime;updateSceneTime();if(err?.name==='NotAllowedError')captureMessage('캡처를 취소했어요.','');else if(err?.message==='choose_current_tab')captureMessage('“현재 탭”을 선택해 주세요.','error');else captureMessage('장면을 가져오지 못했어요. 다시 시도해 주세요.','error')}finally{stream?.getTracks?.().forEach(t=>t.stop());controls.forEach(b=>b.disabled=false)}}
-
-  function wireFrameAction(){const title=playerBody?.querySelector('.player-title');if(!title||title.querySelector('#frameTopkkuButton'))return;enableYoutubeApi();const wrap=document.createElement('div');wrap.className='frame-topkku-action';wrap.innerHTML=`<div class="frame-scene-head"><b>딱 이 표정으로</b><strong id="frameTopkkuTime">${preciseTimeLabel(latestTime)}</strong></div><div class="frame-nudge" aria-label="장면 미세 선택"><button type="button" data-step="-0.2">−0.2초</button><button type="button" data-step="-0.1">−0.1초</button><button type="button" data-step="0.1">+0.1초</button><button type="button" data-step="0.2">+0.2초</button></div><button id="frameTopkkuButton" type="button">✨ 이 장면 탑꾸</button><span id="frameTopkkuState">원하는 표정에 맞춘 뒤 눌러보세요. 실제 영상 영역만 가져와요.</span>`;title.appendChild(wrap);wrap.querySelectorAll('.frame-nudge button').forEach(b=>b.addEventListener('click',()=>nudgeFrame(Number(b.dataset.step))));wrap.querySelector('#frameTopkkuButton').addEventListener('click',captureFrame);updateSceneTime()}
-  function lockPage(){if(pageLocked)return;pageLocked=true;savedScrollY=window.scrollY||0;document.documentElement.style.overflow='hidden';document.body.style.position='fixed';document.body.style.top=`-${savedScrollY}px`;document.body.style.left='0';document.body.style.right='0';document.body.style.width='100%';document.body.style.overflow='hidden'}
-  function unlockPage(){if(!pageLocked)return;pageLocked=false;document.documentElement.style.overflow='';document.body.style.position='';document.body.style.top='';document.body.style.left='';document.body.style.right='';document.body.style.width='';document.body.style.overflow='';window.scrollTo(0,savedScrollY)}
-  function syncPlayer(){if(!player?.open)return;const title=(playerBody?.querySelector('.player-title h2')?.textContent||'').toLowerCase();const portrait=portraitNext||title.includes('#shorts')||title.includes(' shorts');player.classList.toggle('is-vertical',portrait);lockPage();wireFrameAction();enableYoutubeApi();updateSceneTime()}
   window.addEventListener('nugu-watch-opened',syncPlayer);
-  const playerObserver=new MutationObserver(()=>{if(player?.open)queueMicrotask(syncPlayer)});if(playerBody)playerObserver.observe(playerBody,{childList:true});
-  const feedObserver=new MutationObserver(mutations=>{for(const m of mutations)for(const n of m.addedNodes)if(n.nodeType===1)scanThumbs(n)});if(feed)feedObserver.observe(feed,{childList:true});
-  player?.addEventListener('close',()=>{unlockPage();player.classList.remove('is-vertical');portraitNext=false;latestTime=0});
-  player?.addEventListener('cancel',unlockPage);
-  scanThumbs(feed);
+
+  const playerObserver=new MutationObserver(()=>{
+    if(player.open)queueMicrotask(syncPlayer);
+  });
+  playerObserver.observe(playerBody,{childList:true});
+
+  if(feed){
+    const feedObserver=new MutationObserver(mutations=>{
+      for(const m of mutations){
+        for(const n of m.addedNodes){
+          if(n.nodeType===1)scanThumbs(n);
+        }
+      }
+    });
+    feedObserver.observe(feed,{childList:true});
+    scanThumbs(feed);
+  }
+
+  player.addEventListener('close',()=>{
+    player.classList.remove('is-vertical');
+    portraitNext=false;
+    latestTime=0;
+  });
 })();
