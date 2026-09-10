@@ -136,7 +136,7 @@
         const p=new YT.Player(slot.id,{host:'https://www.youtube-nocookie.com',videoId:id,width:'100%',height:'100%',playerVars:{autoplay:1,mute:1,controls:0,rel:0,playsinline:1,disablekb:1,fs:0,iv_load_policy:3,origin:location.origin},events:{onReady:()=>{clearTimeout(timer);resolve(p);},onError:()=>{clearTimeout(timer);reject(new Error('clean_player_error'));}}});
       });
       yt.mute();
-      const duration=await waitDuration(yt),target=safeTarget(requested,duration),preRoll=Math.max(0,target-Math.min(.65,target));
+      const duration=await waitDuration(yt),target=safeTarget(requested,duration),preRoll=Math.max(0,target-Math.min(1.1,target));
       yt.seekTo(preRoll,true);yt.playVideo();
       return{stage,yt,portrait,ratio,box,duration,target};
     }catch(e){try{yt?.destroy?.();}catch{}stage.remove();throw e;}
@@ -151,8 +151,8 @@
         last=t;
       }
       if(state===YT.PlayerState.PLAYING&&Number.isFinite(t)&&t>=target-.035&&t<=target+.22)return t;
-      if((state===YT.PlayerState.BUFFERING||stalled>35)&&retries<2){retries++;const back=Math.max(0,target-.55);try{yt.seekTo(back,true);yt.playVideo();}catch{}stalled=0;await wait(120);}
-      if(Number.isFinite(t)&&t>target+.28&&retries<2){retries++;try{yt.seekTo(Math.max(0,target-.45),true);yt.playVideo();}catch{}await wait(80);}
+      if((state===YT.PlayerState.BUFFERING||stalled>35)&&retries<2){retries++;const back=Math.max(0,target-.8);try{yt.seekTo(back,true);yt.playVideo();}catch{}stalled=0;await wait(120);}
+      if(Number.isFinite(t)&&t>target+.28&&retries<2){retries++;try{yt.seekTo(Math.max(0,target-.65),true);yt.playVideo();}catch{}await wait(80);}
       await wait(22);
     }
     throw new Error('frame_sync_failed');
@@ -174,11 +174,11 @@
   function horizontalRedBar(src){
     const a=small(src,480),w=a.width,h=a.height,d=a.getContext('2d',{willReadFrequently:true}).getImageData(0,0,w,h).data;
     let best=0;
-    for(let y=Math.floor(h*.80);y<h;y++){
+    for(let y=Math.floor(h*.90);y<h;y++){
       let run=0,maxRun=0;
       for(let x=0;x<w;x++){
         const i=(y*w+x)*4,R=d[i],G=d[i+1],B=d[i+2];
-        if(R>150&&R>G*1.55&&R>B*1.4){run++;maxRun=Math.max(maxRun,run);}else run=0;
+        if(R>165&&R>G*1.65&&R>B*1.5){run++;maxRun=Math.max(maxRun,run);}else run=0;
       }
       best=Math.max(best,maxRun/w);
     }
@@ -189,8 +189,8 @@
     let dark=0,flat=0,n=0,edges=0;let prev=null;
     for(let y=0;y<h;y+=2)for(let x=0;x<w;x+=2){const i=(y*w+x)*4,L=luma(d[i],d[i+1],d[i+2]);n++;if(L<8)dark++;if(prev!==null){const e=Math.abs(L-prev);if(e<1.5)flat++;edges+=e;}prev=L;}
     const darkRatio=dark/Math.max(1,n),flatRatio=flat/Math.max(1,n),redRun=horizontalRedBar(a),detail=edges/Math.max(1,n);
-    const bad=darkRatio>.92||redRun>.34||detail<1.2;
-    return{bad,score:redRun*100+darkRatio*8+flatRatio*1.5-detail*.03,redRun:+redRun.toFixed(4),dark:+darkRatio.toFixed(4),detail:+detail.toFixed(2)};
+    const bad=darkRatio>.92||redRun>.58||detail<1.2;
+    return{bad,score:redRun*60+darkRatio*8+flatRatio*1.5-detail*.03,redRun:+redRun.toFixed(4),dark:+darkRatio.toFixed(4),detail:+detail.toFixed(2)};
   }
 
   async function dataUrl(c,q=.94){return await new Promise((ok,bad)=>c.toBlob(b=>{if(!b)return bad(new Error('encode'));const r=new FileReader;r.onload=()=>ok(String(r.result||''));r.onerror=()=>bad(new Error('encode'));r.readAsDataURL(b);},'image/jpeg',q));}
