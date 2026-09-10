@@ -5,15 +5,34 @@
   if(canDirectCapture())return;
 
   const $=(s,r=document)=>r.querySelector(s);
-  const setState=(text,state='')=>{const el=$('#frameTopkkuState',body);if(el){el.textContent=text;el.dataset.state=state;}};
-  const targetTime=()=>{const raw=(($('#frameTopkkuTime',body)?.textContent)||'0:00').trim(),p=raw.split(':').map(Number);if(p.length===3)return Math.max(0,(p[0]||0)*3600+(p[1]||0)*60+(p[2]||0));return Math.max(0,(p[0]||0)*60+(p[1]||0));};
-  const meta=()=>{const title=$('.player-title h2',body)?.textContent?.trim()||'NUGU RADAR Watch',mt=$('.player-title p',body)?.textContent?.trim()||'',artist=mt.split('·')[0]?.trim()||'',url=$('.player-title a',body)?.href||'';return{title,artist,url,time:targetTime()};};
+  const setState=(text,state='')=>{
+    const el=$('#frameTopkkuState',body);
+    if(!el)return;
+    if(el.textContent!==text)el.textContent=text;
+    if(el.dataset.state!==state)el.dataset.state=state;
+  };
+  const targetTime=()=>{
+    const raw=(($('#frameTopkkuTime',body)?.textContent)||'0:00').trim(),p=raw.split(':').map(Number);
+    if(p.length===3)return Math.max(0,(p[0]||0)*3600+(p[1]||0)*60+(p[2]||0));
+    return Math.max(0,(p[0]||0)*60+(p[1]||0));
+  };
+  const meta=()=>{
+    const title=$('.player-title h2',body)?.textContent?.trim()||'NUGU RADAR Watch';
+    const mt=$('.player-title p',body)?.textContent?.trim()||'';
+    const artist=mt.split('·')[0]?.trim()||'';
+    const url=$('.player-title a',body)?.href||'';
+    return{title,artist,url,time:targetTime()};
+  };
 
   function decorate(){
     const b=$('#frameTopkkuButton',body);
-    if(!b)return;
-    b.textContent='🖼 스크린샷으로 탑꾸';
+    if(!b||b.dataset.mobileFallback==='1')return;
+
+    // Set the guard before mutating descendants. The MutationObserver watches
+    // playerBody, so doing this first prevents the text/state changes below
+    // from recursively re-entering decorate() on iOS Safari.
     b.dataset.mobileFallback='1';
+    b.textContent='🖼 스크린샷으로 탑꾸';
     b.title='iPhone/iPad에서는 현재 탭 자동 캡처 대신 스크린샷이나 사진을 골라 탑꾸로 이어집니다.';
     setState('iPhone에서는 원하는 장면을 크게 띄워 스크린샷을 찍은 뒤 이 버튼에서 사진을 골라주세요.','mobile');
   }
@@ -49,8 +68,17 @@
     const c=document.createElement('canvas');
     c.width=Math.max(1,Math.round(img.naturalWidth*scale));
     c.height=Math.max(1,Math.round(img.naturalHeight*scale));
-    const g=c.getContext('2d');g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(img,0,0,c.width,c.height);
-    const data=await new Promise((resolve,reject)=>c.toBlob(blob=>{if(!blob)return reject(new Error('encode'));const r=new FileReader();r.onerror=()=>reject(new Error('encode'));r.onload=()=>resolve(String(r.result||''));r.readAsDataURL(blob);},'image/jpeg',.92));
+    const g=c.getContext('2d');
+    g.imageSmoothingEnabled=true;
+    g.imageSmoothingQuality='high';
+    g.drawImage(img,0,0,c.width,c.height);
+    const data=await new Promise((resolve,reject)=>c.toBlob(blob=>{
+      if(!blob)return reject(new Error('encode'));
+      const r=new FileReader();
+      r.onerror=()=>reject(new Error('encode'));
+      r.onload=()=>resolve(String(r.result||''));
+      r.readAsDataURL(blob);
+    },'image/jpeg',.92));
     return{data,width:c.width,height:c.height};
   }
 
@@ -70,14 +98,20 @@
     }
   }
 
-  const observer=new MutationObserver(decorate);
+  const observer=new MutationObserver(()=>{
+    // Only touch the DOM when a newly rendered Topkku button still needs
+    // mobile decoration. Other player mutations (time labels, state text,
+    // iframe changes) are ignored, preventing observer feedback loops.
+    if(body.querySelector('#frameTopkkuButton:not([data-mobile-fallback="1"])'))decorate();
+  });
   observer.observe(body,{childList:true,subtree:true});
   decorate();
 
   window.addEventListener('click',e=>{
     const b=e.target.closest?.('#frameTopkkuButton');
     if(!b)return;
-    e.preventDefault();e.stopImmediatePropagation();
+    e.preventDefault();
+    e.stopImmediatePropagation();
     const input=picker();
     input.value='';
     input.onchange=()=>usePhoto(input.files?.[0]);
