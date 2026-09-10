@@ -4,6 +4,8 @@
   if(!dialog||!body)return;
 
   let busy=false;
+  const MIN_STAGE_CSS=120;
+  const MIN_CAPTURE_PX=64;
   const $=(s,r=document)=>r.querySelector(s);
   const wait=ms=>new Promise(r=>setTimeout(r,ms));
   const sourceFrame=()=>$('.player-frame iframe',body);
@@ -123,7 +125,7 @@
     const vw=Math.max(320,window.innerWidth||document.documentElement.clientWidth||1280);
     const vh=Math.max(320,window.innerHeight||document.documentElement.clientHeight||720);
     const box=fittedBox(vw*.88,vh*.88,ratio);
-    if(box.w<180||box.h<180)throw new Error('frame_too_small');
+    if(box.w<MIN_STAGE_CSS||box.h<MIN_STAGE_CSS)throw new Error('frame_too_small');
 
     const veil=document.createElement('div');
     veil.className='nugu-capture-veil-v6';
@@ -172,7 +174,7 @@
     if(!Number.isFinite(sx)||!Number.isFinite(sy)||sx<=0||sy<=0)return null;
     if(Math.abs(sx-sy)/Math.max(sx,sy)>.12)return null;
     const x=Math.round(r.left*sx),y=Math.round(r.top*sy),w=Math.round(r.width*sx),h=Math.round(r.height*sy);
-    if(w<150||h<150||x<0||y<0||x+w>full.width+3||y+h>full.height+3)return null;
+    if(w<MIN_CAPTURE_PX||h<MIN_CAPTURE_PX||x<0||y<0||x+w>full.width+3||y+h>full.height+3)return null;
     return{x:Math.max(0,x),y:Math.max(0,y),w:Math.min(w,full.width-Math.max(0,x)),h:Math.min(h,full.height-Math.max(0,y)),sx,sy};
   }
 
