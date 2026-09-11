@@ -1,0 +1,27 @@
+.topkku-fan-page{--tk-ink:#35284f;--tk-muted:#7d728a;--tk-pink:#ff9acb;--tk-lilac:#c9b7ff;--tk-paper:#fffdfa;background:
+radial-gradient(circle at 12% 14%,rgba(255,175,216,.34),transparent 28%),
+radial-gradient(circle at 88% 10%,rgba(192,207,255,.34),transparent 30%),
+linear-gradient(180deg,#fbf8ff 0,#fff9fb 45%,#fbf7ff 100%);color:var(--tk-ink)}
+.topkku-fan-page:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.18;background-image:repeating-linear-gradient(0deg,rgba(83,63,112,.045) 0 1px,transparent 1px 5px)}
+.topkku-fan-page .topbar{background:rgba(255,252,255,.88);border-bottom:1px solid rgba(87,66,117,.12);backdrop-filter:blur(18px);color:#241d35}.topkku-fan-page .topbar a{color:#241d35}.topkku-fan-page .nav a{color:#72687d}.topkku-fan-page .nav a.active{color:#2a203b}
+.topkku-fan-page .topkku-shell{max-width:1500px;padding:0 4vw 90px}
+.topkku-fan-page .topkku-hero{position:relative;border:1px solid rgba(99,75,128,.13);border-radius:30px;padding:38px;margin-top:96px;background:rgba(255,255,255,.77);box-shadow:0 24px 80px rgba(88,64,112,.11);overflow:hidden}
+.topkku-fan-page .topkku-hero:before,.topkku-fan-page .topkku-hero:after{content:"";position:absolute;width:120px;height:28px;background:rgba(226,210,255,.72);z-index:0}.topkku-fan-page .topkku-hero:before{top:8px;left:9%;transform:rotate(-3deg)}.topkku-fan-page .topkku-hero:after{right:8%;bottom:9px;transform:rotate(3deg);background:rgba(255,198,225,.75)}
+.topkku-fan-page .topkku-hero>*{position:relative;z-index:1}.topkku-fan-page .topkku-hero h1{color:#34254f;font-size:clamp(50px,6.5vw,92px)}.topkku-fan-page .topkku-hero p{color:#786d84}
+.topkku-fan-page .topkku-note{background:#ffe0ee;border-color:rgba(141,91,123,.14);color:#6b3f5a;box-shadow:0 10px 28px rgba(97,67,91,.09);transform:rotate(1deg);font-family:"Comic Sans MS","Bradley Hand",cursive}.topkku-fan-page .topkku-note span{color:#7c5d70}
+.topkku-fan-page .topkku-workspace{grid-template-columns:minmax(220px,280px) minmax(420px,720px) minmax(220px,300px)}
+.topkku-fan-page .topkku-tools,.topkku-fan-page .topkku-tips{background:rgba(255,255,255,.79);border-color:rgba(93,70,122,.14);box-shadow:0 14px 40px rgba(86,62,109,.08);color:var(--tk-ink)}
+.topkku-fan-page .tool-block{border-bottom-color:rgba(91,68,120,.11)}.topkku-fan-page .tool-label{color:#9b6b93}.topkku-fan-page .tool-block small{color:#8b8193}
+.topkku-fan-page .upload-button{background:#3e3157;color:#fff;border-color:#3e3157}
+.topkku-fan-page .photo-edit button,.topkku-fan-page .theme-chip,.topkku-fan-page .sticker-grid button,.topkku-fan-page .edit-row button,.topkku-fan-page .quick-copy button,.topkku-fan-page .text-add button,.topkku-fan-page .stage-actions button{background:#fff;color:#4b3e5e;border-color:rgba(95,72,124,.15)}
+.topkku-fan-page .photo-edit #photoCenter,.topkku-fan-page .theme-chip.active{background:linear-gradient(135deg,#eadfff,#ffddec);color:#493858;border-color:#decdf0}
+.topkku-fan-page .text-add input{background:#fffdfd;color:#463951;border-color:rgba(95,72,124,.15)}
+.topkku-fan-page .topkku-stage-wrap{position:relative;padding:20px;border:1px solid rgba(97,73,125,.14);border-radius:24px;background:rgba(255,255,255,.72);box-shadow:0 18px 55px rgba(85,61,108,.09)}
+.topkku-fan-page .topkku-stage-wrap:before{content:"favorite moment ♡";position:absolute;top:-12px;right:28px;padding:6px 12px;background:#e5dcff;color:#65557b;transform:rotate(2deg);font:600 13px/1 "Comic Sans MS","Bradley Hand",cursive}
+.topkku-fan-page .stage-caption{color:#7e7189}.topkku-fan-page .canvas-shell{background:#f7f0fb;border-color:rgba(98,74,125,.12);box-shadow:inset 0 0 0 1px rgba(255,255,255,.65)}
+.topkku-fan-page .save-button{background:linear-gradient(135deg,#3d3153,#6b4d7f)!important;color:white!important;border-color:transparent!important}
+.topkku-fan-page .topkku-tips h2{color:#3b2e51}.topkku-fan-page .topkku-tips article{background:#fffafc;border-color:rgba(99,75,126,.1)}.topkku-fan-page .topkku-tips article b{color:#bc6e9f}.topkku-fan-page .topkku-tips article p{color:#75697f}
+.topkku-fan-page .topkku-coming{background:#f2ebff;border-color:rgba(102,77,130,.12)}.topkku-fan-page .topkku-coming span{color:#7b6f87}
+.topkku-fan-page footer{color:#615871;border-top-color:rgba(91,68,118,.12)}.topkku-fan-page footer a{color:#50445f}
+.topkku-diary-strip{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.topkku-diary-strip span{padding:7px 11px;border-radius:999px;background:#f2e9ff;color:#705b89;font:700 11px/1 system-ui}.topkku-diary-strip span:nth-child(2){background:#ffe2ef;color:#92526f}.topkku-diary-strip span:nth-child(3){background:#e7f3ff;color:#536f91}
+@media(max-width:900px){.topkku-fan-page .topkku-hero{margin-top:78px;padding:28px}.topkku-fan-page .topkku-workspace{grid-template-columns:1fr}.topkku-fan-page .topkku-tools,.topkku-fan-page .topkku-tips{position:static}.topkku-fan-page .topkku-stage-wrap{order:-1}}

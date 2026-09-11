@@ -21,7 +21,7 @@
     const mt=$('.player-title p',body)?.textContent?.trim()||'';
     const artist=mt.split('·')[0]?.trim()||'';
     const url=$('.player-title a',body)?.href||'';
-    return{title,artist,url,time:targetTime()};
+    return{title,artist,artistSlug:body.dataset.artistSlug||'',url,time:targetTime()};
   };
 
   function decorate(){
@@ -88,7 +88,7 @@
     setState('사진을 탑꾸에 맞게 준비하고 있어요…','working');
     try{
       const img=await compressedData(file);
-      const payload={version:17,source:'watch',image:img.data,artist:m.artist,title:m.title,contentUrl:m.url,time:m.time,capturedAt:new Date().toISOString(),cleanCapture:false,videoOnly:false,strictCapture:false,manualCapture:true,captureMode:'mobile-photo-picker-fallback',width:img.width,height:img.height};
+      const payload={version:17,source:'watch',image:img.data,artist:m.artist,artistSlug:m.artistSlug||'',title:m.title,contentUrl:m.url,time:m.time,capturedAt:new Date().toISOString(),cleanCapture:false,videoOnly:false,strictCapture:false,manualCapture:true,captureMode:'mobile-photo-picker-fallback',width:img.width,height:img.height};
       sessionStorage.setItem('nuguTopkkuIncoming',JSON.stringify(payload));
       setState('사진을 가져왔어요 ✓ 탑꾸로 이동합니다.','success');
       location.href='topkku.html?from=watch-mobile';

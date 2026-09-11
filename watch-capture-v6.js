@@ -202,7 +202,7 @@
 
   async function dataUrl(c,q=.94){return await new Promise((ok,bad)=>c.toBlob(b=>{if(!b)return bad(new Error('encode'));const r=new FileReader;r.onload=()=>ok(String(r.result||''));r.onerror=()=>bad(new Error('encode'));r.readAsDataURL(b);},'image/jpeg',q));}
   async function save(c,m){
-    const p={version:16,source:'watch',image:await dataUrl(c),artist:m.artist,title:m.title,contentUrl:m.url,time:m.requestedTime,capturedAt:new Date().toISOString(),cleanCapture:true,videoOnly:true,strictCapture:true,captureMode:'canonical-fixed-render-v6',width:c.width,height:c.height,portrait:m.portrait,renderRatio:m.renderRatio,duration:m.duration,capturedVideoTime:m.capturedVideoTime,quality:m.quality,geometry:m.geometry};
+    const p={version:16,source:'watch',image:await dataUrl(c),artist:m.artist,artistSlug:m.artistSlug||'',title:m.title,contentUrl:m.url,time:m.requestedTime,capturedAt:new Date().toISOString(),cleanCapture:true,videoOnly:true,strictCapture:true,captureMode:'canonical-fixed-render-v6',width:c.width,height:c.height,portrait:m.portrait,renderRatio:m.renderRatio,duration:m.duration,capturedVideoTime:m.capturedVideoTime,quality:m.quality,geometry:m.geometry};
     try{sessionStorage.setItem('nuguTopkkuIncoming',JSON.stringify(p));}
     catch{const k=Math.min(1,1100/Math.max(c.width,c.height)),d=document.createElement('canvas');d.width=Math.round(c.width*k);d.height=Math.round(c.height*k);d.getContext('2d').drawImage(c,0,0,d.width,d.height);p.image=await dataUrl(d,.86);p.width=d.width;p.height=d.height;sessionStorage.setItem('nuguTopkkuIncoming',JSON.stringify(p));}
   }
@@ -210,7 +210,7 @@
   async function capture(){
     if(busy)return;busy=true;
     const buttons=[...body.querySelectorAll('.frame-topkku-action button')];buttons.forEach(b=>b.disabled=true);
-    const requested=targetTime(),id=videoId(),title=$('.player-title h2',body)?.textContent?.trim()||'NUGU RADAR Watch',mt=$('.player-title p',body)?.textContent?.trim()||'',artist=mt.split('·')[0]?.trim()||'',url=$('.player-title a',body)?.href||'';
+    const requested=targetTime(),id=videoId(),title=$('.player-title h2',body)?.textContent?.trim()||'NUGU RADAR Watch',mt=$('.player-title p',body)?.textContent?.trim()||'',artist=mt.split('·')[0]?.trim()||'',artistSlug=body.dataset.artistSlug||'',url=$('.player-title a',body)?.href||'';
     let stream=null,veil=null,stage=null,yt=null;
     try{
       if(!id)throw new Error('video_id');
@@ -245,7 +245,7 @@
       const expected=clean.ratio,got=best.canvas.width/best.canvas.height;
       if(Math.abs(got-expected)/expected>.055)throw new Error('ratio_mismatch');
 
-      await save(best.canvas,{artist,title,url,requestedTime:requested,portrait:clean.portrait,renderRatio:+clean.ratio.toFixed(4),duration:+clean.duration.toFixed(3),capturedVideoTime:Number.isFinite(best.time)?best.time:actualTime,quality:best.quality,geometry:best.geometry});
+      await save(best.canvas,{artist,artistSlug,title,url,requestedTime:requested,portrait:clean.portrait,renderRatio:+clean.ratio.toFixed(4),duration:+clean.duration.toFixed(3),capturedVideoTime:Number.isFinite(best.time)?best.time:actualTime,quality:best.quality,geometry:best.geometry});
       setState(`영상 프레임만 가져왔어요 ✓ ${best.canvas.width}×${best.canvas.height}`,'success');toast('완료 ✓ 탑꾸로 이동합니다','success');await wait(180);location.href='topkku.html?from=watch';
     }catch(err){
       console.error('topkku capture v6 failed',err);const c=String(err?.message||err);
