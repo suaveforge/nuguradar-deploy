@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
   <url>
+    <loc>https://nuguradar.suaveforge.com/watch/youtube/Gyiw-OjMR7U/</loc>
+    <video:video>
+      <video:thumbnail_loc>https://i.ytimg.com/vi/Gyiw-OjMR7U/maxresdefault.jpg</video:thumbnail_loc>
+      <video:title>𝘠𝘰𝘶 𝘋𝘰𝘯’𝘵 𝘓𝘰𝘷𝘦 𝘔𝘦 DC: #EVAN#DAILYDIRECTION #DD #데일리디렉션 #이반</video:title>
+      <video:description>Auto-discovered canonical K-pop group entity from Wikidata and MusicBrainz. Popularity does not affect inclusion; activity is evaluated separately.</video:description>
+      <video:player_loc>https://www.youtube-nocookie.com/embed/Gyiw-OjMR7U</video:player_loc>
+      <video:publication_date>2026-09-11T11:10:33.000Z</video:publication_date>
+      <video:duration>23</video:duration>
+    </video:video>
+  </url>
+  <url>
     <loc>https://nuguradar.suaveforge.com/watch/youtube/zqFRzHbyltk/</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/zqFRzHbyltk/maxresdefault.jpg</video:thumbnail_loc>
