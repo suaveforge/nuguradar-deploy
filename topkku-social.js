@@ -2,7 +2,7 @@
   const $=s=>document.querySelector(s),$$=(s,root=document)=>[...root.querySelectorAll(s)];
   const esc=s=>String(s??'').replace(/[&<>'"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
   const apiBase=()=>String((window.NUGU_CONFIG||{}).apiBase||'').replace(/\/$/,'');
-  const state={gallerySort:'saved',gallery:[],savedIds:new Set(),compare:[],vaultScope:'mine',vaultView:'fan',vaultGroup:'all',savedVault:[],balance:null};
+  const state={gallerySort:'saved',gallery:[],savedIds:new Set(),compare:[],vaultScope:'mine',vaultView:'fan',vaultGroup:'all',savedVault:[],balance:null,makerWindow:'current',makerRanking:null};
 
   const bucketLabels={
     mine:{north:'완성',east:'자랑할 것',south:'다시 손볼 것',west:'보관',inbox:'미분류'},
@@ -88,7 +88,7 @@
         const body=$('#topkkuCommentBody')?.value?.trim();if(!body)return;
         const rr=await fetch(`${apiBase()}/api/v1/community/topkku/${id}/comments`,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json',...authHeaders(me)},body:JSON.stringify({visitorId:me.visitorId,body})});
         const out=await rr.json();if(!rr.ok){$('#topkkuCommentBody').placeholder=out.error==='comment_rate_limit'?'조금만 천천히 남겨주세요.':'지금은 댓글을 남기지 못했어요.';return}
-        const list=sheet.querySelector('.topkku-comment-list');list.querySelector('.fan-modal-empty')?.remove();list.insertAdjacentHTML('beforeend',`<article><b>${esc(out.item.displayName||'팬')}</b><p>${esc(out.item.body)}</p></article>`);$('#topkkuCommentBody').value='';
+        const list=sheet.querySelector('.topkku-comment-list');list.querySelector('.fan-modal-empty')?.remove();list.insertAdjacentHTML('beforeend',`<article><b>${esc(out.item.displayName||'팬')}</b><p>${esc(out.item.body)}</p></article>`);$('#topkkuCommentBody').value='';loadMakerTrend('current');
       });
     }catch{const box=root.querySelector('.fan-modal-loading');if(box)box.textContent='댓글을 잠시 불러오지 못했어요.'}
   }
@@ -140,7 +140,7 @@
       const r=await fetch(`${apiBase()}/api/v1/community/topkku/${id}/taste`,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json',...authHeaders(user)},body:JSON.stringify({visitorId:user.visitorId,saved})});
       const data=await r.json();if(!r.ok)throw new Error(data.error||'taste_failed');
       if(saved)state.savedIds.add(id);else state.savedIds.delete(id);
-      await loadSavedIds();renderGallery();if(state.vaultScope==='saved')renderSavedVault();
+      await loadSavedIds();renderGallery();if(state.vaultScope==='saved')renderSavedVault();loadMakerTrend('current');
     }catch{}
   }
 
@@ -174,6 +174,31 @@
     }catch{}
   }
 
+  function makerRewardCopy(windowType){
+    if(windowType==='weekly')return '이번 주가 끝나면 1위 +3P · 2~3위 +2P · 4~10위 +1P';
+    if(windowType==='monthly')return '이번 달이 끝나면 1위 +8P · 2~3위 +6P · 4~10위 +4P · 11~20위 +2P';
+    return '지금 순위는 보상 없이 흐름만 보여줘요.';
+  }
+  function renderMakerTrend(){
+    const root=$('#makerTrendGrid'),note=$('#makerTrendReward');if(!root||!note)return;
+    const data=state.makerRanking;note.textContent=makerRewardCopy(state.makerWindow);
+    if(!data?.items?.length){root.innerHTML='<div class="topkku-loading">아직 취향이 모이는 중이에요. 마음껏 꾸미고 놀아주세요 ♡</div>';return}
+    root.innerHTML=data.items.map(x=>`<article class="maker-trend-card ${Number(x.rank)<=3?'top-maker':''}">
+      <span class="maker-trend-place">${Number(x.rank)}</span>
+      <div class="maker-trend-copy"><b>${esc(x.displayName||'팬')}</b><strong>함께 취향 남긴 팬 ${Number(x.uniqueFans||0)}명</strong><small>취향함 ${Number(x.tasteFans||0)} · 댓글 ${Number(x.commentFans||0)} · 참고완성 ${Number(x.referenceFans||0)} · 취향선택 ${Number(x.battleFans||0)}</small></div>
+      ${Number(x.rewardPoints||0)>0?`<em>+${Number(x.rewardPoints)}P</em>`:''}
+    </article>`).join('');
+  }
+  async function loadMakerTrend(windowType=state.makerWindow){
+    state.makerWindow=windowType;const root=$('#makerTrendGrid');if(!root)return;
+    root.innerHTML='<div class="topkku-loading">요즘 취향이 모이는 곳을 불러오는 중…</div>';
+    try{
+      const r=await fetch(`${apiBase()}/api/v1/community/maker-ranking?window=${encodeURIComponent(windowType)}&limit=30`,{headers:{Accept:'application/json'},cache:'no-store'});
+      const data=await r.json();if(!r.ok)throw new Error(data.error||'maker_ranking_failed');
+      state.makerRanking=data;renderMakerTrend();
+    }catch{root.innerHTML='<div class="topkku-loading">요즘 취향 흐름을 잠시 불러오지 못했어요.</div>'}
+  }
+
   function balanceSide(item,matchNo,side,myWinner){
     const chosen=Number(myWinner)===Number(item.id);
     return `<button type="button" class="balance-side ${chosen?'chosen':''}" data-balance-vote="${Number(item.id)}" data-match-no="${Number(matchNo)}" ${myWinner?'disabled':''}>
@@ -201,7 +226,7 @@
     try{
       const r=await fetch(`${apiBase()}/api/v1/community/topkku/balance/${matchNo}/vote`,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json',...authHeaders(user)},body:JSON.stringify({visitorId:user.visitorId,winnerId})});
       const data=await r.json();if(!r.ok)throw new Error(data.error||'vote_failed');state.balance=data.game;renderBalance();
-      if(data.awarded){const rank=$('#topkkuBalanceRanking');rank?.insertAdjacentHTML('afterbegin','<div class="point-pop">+1P 취향 포인트 적립 ✦</div>')}
+      if(data.awarded){const rank=$('#topkkuBalanceRanking');rank?.insertAdjacentHTML('afterbegin','<div class="point-pop">+1P 취향 포인트 적립 ✦</div>')}loadMakerTrend('current');
     }catch{}
   }
 
@@ -281,7 +306,8 @@
   }
 
   function initControls(){
-    $$('#topkkuGalleryTabs [data-gallery-sort]').forEach(b=>b.onclick=()=>{$$('#topkkuGalleryTabs [data-gallery-sort]').forEach(x=>x.classList.toggle('active',x===b));loadGallery(b.dataset.gallerySort)});
+    $('#topkkuGalleryTabs [data-gallery-sort]').forEach(b=>b.onclick=()=>{$('#topkkuGalleryTabs [data-gallery-sort]').forEach(x=>x.classList.toggle('active',x===b));loadGallery(b.dataset.gallerySort)});
+    $('#makerTrendTabs [data-maker-window]').forEach(b=>b.onclick=()=>{$('#makerTrendTabs [data-maker-window]').forEach(x=>x.classList.toggle('active',x===b));loadMakerTrend(b.dataset.makerWindow)});
     $$('#vaultScopeTabs [data-vault-scope]').forEach(b=>b.onclick=()=>{$$('#vaultScopeTabs [data-vault-scope]').forEach(x=>x.classList.toggle('active',x===b));state.vaultGroup='all';loadVaultScope(b.dataset.vaultScope)});
     $$('#vaultViewTabs [data-vault-view]').forEach(b=>b.onclick=()=>{$$('#vaultViewTabs [data-vault-view]').forEach(x=>x.classList.toggle('active',x===b));state.vaultView=b.dataset.vaultView;decorateVault()});
   }
@@ -292,5 +318,6 @@
   initControls();
   Promise.resolve().then(loadSavedIds).then(()=>loadGallery());
   loadBalance();
+  loadMakerTrend();
   setTimeout(()=>{if(state.vaultScope==='mine')decorateVault()},250);
 })();
