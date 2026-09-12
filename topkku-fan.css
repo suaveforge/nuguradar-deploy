@@ -86,7 +86,7 @@ linear-gradient(180deg,#fbf8ff 0,#fff9fb 45%,#fbf7ff 100%);color:var(--tk-ink)}
 .growth-leaf-mark{display:flex;align-items:flex-end;gap:1px;min-width:76px;padding:7px 8px;border-radius:999px;background:#fff;border:1px solid rgba(94,71,118,.12);box-shadow:0 6px 16px rgba(80,58,95,.08)}
 .growth-leaf-mark i{font-style:normal;font-size:14px;line-height:1;color:#d9d2dd;opacity:.45;transform:scale(.78) rotate(-12deg);transition:.25s}.growth-leaf-mark i:nth-child(even){transform:scale(.78) rotate(12deg)}.growth-leaf-mark i.grown{opacity:1;transform:scale(1) rotate(-12deg)}.growth-leaf-mark i:nth-child(even).grown{transform:scale(1) rotate(12deg)}
 .growth-leaf-mark.band-1 i.grown{color:#9ed49d}.growth-leaf-mark.band-2 i.grown{color:#70bf83}.growth-leaf-mark.band-3 i.grown{color:#4ba16f}.growth-leaf-mark.band-4 i.grown{color:#43856a}.growth-leaf-mark.band-5 i.grown{color:#4f6f66}.growth-leaf-mark.band-6{background:linear-gradient(135deg,#fff7fd,#eee7ff,#f7fff7);box-shadow:0 0 0 3px rgba(182,146,211,.1),0 7px 22px rgba(92,61,114,.12)}.growth-leaf-mark.band-6 i.grown{color:#7c6b91;text-shadow:0 0 7px #e9d7ff}
-.growth-progress{height:4px;margin-top:9px;border-radius:999px;background:#eee6f2;overflow:hidden}.growth-progress i{display:block;height:100%;width:var(--growth);border-radius:inherit;background:linear-gradient(90deg,#b6d99d,#8cc7a0,#a98ac9)}
+
 .sticker-empty-band{grid-column:1/-1;padding:20px 12px;border:1px dashed rgba(104,78,126,.14);border-radius:13px;text-align:center;color:#8e8096;font-size:9px;background:#fffafd}.material-sticker.gifted-item{box-shadow:0 0 0 2px rgba(255,151,198,.16),0 8px 20px rgba(89,61,105,.08)}.material-sticker.gifted-item small{color:#ad4f7f!important}
 
 /* physical-feeling growth letter / received gift keepsakes */
