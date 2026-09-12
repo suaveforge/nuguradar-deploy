@@ -22,9 +22,10 @@
     const saved=state.savedIds.has(Number(item.id)),stats=item.stats||{};
     return `<article class="social-topkku-card" data-social-id="${Number(item.id)}">
       <button class="social-topkku-image" type="button" data-compare-add="${Number(item.id)}"><img src="${esc(item.display_url||item.secure_url)}" alt="${esc(item.artist_name||'탑꾸')}"></button>
-      <div class="social-topkku-meta"><b>${esc(item.artist_name||'탑꾸')}</b><span>${esc(item.maker_name||'팬')} · 담김 ${Number(stats.saved||0)} · 참고완성 ${Number(stats.referenced||0)}</span></div>
+      <div class="social-topkku-meta"><b>${esc(item.artist_name||'탑꾸')}</b><span>${esc(item.maker_name||'팬')} · 담김 ${Number(stats.saved||0)} · 댓글 ${Number(stats.comments||0)} · 참고완성 ${Number(stats.referenced||0)}</span></div>
       <div class="social-topkku-actions">
         <button type="button" class="${saved?'active':''}" data-taste="${Number(item.id)}">${saved?'♥ 취향함':'♡ 취향함'}</button>
+        <button type="button" data-comments="${Number(item.id)}">댓글 ${Number(stats.comments||0)}</button>
         <button type="button" data-compare-add="${Number(item.id)}">비교 +</button>
         <button type="button" data-reference="${Number(item.id)}">참고해서 꾸미기</button>
       </div>
@@ -55,6 +56,81 @@
     root.querySelectorAll('[data-taste]').forEach(b=>b.onclick=()=>toggleTaste(Number(b.dataset.taste)));
     root.querySelectorAll('[data-compare-add]').forEach(b=>b.onclick=()=>toggleCompare(Number(b.dataset.compareAdd)));
     root.querySelectorAll('[data-reference]').forEach(b=>b.onclick=()=>startReference(Number(b.dataset.reference)));
+    root.querySelectorAll('[data-comments]').forEach(b=>b.onclick=()=>openComments(Number(b.dataset.comments)));
+  }
+
+  function fanModal(html){
+    const root=$('#topkkuFanModal');if(!root)return null;
+    root.hidden=false;root.innerHTML='<div class="fan-modal-backdrop"><section class="fan-modal-sheet">'+html+'</section></div>';
+    root.querySelectorAll('[data-fan-modal-close]').forEach(b=>b.onclick=()=>{root.hidden=true;root.innerHTML=''});
+    return root;
+  }
+  function stickerGiftVisual(item){
+    if(item?.asset)return '<img src="'+esc(item.asset)+'" alt="">';
+    return '<span>'+esc(item?.value||'✦')+'</span>';
+  }
+  async function openComments(id){
+    const item=state.gallery.find(x=>Number(x.id)===Number(id));
+    const root=fanModal('<button class="fan-modal-x" type="button" data-fan-modal-close>×</button><span class="fan-modal-kicker">TOPKKU NOTE</span><h3>이 탑꾸에 남긴 말들</h3><div class="fan-modal-loading">댓글 불러오는 중…</div>');
+    if(!root)return;
+    try{
+      const r=await fetch(`${apiBase()}/api/v1/community/topkku/${id}/comments?limit=60`,{headers:{Accept:'application/json'},cache:'no-store'});
+      const data=await r.json();if(!r.ok)throw new Error(data.error||'comments_failed');
+      const user=await identity(false);
+      const sheet=root.querySelector('.fan-modal-sheet');
+      sheet.innerHTML=`<button class="fan-modal-x" type="button" data-fan-modal-close>×</button>
+        <div class="fan-modal-topkku">${item?'<img src="'+esc(item.display_url||item.secure_url)+'" alt="">':''}<div><span class="fan-modal-kicker">TOPKKU NOTE</span><h3>예쁘다고 말해주고 가요 ♡</h3><small>좋아하는 마음만 남기고, 비교하거나 깎아내리는 말은 두고 가지 않아요.</small></div></div>
+        <div class="topkku-comment-list">${data.items?.length?data.items.map(x=>`<article><b>${esc(x.displayName||'팬')}</b><p>${esc(x.body)}</p></article>`).join(''):'<p class="fan-modal-empty">아직 첫 댓글을 기다리고 있어요.</p>'}</div>
+        <div class="topkku-comment-compose"><textarea id="topkkuCommentBody" maxlength="240" placeholder="예쁜 탑꾸에 한마디 남겨주세요"></textarea><button id="sendTopkkuComment" type="button">${user?'남기기':'로그인하고 남기기'}</button></div>`;
+      sheet.querySelectorAll('[data-fan-modal-close]').forEach(b=>b.onclick=()=>{root.hidden=true;root.innerHTML=''});
+      $('#sendTopkkuComment')?.addEventListener('click',async()=>{
+        const me=await identity(true);if(!me)return;
+        const body=$('#topkkuCommentBody')?.value?.trim();if(!body)return;
+        const rr=await fetch(`${apiBase()}/api/v1/community/topkku/${id}/comments`,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json',...authHeaders(me)},body:JSON.stringify({visitorId:me.visitorId,body})});
+        const out=await rr.json();if(!rr.ok){$('#topkkuCommentBody').placeholder=out.error==='comment_rate_limit'?'조금만 천천히 남겨주세요.':'지금은 댓글을 남기지 못했어요.';return}
+        const list=sheet.querySelector('.topkku-comment-list');list.querySelector('.fan-modal-empty')?.remove();list.insertAdjacentHTML('beforeend',`<article><b>${esc(out.item.displayName||'팬')}</b><p>${esc(out.item.body)}</p></article>`);$('#topkkuCommentBody').value='';
+      });
+    }catch{const box=root.querySelector('.fan-modal-loading');if(box)box.textContent='댓글을 잠시 불러오지 못했어요.'}
+  }
+
+  async function openReactions(id){
+    const user=await identity(true);if(!user)return;
+    const root=fanModal('<button class="fan-modal-x" type="button" data-fan-modal-close>×</button><span class="fan-modal-kicker">PEOPLE WHO LIKED YOUR TOPKKU</span><h3>내 탑꾸를 좋아해준 팬들</h3><div class="fan-modal-loading">반응을 모아보는 중…</div>');
+    if(!root)return;
+    try{
+      const r=await fetch(`${apiBase()}/api/v1/community/topkku/${id}/reactions?visitorId=${encodeURIComponent(user.visitorId)}`,{headers:{Accept:'application/json',...authHeaders(user)},cache:'no-store'});
+      const data=await r.json();if(!r.ok)throw new Error(data.error||'reactions_failed');
+      const sheet=root.querySelector('.fan-modal-sheet');
+      sheet.innerHTML=`<button class="fan-modal-x" type="button" data-fan-modal-close>×</button><span class="fan-modal-kicker">THANK YOU LIST</span><h3>내 탑꾸를 좋아해준 팬들 ♡</h3><p class="fan-modal-sub">취향함에 담아주거나 댓글을 남겨준 팬에게 작은 꾸미기를 건넬 수 있어요. 오늘 선물 ${Number(data.giftUsage?.sentToday||0)}/${Number(data.giftUsage?.limit||3)}</p>
+        <div class="reaction-fan-list">${data.items?.length?data.items.map(x=>`<article><div><b>${esc(x.displayName)}</b><span>${x.tasted?'♡ 취향함 ':''}${x.commented?'✎ 댓글':''}</span></div><button type="button" data-gift-fan="${esc(x.fanKey)}">🎁 선물하기</button></article>`).join(''):'<p class="fan-modal-empty">아직 반응한 팬이 없어요.</p>'}</div>`;
+      sheet.querySelectorAll('[data-fan-modal-close]').forEach(b=>b.onclick=()=>{root.hidden=true;root.innerHTML=''});
+      sheet.querySelectorAll('[data-gift-fan]').forEach(b=>b.onclick=()=>openGift(id,b.dataset.giftFan));
+    }catch{const box=root.querySelector('.fan-modal-loading');if(box)box.textContent='반응 목록을 잠시 불러오지 못했어요.'}
+  }
+
+  async function openGift(id,fanKey){
+    const user=await identity(true);if(!user)return;
+    const root=fanModal('<button class="fan-modal-x" type="button" data-fan-modal-close>×</button><span class="fan-modal-kicker">A SMALL GIFT</span><h3>작은 선물 고르는 중…</h3><div class="fan-modal-loading">보낼 수 있는 꾸미기를 찾고 있어요.</div>');
+    if(!root)return;
+    try{
+      const r=await fetch(`${apiBase()}/api/v1/community/topkku/${id}/gift-options?visitorId=${encodeURIComponent(user.visitorId)}&fanKey=${encodeURIComponent(fanKey)}`,{headers:{Accept:'application/json',...authHeaders(user)},cache:'no-store'});
+      const data=await r.json();if(!r.ok)throw new Error(data.error||'gift_options_failed');
+      const sheet=root.querySelector('.fan-modal-sheet');
+      sheet.innerHTML=`<button class="fan-modal-x" type="button" data-fan-modal-close>×</button><span class="fan-modal-kicker">A SMALL GIFT</span><h3>${esc(data.fan?.displayName||'팬')}님에게 마음 보내기</h3><p class="fan-modal-sub">내가 지금 피운 잎보다 아래에서 열리는 꾸미기만 건넬 수 있어요. 희귀 포인트 아이템은 선물 대상이 아니에요. · 오늘 ${Number(data.usage?.sentToday||0)}/${Number(data.usage?.limit||3)}</p>
+        <div class="gift-item-picker">${data.items?.length?data.items.map(x=>`<button type="button" data-gift-item="${esc(x.id)}"><i>${stickerGiftVisual(x)}</i><b>${esc(x.label)}</b></button>`).join(''):'<p class="fan-modal-empty">지금 이 팬에게 건넬 수 있는 새 꾸미기가 없어요.</p>'}</div>
+        <textarea class="gift-note" id="giftNote" maxlength="120" placeholder="고마운 마음을 짧게 적어도 좋아요 ♡"></textarea>
+        <button class="gift-send-main" id="sendGiftNow" type="button" disabled>선물 보내기</button>`;
+      sheet.querySelectorAll('[data-fan-modal-close]').forEach(b=>b.onclick=()=>{root.hidden=true;root.innerHTML=''});
+      let selected='';
+      sheet.querySelectorAll('[data-gift-item]').forEach(b=>b.onclick=()=>{selected=b.dataset.giftItem;sheet.querySelectorAll('[data-gift-item]').forEach(x=>x.classList.toggle('selected',x===b));$('#sendGiftNow').disabled=false});
+      $('#sendGiftNow')?.addEventListener('click',async()=>{
+        if(!selected)return;const send=$('#sendGiftNow');send.disabled=true;send.textContent='포장하는 중…';
+        const rr=await fetch(`${apiBase()}/api/v1/community/topkku/${id}/gift`,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json',...authHeaders(user)},body:JSON.stringify({visitorId:user.visitorId,fanKey,itemId:selected,message:$('#giftNote')?.value||''})});
+        const out=await rr.json();if(!rr.ok){send.disabled=false;send.textContent=out.error==='daily_gift_limit'?'오늘 선물은 다 건넸어요':'이 선물은 지금 보낼 수 없어요';return}
+        sheet.innerHTML=`<div class="gift-sent-celebration"><span>🎁</span><h3>잘 포장해서 보냈어요.</h3><p>${esc(out.gift.receiverName)}님 서랍에 <b>${esc(out.gift.label)}</b>이 진짜 선물처럼 남아요.</p><button type="button" data-fan-modal-close>다른 탑꾸 보러가기</button></div>`;
+        sheet.querySelector('[data-fan-modal-close]').onclick=()=>{root.hidden=true;root.innerHTML=''};window.NUGU_TOPKKU_LOAD_STYLE?.();
+      });
+    }catch{const box=root.querySelector('.fan-modal-loading');if(box)box.textContent='선물 서랍을 잠시 열지 못했어요.'}
   }
 
   async function toggleTaste(id){
@@ -210,7 +286,7 @@
     $$('#vaultViewTabs [data-vault-view]').forEach(b=>b.onclick=()=>{$$('#vaultViewTabs [data-vault-view]').forEach(x=>x.classList.toggle('active',x===b));state.vaultView=b.dataset.vaultView;decorateVault()});
   }
 
-  window.addEventListener('nugu-topkku-vault-rendered',ev=>{if(state.vaultScope==='mine'){state.vaultScope='mine';decorateVault()}});
+  window.addEventListener('nugu-topkku-vault-rendered',ev=>{if(state.vaultScope==='mine'){state.vaultScope='mine';decorateVault();$('#topkkuVaultGrid [data-reactions]').forEach(b=>b.onclick=()=>openReactions(Number(b.dataset.reactions)))}});
   window.addEventListener('nugu-auth-changed',async()=>{await loadSavedIds();renderGallery();loadBalance();loadVaultScope(state.vaultScope)});
 
   initControls();
