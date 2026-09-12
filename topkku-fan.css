@@ -36,3 +36,8 @@ linear-gradient(180deg,#fbf8ff 0,#fff9fb 45%,#fbf7ff 100%);color:var(--tk-ink)}
 @media (prefers-reduced-motion:reduce){.material-sticker.motion-item .sticker-swatch{animation:none}}
 @media(max-width:900px){.topkku-vault-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.topkku-vault .paper-heading{display:block}.topkku-vault .paper-heading em{display:block;margin-top:6px}}
 @media(max-width:520px){.material-sticker-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}.topkku-vault{padding:16px}.topkku-vault-grid{gap:8px}}
+
+.material-sticker .sticker-swatch.has-asset{background:#fff!important;overflow:hidden}
+.material-sticker .sticker-swatch.has-asset img{display:block;width:86%;height:86%;object-fit:contain;pointer-events:none;user-select:none}
+.material-sticker.locked .sticker-swatch.has-asset img{filter:saturate(.42) brightness(.96)}
+.material-sticker.motion-item .sticker-swatch.has-asset img{filter:drop-shadow(0 3px 5px rgba(83,58,105,.12))}

@@ -16,6 +16,24 @@
   let theme='lavender',photo=null,photoView=defaultPhotoView(),elements=[],selected=-1,drag=null,history=[],sourceMeta=null,compositionEventKey='',selectedArtist=null,saveBusy=false,searchTimer=null;
   let activeStickerPack='all',styleState=null,vaultUsage=null,currentSavedId=null,currentSavedPublished=false,lastSavedEventKey='';
   const reducedMotion=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
+  const assetImages=new Map(),assetPromises=new Map();
+  function ensureAsset(item){
+    if(!item?.asset)return Promise.resolve(null);
+    const cached=assetImages.get(item.asset);
+    if(cached?.complete&&cached.naturalWidth)return Promise.resolve(cached);
+    if(assetPromises.has(item.asset))return assetPromises.get(item.asset);
+    const pending=new Promise((resolve,reject)=>{
+      const img=cached||new Image();
+      img.decoding='async';
+      img.onload=()=>{assetImages.set(item.asset,img);draw();resolve(img)};
+      img.onerror=()=>reject(new Error('asset_load_failed'));
+      assetImages.set(item.asset,img);
+      if(!img.src)img.src=item.asset;
+    }).finally(()=>assetPromises.delete(item.asset));
+    assetPromises.set(item.asset,pending);
+    return pending;
+  }
+  function preloadStickerAssets(){catalog.items.filter(item=>item.asset).forEach(item=>ensureAsset(item).catch(()=>{}))}
   const $=s=>document.querySelector(s);
   const $$=s=>[...document.querySelectorAll(s)];
   const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
@@ -40,11 +58,31 @@
   function canAddItem(item){if(elements.length>=limits.totalObjects)return{ok:false,msg:`한 작품에는 최대 ${limits.totalObjects}개까지 붙일 수 있어요.`};if(item.motion&&motionCount()>=limits.motionObjects)return{ok:false,msg:`움직이는 장식은 한 작품에 ${limits.motionObjects}개까지 써요.`};if(item.maxPerCanvas&&itemCount(item.id)>=item.maxPerCanvas)return{ok:false,msg:`${item.label}은 한 작품에 ${item.maxPerCanvas}개까지 쓸 수 있어요.`};return{ok:true}}
   function addStickerItem(item){const check=canAddItem(item);if(!check.ok){guide(check.msg);return}saveHistory();const size=item.kind==='frame'?100:item.kind==='tape'?90:item.kind==='lace'?86:76;const y=item.kind==='frame'?photoBox.y+photoBox.h/2:H/2;elements.push({type:'sticker',stickerId:item.id,value:item.value||'',x:W/2,y,size,rotation:0});selected=elements.length-1;guide(`${item.label} 붙였어 ♡`);draw()}
   function addText(value){const text=String(value||'').trim();if(!text)return;if(elements.length>=limits.totalObjects){guide(`한 작품에는 최대 ${limits.totalObjects}개 오브젝트까지 붙일 수 있어요.`);return}saveHistory();elements.push({type:'text',value:text,x:W/2,y:H-112,size:34,rotation:0});selected=elements.length-1;draw();$('#textInput').value=''}
-  function elementRadius(e){if(e.type!=='sticker')return Math.max(e.size*1.1,e.value.length*e.size*.27);const item=itemById(e.stickerId);if(item?.kind==='frame')return Math.max(photoBox.w,photoBox.h)*.48;return e.size*.75}
+  function elementRadius(e){if(e.type!=='sticker')return Math.max(e.size*1.1,e.value.length*e.size*.27);const item=itemById(e.stickerId);if(item?.kind==='frame'&&!item?.asset)return Math.max(photoBox.w,photoBox.h)*.48;return e.size*.75*Number(item?.assetScale||1)}
   function drawBackdrop(t){ctx.fillStyle=t.bg;ctx.fillRect(0,0,W,H);const g=ctx.createRadialGradient(W*.18,H*.12,20,W*.18,H*.12,420);g.addColorStop(0,t.accent+'55');g.addColorStop(1,t.bg+'00');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.save();ctx.globalAlpha=.22;ctx.strokeStyle=t.frame;ctx.lineWidth=2;for(let y=30;y<H;y+=46){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y-18);ctx.stroke()}ctx.restore()}
   function drawFrame(t){ctx.save();ctx.shadowColor='rgba(0,0,0,.20)';ctx.shadowBlur=28;ctx.shadowOffsetY=18;roundedPath(photoBox.x-24,photoBox.y-24,photoBox.w+48,photoBox.h+48,46);ctx.fillStyle=t.paper;ctx.fill();ctx.restore();ctx.save();roundedPath(photoBox.x,photoBox.y,photoBox.w,photoBox.h,photoBox.r);ctx.clip();if(photo)coverImage(photo,photoBox.x,photoBox.y,photoBox.w,photoBox.h);else{ctx.fillStyle=theme==='midnight'?'#313044':'#f4f1f7';ctx.fillRect(photoBox.x,photoBox.y,photoBox.w,photoBox.h);ctx.fillStyle=theme==='midnight'?'#aba5c6':'#90899b';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='700 28px system-ui,sans-serif';ctx.fillText('최애 사진을 올려주세요 ♡',W/2,H/2-8);ctx.font='500 17px system-ui,sans-serif';ctx.fillText('사진은 이 브라우저 밖으로 나가지 않아요',W/2,H/2+34)}ctx.restore();ctx.save();roundedPath(photoBox.x-11,photoBox.y-11,photoBox.w+22,photoBox.h+22,38);ctx.strokeStyle=t.frame;ctx.lineWidth=12;ctx.stroke();ctx.restore();ctx.fillStyle=t.ink;ctx.font='900 20px system-ui,sans-serif';ctx.textAlign='left';ctx.fillText('NUGU RADAR · TOPKKU',48,58);ctx.textAlign='right';ctx.fillText('♡ made by a fan',W-48,H-45)}
   function drawMaterial(e,item,now){
     const s=e.size,t=(Number(now)||0)/1000;
+    if(item.asset){
+      const img=assetImages.get(item.asset);
+      if(img?.complete&&img.naturalWidth){
+        const scale=Number(item.assetScale||1),ratio=img.naturalHeight/img.naturalWidth;
+        let w=s*scale,h=w*ratio;
+        const maxH=s*1.65;if(h>maxH){const k=maxH/h;h*=k;w*=k}
+        ctx.save();
+        if(item.assetTone==='chrome')ctx.filter='grayscale(1) contrast(1.28) brightness(1.16)';
+        if(item.motion&&!reducedMotion){
+          const pulse=.98+.035*Math.sin(t*3.2);ctx.scale(pulse,pulse);
+          ctx.globalAlpha=.9+.1*Math.sin(t*2.4);
+          ctx.shadowColor=item.motion==='sparkle'?'rgba(255,185,230,.65)':'rgba(220,210,255,.45)';
+          ctx.shadowBlur=8;
+        }
+        ctx.drawImage(img,-w/2,-h/2,w,h);
+        ctx.restore();
+        return;
+      }
+      ensureAsset(item).catch(()=>{});
+    }
     if(item.kind==='emoji'){ctx.font=`${s}px "Apple Color Emoji","Segoe UI Emoji",sans-serif`;ctx.fillText(item.value,0,0);return}
     if(item.kind==='tape'){const w=s*1.65,h=s*.48;ctx.globalAlpha=.86;ctx.fillStyle=item.variant==='pink'?'#ffb7d5':item.variant==='lilac'?'#d9c5ff':gradient([[0,'#ffc1df'],[.2,'#bfe8ff'],[.45,'#d7c3ff'],[.7,'#fff0ae'],[1,'#ffc7ec']],-w/2,0,w/2,0);ctx.fillRect(-w/2,-h/2,w,h);ctx.globalAlpha=.35;ctx.strokeStyle='#fff';ctx.lineWidth=3;for(let x=-w/2;x<w/2;x+=18){ctx.beginPath();ctx.moveTo(x,-h/2);ctx.lineTo(x+18,h/2);ctx.stroke()}ctx.globalAlpha=1;return}
     if(item.kind==='paper'){const w=s*1.5,h=s*1.05;ctx.shadowColor='rgba(50,35,65,.18)';ctx.shadowBlur=8;ctx.fillStyle=item.variant==='ticket'?'#fff0d7':'#fffaf0';roundedPath(-w/2,-h/2,w,h,8);ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle='rgba(99,75,120,.22)';ctx.lineWidth=2;ctx.stroke();if(item.variant==='ticket'){ctx.setLineDash([6,5]);ctx.beginPath();ctx.moveTo(-w*.28,-h*.35);ctx.lineTo(-w*.28,h*.35);ctx.stroke();ctx.setLineDash([])}return}
@@ -68,10 +106,10 @@
   function accessFor(item){if(item.access==='free')return{unlocked:true,label:'FREE'};const server=serverCatalogItem(item.id);if(server)return{unlocked:!!server.unlocked,label:item.access==='points'?`${item.unlockCost}P`:`${item.minPoints}P 활동`};return{unlocked:false,label:item.access==='points'?`${item.unlockCost}P`:`${item.minPoints}P 활동`}}
   function previewGlyph(item){if(item.kind==='emoji')return item.value;return{tape:'▰',paper:'▤',pearl:'○',gem:'◆',chrome:item.variant==='heart'?'♡':'★',jelly:'♥',lace:'⌜',acrylic:'◉',frame:'▣',sparkle:'✦'}[item.kind]||'✦'}
   function renderStickerProfile(){const root=$('#stickerProfile');if(!root)return;const identity=window.NUGU_AUTH?.getIdentitySync?.();if(!identity?.authenticated){root.innerHTML='<b>기본 꾸미기는 바로 가능 ♡</b><span>로그인하면 활동 해금·희귀 스티커 영구 해금이 연결돼요.</span>';return}const p=styleState?.profile;if(!p){root.innerHTML='<b>꾸미기 서랍 불러오는 중…</b><span>활동 포인트를 확인하고 있어요.</span>';return}root.innerHTML=`<b>${esc(p.level?.label||'새싹 팬')} · ${Number(p.points?.balance||0)}P</b><span>누적 ${Number(p.points?.earned||0)}P · 해금 사용 ${Number(p.points?.spent||0)}P</span>`}
-  function renderStickerGrid(){const root=$('#stickerGrid');if(!root)return;const rows=catalog.items.filter(item=>activeStickerPack==='all'||item.pack===activeStickerPack);root.innerHTML=rows.map(item=>{const a=accessFor(item),motion=item.motion&&!reducedMotion;return `<button type="button" class="material-sticker ${a.unlocked?'':'locked'} ${motion?'motion-item':''}" data-sticker-id="${esc(item.id)}" title="${esc(item.label)}"><span class="sticker-swatch kind-${esc(item.kind)} variant-${esc(item.variant||'base')}">${esc(previewGlyph(item))}</span><b>${esc(item.label)}</b><small>${a.unlocked?(motion?'LIVE ✦':'사용 가능'):`🔒 ${esc(a.label)}`}</small></button>`}).join('');root.querySelectorAll('[data-sticker-id]').forEach(b=>b.onclick=()=>handleStickerClick(b.dataset.stickerId))}
+  function renderStickerGrid(){const root=$('#stickerGrid');if(!root)return;const rows=catalog.items.filter(item=>activeStickerPack==='all'||item.pack===activeStickerPack);root.innerHTML=rows.map(item=>{const a=accessFor(item),motion=item.motion&&!reducedMotion,visual=item.asset?`<img src="${esc(item.asset)}" alt="" loading="lazy" draggable="false">`:esc(previewGlyph(item));return `<button type="button" class="material-sticker ${a.unlocked?'':'locked'} ${motion?'motion-item':''}" data-sticker-id="${esc(item.id)}" title="${esc(item.label)}"><span class="sticker-swatch kind-${esc(item.kind)} variant-${esc(item.variant||'base')} ${item.asset?'has-asset':''}">${visual}</span><b>${esc(item.label)}</b><small>${a.unlocked?(motion?'LIVE ✦':'사용 가능'):`🔒 ${esc(a.label)}`}</small></button>`}).join('');root.querySelectorAll('[data-sticker-id]').forEach(b=>b.onclick=()=>handleStickerClick(b.dataset.stickerId))}
   async function signedIdentity(message='이 기능은 로그인 후 사용할 수 있어요.'){let identity=null;try{identity=await window.NUGU_AUTH?.getIdentity?.()}catch{}if(identity?.authenticated&&identity.accessToken)return identity;const state=$('#webSaveState');if(state)state.textContent=message;window.NUGU_AUTH_UI?.signIn?.(location.href);return null}
   async function unlockSticker(item){const identity=await signedIdentity('희귀 스티커는 로그인 후 영구 해금할 수 있어요.');if(!identity)return;const balance=Number(styleState?.profile?.points?.balance||0);if(balance<Number(item.unlockCost||0)){guide(`${item.label}은 ${item.unlockCost}P가 필요해요. 지금은 ${balance}P 있어요.`);return}guide(`${item.label} 영구 해금 중…`);try{const r=await fetch(`${apiBase()}/api/v1/community/style/unlock/${encodeURIComponent(item.id)}`,{method:'POST',headers:{Accept:'application/json','Content-Type':'application/json',...(window.NUGU_AUTH?.authHeaders?.(identity)||{})},body:JSON.stringify({visitorId:identity.visitorId})});const data=await r.json().catch(()=>({}));if(!r.ok)throw Object.assign(new Error(data.error||'unlock_failed'),{code:data.error});styleState={profile:data.profile,items:data.items};renderStickerProfile();renderStickerGrid();guide(`${item.label} 영구 해금 완료 ♡ 이제 횟수 차감 없이 계속 쓸 수 있어요.`)}catch(e){guide(e.code==='insufficient_style_points'?'포인트가 조금 부족해요. 덕질하다 보면 자연스럽게 쌓여요.':'지금은 해금하지 못했어요.')}}
-  async function handleStickerClick(id){const item=itemById(id);if(!item)return;const access=accessFor(item);if(!access.unlocked){if(item.access==='points'){await unlockSticker(item);return}const identity=window.NUGU_AUTH?.getIdentitySync?.();if(!identity?.authenticated){await signedIdentity('활동 해금 스티커는 로그인 후 덕질 기록과 연결돼요.');return}guide(`${item.label}은 누적 활동 ${item.minPoints}P부터 열려요. 현재 ${Number(styleState?.profile?.points?.earned||0)}P예요.`);return}addStickerItem(item)}
+  async function handleStickerClick(id){const item=itemById(id);if(!item)return;const access=accessFor(item);if(!access.unlocked){if(item.access==='points'){await unlockSticker(item);return}const identity=window.NUGU_AUTH?.getIdentitySync?.();if(!identity?.authenticated){await signedIdentity('활동 해금 스티커는 로그인 후 덕질 기록과 연결돼요.');return}guide(`${item.label}은 누적 활동 ${item.minPoints}P부터 열려요. 현재 ${Number(styleState?.profile?.points?.earned||0)}P예요.`);return}if(item.asset){try{await ensureAsset(item)}catch{guide(`${item.label} 벡터 장식을 불러오지 못했어요. 다시 눌러줘.`);return}}addStickerItem(item)}
   async function loadStyleState(){const sync=window.NUGU_AUTH?.getIdentitySync?.();if(!sync?.authenticated){styleState=null;renderStickerProfile();renderStickerGrid();return}try{const identity=await window.NUGU_AUTH.getIdentity();if(!identity?.authenticated)return;const r=await fetch(`${apiBase()}/api/v1/community/style/me?visitorId=${encodeURIComponent(identity.visitorId)}`,{headers:{Accept:'application/json',...(window.NUGU_AUTH?.authHeaders?.(identity)||{})},cache:'no-store'});const data=await r.json();if(!r.ok)throw new Error(data.error||'style_failed');styleState=data}catch(e){console.warn('style state',e);styleState=null}renderStickerProfile();renderStickerGrid()}
   function setArtist(artist){const next=artist?.slug?{slug:String(artist.slug).toLowerCase(),name:String(artist.name||artist.korean_name||artist.slug)}:null;if(selectedArtist?.slug!==next?.slug)markDirty();selectedArtist=next;const box=$('#topkkuArtistConnected');if(box)box.innerHTML=selectedArtist?`<b>${esc(selectedArtist.name)}</b><span>웹 보관함과 아지트 공개 대상을 이 팀으로 연결했어요.</span>`:'아직 팀이 연결되지 않았어요.';const results=$('#topkkuArtistResults');if(results)results.innerHTML='';const input=$('#topkkuArtistSearch');if(input&&selectedArtist)input.value=selectedArtist.name}
   function loadPhotoData(src,meta=null){if(!src)return;const img=new Image();img.onload=()=>{photo=img;photoView=defaultPhotoView();sourceMeta=meta;compositionEventKey=newCompositionKey();currentSavedId=null;currentSavedPublished=false;lastSavedEventKey='';if(meta?.artistSlug)setArtist({slug:meta.artistSlug,name:meta.artist||meta.artistSlug});selected=-1;draw();renderSaveState()};img.onerror=()=>{sourceMeta=null;compositionEventKey='';draw()};img.src=src}
@@ -150,5 +188,5 @@
   }
   async function loadArtistFromQuery(){const slug=new URLSearchParams(location.search).get('artist');if(!slug||!apiBase())return;try{const r=await fetch(`${apiBase()}/api/v1/community/topkku/${encodeURIComponent(slug)}?limit=1`,{headers:{Accept:'application/json'},cache:'no-store'});if(r.ok){const data=await r.json();if(data.artist?.slug)setArtist(data.artist)}}catch{}}
   window.addEventListener('nugu-auth-changed',()=>{loadStyleState();loadVault()});
-  $('#versionLabel').textContent=(window.NUGU_CONFIG||{}).build||'Updated 2026.09.12';setArtist(null);renderStickerProfile();renderStickerGrid();renderSaveState();draw();requestAnimationFrame(animationLoop);const incoming=loadIncoming();if(!incoming)loadArtistFromQuery();loadStyleState();loadVault();
+  $('#versionLabel').textContent=(window.NUGU_CONFIG||{}).build||'Updated 2026.09.12';preloadStickerAssets();setArtist(null);renderStickerProfile();renderStickerGrid();renderSaveState();draw();requestAnimationFrame(animationLoop);const incoming=loadIncoming();if(!incoming)loadArtistFromQuery();loadStyleState();loadVault();
 })();
