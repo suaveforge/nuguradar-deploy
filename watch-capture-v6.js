@@ -9,6 +9,11 @@
   const $=(s,r=document)=>r.querySelector(s);
   const wait=ms=>new Promise(r=>setTimeout(r,ms));
   const sourceFrame=()=>$('.player-frame iframe',body);
+  function pauseSourcePlayer(){
+    const frame=sourceFrame();
+    if(!frame?.contentWindow)return;
+    try{frame.contentWindow.postMessage(JSON.stringify({event:'command',func:'pauseVideo',args:[]}),'*')}catch{}
+  }
   const luma=(r,g,b)=>r*.2126+g*.7152+b*.0722;
 
   function setState(text,state=''){
@@ -140,9 +145,11 @@
     try{
       yt=await new Promise((resolve,reject)=>{
         const timer=setTimeout(()=>reject(new Error('clean_player_timeout')),9000);
-        const p=new YT.Player(slot.id,{host:'https://www.youtube-nocookie.com',videoId:id,width:'100%',height:'100%',playerVars:{autoplay:1,mute:1,controls:0,rel:0,playsinline:1,disablekb:1,fs:0,iv_load_policy:3,origin:location.origin},events:{onReady:()=>{clearTimeout(timer);resolve(p);},onError:()=>{clearTimeout(timer);reject(new Error('clean_player_error'));}}});
+        const p=new YT.Player(slot.id,{host:'https://www.youtube-nocookie.com',videoId:id,width:'100%',height:'100%',playerVars:{autoplay:1,mute:1,controls:0,rel:0,playsinline:1,disablekb:1,fs:0,iv_load_policy:3,cc_load_policy:0,modestbranding:1,origin:location.origin},events:{onReady:()=>{clearTimeout(timer);resolve(p);},onError:()=>{clearTimeout(timer);reject(new Error('clean_player_error'));}}});
       });
       yt.mute();
+      try{yt.setOption?.('captions','track',{});}catch{}
+      try{yt.setOption?.('captions','fontSize',0);}catch{}
       const duration=await waitDuration(yt),target=safeTarget(requested,duration),preRoll=Math.max(0,target-Math.min(1.1,target));
       yt.seekTo(preRoll,true);yt.playVideo();
       return{veil,stage,yt,portrait,ratio,box,duration,target};
@@ -210,11 +217,13 @@
   async function capture(){
     if(busy)return;busy=true;
     const buttons=[...body.querySelectorAll('.frame-topkku-action button')];buttons.forEach(b=>b.disabled=true);
+    pauseSourcePlayer();
+    await wait(120);
     const requested=targetTime(),id=videoId(),title=$('.player-title h2',body)?.textContent?.trim()||'NUGU RADAR Watch',mt=$('.player-title p',body)?.textContent?.trim()||'',artist=mt.split('·')[0]?.trim()||'',artistSlug=body.dataset.artistSlug||'',url=$('.player-title a',body)?.href||'';
     let stream=null,veil=null,stage=null,yt=null;
     try{
       if(!id)throw new Error('video_id');
-      setState('현재 탭 허용을 기다리고 있어요.','working');toast('① 현재 탭을 허용해 주세요 · 허용 뒤 자동으로 진행돼요');
+      setState(`${timeLabel(requested)} 장면을 멈췄어요. 현재 탭 허용을 기다리고 있어요.`,'working');toast(`① ${timeLabel(requested)} 장면 고정 ✓ · 현재 탭을 허용해 주세요`);
       stream=await requestShare();
       const v=await streamVideo(stream);
       toast('② 화면 중앙에 UI 없는 전용 영상 프레임을 만드는 중…');setState('허용 완료 · 깨끗한 영상 프레임을 준비하고 있어요.','working');
@@ -230,8 +239,8 @@
 
       toast('④ 영상 프레임 픽셀만 검증하는 중…');
       const candidates=[];
-      for(let i=0;i<6;i++){
-        if(i)await wait(32);
+      for(let i=0;i<3;i++){
+        if(i)await wait(8);
         let state=-99,t=-1;try{state=yt.getPlayerState();t=Number(yt.getCurrentTime());}catch{}
         if(state!==YT.PlayerState.PLAYING)continue;
         const full=snap(v),freshRect=geometryRect(stage,full);

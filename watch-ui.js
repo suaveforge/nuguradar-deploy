@@ -137,13 +137,13 @@
   }
 
   function wireFrameAction(){
-    const title=playerBody.querySelector('.player-title');
-    if(!title||title.querySelector('#frameTopkkuButton'))return;
+    const frame=playerBody.querySelector('.player-frame');
+    if(!frame||frame.querySelector('#frameTopkkuButton'))return;
     enableYoutubeApi();
     const wrap=document.createElement('div');
-    wrap.className='frame-topkku-action';
-    wrap.innerHTML=`<div class="frame-scene-head"><b>딱 이 표정으로</b><strong id="frameTopkkuTime">${preciseTimeLabel(latestTime)}</strong></div><div class="frame-nudge" aria-label="장면 미세 선택"><button type="button" data-step="-0.2">−0.2초</button><button type="button" data-step="-0.1">−0.1초</button><button type="button" data-step="0.1">+0.1초</button><button type="button" data-step="0.2">+0.2초</button></div><button id="frameTopkkuButton" type="button">✨ 이 장면 탑꾸</button><span id="frameTopkkuState">원하는 표정에 맞춘 뒤 눌러보세요. 실제 영상 영역만 가져와요.</span>`;
-    title.appendChild(wrap);
+    wrap.className='frame-topkku-action frame-topkku-dock';
+    wrap.innerHTML=`<div class="frame-scene-head"><b>딱 이 표정으로</b><strong id="frameTopkkuTime">${preciseTimeLabel(latestTime)}</strong></div><div class="frame-nudge" aria-label="장면 미세 선택"><button type="button" data-step="-0.2">−0.2초</button><button type="button" data-step="-0.1">−0.1초</button><button type="button" data-step="0.1">+0.1초</button><button type="button" data-step="0.2">+0.2초</button></div><button id="frameTopkkuButton" type="button">⏸ 이 장면 멈추고 탑꾸</button><span id="frameTopkkuState">누르는 순간 영상을 멈추고, 그 장면만 가져와요.</span>`;
+    frame.appendChild(wrap);
     wrap.querySelectorAll('.frame-nudge button').forEach(b=>b.addEventListener('click',()=>nudgeFrame(Number(b.dataset.step))));
     updateSceneTime();
   }

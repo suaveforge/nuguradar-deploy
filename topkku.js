@@ -46,6 +46,16 @@
   function starPath(size,points=5){const outer=size*.52,inner=outer*.43;ctx.beginPath();for(let i=0;i<points*2;i++){const r=i%2?inner:outer,a=-Math.PI/2+i*Math.PI/points,x=Math.cos(a)*r,y=Math.sin(a)*r;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)}ctx.closePath()}
   function gradient(stops,x1,y1,x2,y2){const g=ctx.createLinearGradient(x1,y1,x2,y2);for(const [p,col] of stops)g.addColorStop(p,col);return g}
   function coverImage(img,x,y,w,h){const base=Math.max(w/img.naturalWidth,h/img.naturalHeight),scale=base*photoView.zoom;const dw=img.naturalWidth*scale,dh=img.naturalHeight*scale;const maxX=Math.max(0,(dw-w)/2),maxY=Math.max(0,(dh-h)/2);photoView.x=clamp(photoView.x,-maxX,maxX);photoView.y=clamp(photoView.y,-maxY,maxY);ctx.drawImage(img,x+(w-dw)/2+photoView.x,y+(h-dh)/2+photoView.y,dw,dh)}
+  function fitWatchImage(img,x,y,w,h){
+    const cover=Math.max(w/img.naturalWidth,h/img.naturalHeight);
+    const bw=img.naturalWidth*cover,bh=img.naturalHeight*cover;
+    ctx.save();ctx.globalAlpha=.26;ctx.filter='blur(22px) brightness(.72)';ctx.drawImage(img,x+(w-bw)/2,y+(h-bh)/2,bw,bh);ctx.restore();
+    const fit=Math.min(w/img.naturalWidth,h/img.naturalHeight),scale=fit*photoView.zoom;
+    const dw=img.naturalWidth*scale,dh=img.naturalHeight*scale,maxX=Math.max(0,(dw-w)/2),maxY=Math.max(0,(dh-h)/2);
+    photoView.x=clamp(photoView.x,-maxX,maxX);photoView.y=clamp(photoView.y,-maxY,maxY);
+    ctx.drawImage(img,x+(w-dw)/2+photoView.x,y+(h-dh)/2+photoView.y,dw,dh);
+  }
+  function drawPhoto(img,x,y,w,h){if(sourceMeta?.source==='watch')fitWatchImage(img,x,y,w,h);else coverImage(img,x,y,w,h)}
   function snapshot(){return{theme,elements:elements.map(e=>({...e})),photoView:{...photoView}}}
   function renderUsage(){const root=$('#topkkuLimitLine');if(!root)return;const s=Number(vaultUsage?.savedToday||0),p=Number(vaultUsage?.publishedToday||0),sl=Number(vaultUsage?.saveLimit||limits.privateSavesPerDay),pl=Number(vaultUsage?.publishLimit||limits.publicPostsPerDay);root.textContent=`만들기·PNG 저장 무제한 · 웹 보관 ${s}/${sl} · 아지트 공개 ${p}/${pl} · 모션 장식 작품당 ${limits.motionObjects}개`}
   function renderSaveState(){const a=$('#webSaveBtn'),b=$('#publishBtn');if(a)a.disabled=saveBusy;if(b){b.disabled=saveBusy;b.textContent=currentSavedPublished?'아지트 벽에 붙음 ✓':'아지트 벽에 붙이기 ✦'}renderUsage()}
@@ -60,7 +70,7 @@
   function addText(value){const text=String(value||'').trim();if(!text)return;if(elements.length>=limits.totalObjects){guide(`한 작품에는 최대 ${limits.totalObjects}개 오브젝트까지 붙일 수 있어요.`);return}saveHistory();elements.push({type:'text',value:text,x:W/2,y:H-112,size:34,rotation:0});selected=elements.length-1;draw();$('#textInput').value=''}
   function elementRadius(e){if(e.type!=='sticker')return Math.max(e.size*1.1,e.value.length*e.size*.27);const item=itemById(e.stickerId);if(item?.kind==='frame'&&!item?.asset)return Math.max(photoBox.w,photoBox.h)*.48;return e.size*.75*Number(item?.assetScale||1)}
   function drawBackdrop(t){ctx.fillStyle=t.bg;ctx.fillRect(0,0,W,H);const g=ctx.createRadialGradient(W*.18,H*.12,20,W*.18,H*.12,420);g.addColorStop(0,t.accent+'55');g.addColorStop(1,t.bg+'00');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.save();ctx.globalAlpha=.22;ctx.strokeStyle=t.frame;ctx.lineWidth=2;for(let y=30;y<H;y+=46){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y-18);ctx.stroke()}ctx.restore()}
-  function drawFrame(t){ctx.save();ctx.shadowColor='rgba(0,0,0,.20)';ctx.shadowBlur=28;ctx.shadowOffsetY=18;roundedPath(photoBox.x-24,photoBox.y-24,photoBox.w+48,photoBox.h+48,46);ctx.fillStyle=t.paper;ctx.fill();ctx.restore();ctx.save();roundedPath(photoBox.x,photoBox.y,photoBox.w,photoBox.h,photoBox.r);ctx.clip();if(photo)coverImage(photo,photoBox.x,photoBox.y,photoBox.w,photoBox.h);else{ctx.fillStyle=theme==='midnight'?'#313044':'#f4f1f7';ctx.fillRect(photoBox.x,photoBox.y,photoBox.w,photoBox.h);ctx.fillStyle=theme==='midnight'?'#aba5c6':'#90899b';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='700 28px system-ui,sans-serif';ctx.fillText('최애 사진을 올려주세요 ♡',W/2,H/2-8);ctx.font='500 17px system-ui,sans-serif';ctx.fillText('사진은 이 브라우저 밖으로 나가지 않아요',W/2,H/2+34)}ctx.restore();ctx.save();roundedPath(photoBox.x-11,photoBox.y-11,photoBox.w+22,photoBox.h+22,38);ctx.strokeStyle=t.frame;ctx.lineWidth=12;ctx.stroke();ctx.restore();ctx.fillStyle=t.ink;ctx.font='900 20px system-ui,sans-serif';ctx.textAlign='left';ctx.fillText('NUGU RADAR · TOPKKU',48,58);ctx.textAlign='right';ctx.fillText('♡ made by a fan',W-48,H-45)}
+  function drawFrame(t){ctx.save();ctx.shadowColor='rgba(0,0,0,.20)';ctx.shadowBlur=28;ctx.shadowOffsetY=18;roundedPath(photoBox.x-24,photoBox.y-24,photoBox.w+48,photoBox.h+48,46);ctx.fillStyle=t.paper;ctx.fill();ctx.restore();ctx.save();roundedPath(photoBox.x,photoBox.y,photoBox.w,photoBox.h,photoBox.r);ctx.clip();if(photo)drawPhoto(photo,photoBox.x,photoBox.y,photoBox.w,photoBox.h);else{ctx.fillStyle=theme==='midnight'?'#313044':'#f4f1f7';ctx.fillRect(photoBox.x,photoBox.y,photoBox.w,photoBox.h);ctx.fillStyle=theme==='midnight'?'#aba5c6':'#90899b';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='700 28px system-ui,sans-serif';ctx.fillText('최애 사진을 올려주세요 ♡',W/2,H/2-8);ctx.font='500 17px system-ui,sans-serif';ctx.fillText('사진은 이 브라우저 밖으로 나가지 않아요',W/2,H/2+34)}ctx.restore();ctx.save();roundedPath(photoBox.x-11,photoBox.y-11,photoBox.w+22,photoBox.h+22,38);ctx.strokeStyle=t.frame;ctx.lineWidth=12;ctx.stroke();ctx.restore()}
   function drawMaterial(e,item,now){
     const s=e.size,t=(Number(now)||0)/1000;
     if(item.asset){
@@ -161,7 +171,7 @@
       state.innerHTML='내 웹 보관함에 저장 완료 ♡ '+(data.item?.secure_url?'<a href="'+esc(data.item.secure_url)+'" target="_blank" rel="noopener">Cloudinary 원본 보기</a>':'');
       await Promise.all([loadVault(),loadStyleState()]);renderSaveState();return{id:currentSavedId,published:currentSavedPublished}
     }catch(e){
-      state.textContent=e.code==='daily_topkku_save_limit'?'오늘 웹 보관 한도 '+limits.privateSavesPerDay+'개를 다 썼어요. 만들기와 PNG 저장은 계속 무제한이에요.':e.code==='sticker_locked'?'잠긴 스티커가 포함되어 있어요. 해금 상태를 다시 확인해줘.':e.code==='topkku_motion_limit'?'움직이는 장식은 작품당 '+limits.motionObjects+'개까지예요.':e.code==='sign_in_required'?'로그인이 필요해요.':'웹에 저장하지 못했어요. 다시 시도해줘.';return null
+      state.textContent=e.code==='daily_topkku_save_limit'?'오늘 웹 보관 한도 '+limits.privateSavesPerDay+'개를 다 썼어요. 만들기와 PNG 저장은 계속 무제한이에요.':e.code==='sticker_locked'?'잠긴 스티커가 포함되어 있어요. 해금 상태를 다시 확인해줘.':e.code==='topkku_motion_limit'?'움직이는 장식은 작품당 '+limits.motionObjects+'개까지예요.':e.code==='sign_in_required'?'로그인이 필요해요.':e.code==='FST_ERR_CTP_BODY_TOO_LARGE'||e.status===413?'완성본 용량이 커서 저장하지 못했어요. 자동 최적화 후 다시 시도해줘.':e.code==='cloudinary_not_configured'?'이미지 보관 서버 연결을 확인하고 있어요.':e.code==='cloudinary_request_failed'?'이미지 보관 서버 응답이 늦어요. 다시 시도해줘.':'웹에 저장하지 못했어요. 다시 시도해줘.';return null
     }finally{saveBusy=false;renderSaveState()}
   }
   async function publishSaved(id,artistSlug=selectedArtist?.slug){
