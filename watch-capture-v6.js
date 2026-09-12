@@ -184,6 +184,65 @@
     if(w<MIN_CAPTURE_PX||h<MIN_CAPTURE_PX||x<0||y<0||x+w>full.width+3||y+h>full.height+3)return null;
     return{x:Math.max(0,x),y:Math.max(0,y),w:Math.min(w,full.width-Math.max(0,x)),h:Math.min(h,full.height-Math.max(0,y)),sx,sy};
   }
+  const CAL_MARKERS=[
+    {key:'tl',rgb:[17,241,169],style:{left:'6px',top:'6px'}},
+    {key:'tr',rgb:[247,27,174],style:{right:'6px',top:'6px'}},
+    {key:'bl',rgb:[20,177,255],style:{left:'6px',bottom:'6px'}},
+    {key:'br',rgb:[255,214,20],style:{right:'6px',bottom:'6px'}}
+  ];
+  function mountCalibration(stage){
+    const layer=document.createElement('div');
+    layer.className='nugu-capture-calibration-v6';
+    Object.assign(layer.style,{position:'absolute',inset:'0',zIndex:'2147483646',pointerEvents:'none'});
+    for(const m of CAL_MARKERS){
+      const dot=document.createElement('i');
+      dot.dataset.marker=m.key;
+      Object.assign(dot.style,{position:'absolute',width:'16px',height:'16px',borderRadius:'2px',boxShadow:'0 0 0 2px #000',background:`rgb(${m.rgb.join(',')})`,...m.style});
+      layer.appendChild(dot);
+    }
+    stage.appendChild(layer);
+    return layer;
+  }
+  function markerCenter(src,rgb){
+    const d=src.getContext('2d',{willReadFrequently:true}).getImageData(0,0,src.width,src.height).data;
+    let minX=src.width,minY=src.height,maxX=-1,maxY=-1,n=0;
+    for(let y=0;y<src.height;y++){
+      for(let x=0;x<src.width;x++){
+        const i=(y*src.width+x)*4;
+        if(Math.abs(d[i]-rgb[0])<=12&&Math.abs(d[i+1]-rgb[1])<=12&&Math.abs(d[i+2]-rgb[2])<=12){
+          minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);n++;
+        }
+      }
+    }
+    if(n<12||maxX<minX||maxY<minY)return null;
+    return{x:(minX+maxX)/2,y:(minY+maxY)/2,w:maxX-minX+1,h:maxY-minY+1,n};
+  }
+  function calibrationRect(stage,full){
+    const pts={};
+    for(const m of CAL_MARKERS){const p=markerCenter(full,m.rgb);if(!p)return null;pts[m.key]=p;}
+    const css=stage.getBoundingClientRect(),cssDx=Math.max(1,css.width-28),cssDy=Math.max(1,css.height-28);
+    const dx=((pts.tr.x-pts.tl.x)+(pts.br.x-pts.bl.x))/2;
+    const dy=((pts.bl.y-pts.tl.y)+(pts.br.y-pts.tr.y))/2;
+    const sx=dx/cssDx,sy=dy/cssDy;
+    if(!Number.isFinite(sx)||!Number.isFinite(sy)||sx<=0||sy<=0)return null;
+    if(Math.abs(sx-sy)/Math.max(sx,sy)>.10)return null;
+    const left=((pts.tl.x+pts.bl.x)/2)-14*sx;
+    const top=((pts.tl.y+pts.tr.y)/2)-14*sy;
+    const w=css.width*sx,h=css.height*sy;
+    const x=Math.max(0,Math.round(left)),y=Math.max(0,Math.round(top));
+    const ww=Math.min(full.width-x,Math.round(w)),hh=Math.min(full.height-y,Math.round(h));
+    if(ww<MIN_CAPTURE_PX||hh<MIN_CAPTURE_PX||x+ww>full.width||y+hh>full.height)return null;
+    return{x,y,w:ww,h:hh,sx,sy,calibrated:true};
+  }
+  async function waitForCalibration(streamVideoEl,stage,timeout=2200){
+    const start=performance.now();
+    while(performance.now()-start<timeout){
+      const full=snap(streamVideoEl),rect=calibrationRect(stage,full);
+      if(rect)return{full,rect};
+      await wait(45);
+    }
+    throw new Error('capture_surface_not_synced');
+  }
 
   function horizontalRedBar(src){
     const a=small(src,480),w=a.width,h=a.height,d=a.getContext('2d',{willReadFrequently:true}).getImageData(0,0,w,h).data;
@@ -228,9 +287,11 @@
       const v=await streamVideo(stream);
       toast('② 화면 중앙에 UI 없는 전용 영상 프레임을 만드는 중…');setState('허용 완료 · 깨끗한 영상 프레임을 준비하고 있어요.','working');
       const clean=await makeCleanPlayer(id,requested);veil=clean.veil;stage=clean.stage;yt=clean.yt;
-      await wait(180);
-      const probe=snap(v),rect=geometryRect(stage,probe);
-      if(!rect)throw new Error('geometry_mapping_failed');
+      const calibration=mountCalibration(stage);
+      const synced=await waitForCalibration(v,stage);
+      const rect=synced.rect;
+      calibration.remove();
+      await wait(120);
 
       if(clean.duration>.75&&requested>clean.duration-.38)toast(`③ 영상 끝 UI를 피해서 ${timeLabel(clean.target)} 장면으로 자동 보정했어요`);
       else toast(`③ ${timeLabel(clean.target)} 장면을 깨끗하게 맞추는 중…`);
@@ -243,7 +304,7 @@
         if(i)await wait(8);
         let state=-99,t=-1;try{state=yt.getPlayerState();t=Number(yt.getCurrentTime());}catch{}
         if(state!==YT.PlayerState.PLAYING)continue;
-        const full=snap(v),freshRect=geometryRect(stage,full);
+        const full=snap(v),freshRect={...rect};
         if(!freshRect)continue;
         const shot=crop(full,freshRect.x,freshRect.y,freshRect.w,freshRect.h),quality=frameQuality(shot);
         candidates.push({canvas:shot,quality,time:t,geometry:{sx:+freshRect.sx.toFixed(4),sy:+freshRect.sy.toFixed(4)}});
@@ -258,7 +319,7 @@
       setState(`영상 프레임만 가져왔어요 ✓ ${best.canvas.width}×${best.canvas.height}`,'success');toast('완료 ✓ 탑꾸로 이동합니다','success');await wait(180);location.href='topkku.html?from=watch';
     }catch(err){
       console.error('topkku capture v6 failed',err);const c=String(err?.message||err);
-      const msg=c==='choose_tab'?'“현재 탭”을 선택해 주세요.':c==='frame_sync_failed'?'영상 장면이 안정적으로 재생되지 않아 저장하지 않았어요. 다시 시도해 주세요.':c==='clean_player_timeout'||c==='yt_api_timeout'?'캡처 전용 플레이어 준비가 지연됐어요. 다시 시도해 주세요.':c==='geometry_mapping_failed'?'현재 탭의 영상 위치 계산에 실패했어요. 잘못된 사진은 저장하지 않았습니다.':c==='clean_frame_not_found'?'UI 없는 깨끗한 영상 프레임을 확인하지 못해 저장하지 않았어요.':c==='ratio_mismatch'?'영상 비율 검증에 실패해 잘못된 사진은 저장하지 않았어요.':'장면을 가져오지 못했어요. 다시 시도해 주세요.';
+      const msg=c==='choose_tab'?'“현재 탭”을 선택해 주세요.':c==='frame_sync_failed'?'영상 장면이 안정적으로 재생되지 않아 저장하지 않았어요. 다시 시도해 주세요.':c==='clean_player_timeout'||c==='yt_api_timeout'?'캡처 전용 플레이어 준비가 지연됐어요. 다시 시도해 주세요.':c==='capture_surface_not_synced'?'현재 탭 캡처 화면이 영상 전용 프레임으로 바뀐 걸 확인하지 못했어요. 잘못된 영역은 저장하지 않았습니다.':c==='clean_frame_not_found'?'UI 없는 깨끗한 영상 프레임을 확인하지 못해 저장하지 않았어요.':c==='ratio_mismatch'?'영상 비율 검증에 실패해 잘못된 사진은 저장하지 않았어요.':'장면을 가져오지 못했어요. 다시 시도해 주세요.';
       setState(msg,'error');toast(msg,'error');setTimeout(hideToast,4200);
     }finally{
       try{yt?.destroy?.();}catch{}stage?.remove();veil?.remove();stream?.getTracks?.().forEach(t=>t.stop());buttons.forEach(b=>b.disabled=false);busy=false;
