@@ -1,5 +1,16 @@
 (()=>{
   const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  function loadLivePulse(){
+    const page=(location.pathname.split('/').pop()||'index.html').toLowerCase();
+    const allowed=new Set(['','index.html','watch.html','topkku.html','community.html','room.html','fan-board.html','hall-of-fame.html']);
+    if(!allowed.has(page))return;
+    if(!document.querySelector('link[data-live-pulse]')){
+      const link=document.createElement('link');link.rel='stylesheet';link.href='live-pulse.css';link.dataset.livePulse='1';document.head.appendChild(link);
+    }
+    if(!document.querySelector('script[data-live-pulse]')){
+      const script=document.createElement('script');script.src='live-pulse.js';script.async=true;script.dataset.livePulse='1';document.body.appendChild(script);
+    }
+  }
   function slot(){
     let el=document.getElementById('authSlot');if(el)return el;
     const header=document.querySelector('.topbar');if(!header)return null;
@@ -19,5 +30,5 @@
     }
   }
   window.addEventListener('nugu-auth-changed',render);window.addEventListener('nugu-auth-ready',render);
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',render,{once:true});else render();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{render();loadLivePulse()},{once:true});else{render();loadLivePulse()}
 })();
