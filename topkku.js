@@ -14,7 +14,7 @@
   const limits=catalog.limits;
   const defaultPhotoView=()=>({zoom:1,x:0,y:0});
   let theme='lavender',photo=null,photoView=defaultPhotoView(),elements=[],selected=-1,drag=null,history=[],sourceMeta=null,compositionEventKey='',selectedArtist=null,saveBusy=false,searchTimer=null;
-  let activeStickerPack='all',styleState=null,vaultUsage=null,currentSavedId=null,currentSavedPublished=false,lastSavedEventKey='';
+  let activeStickerPack='all',styleState=null,vaultUsage=null,currentSavedId=null,currentSavedPublished=false,lastSavedEventKey='',referenceSource=null;
   const reducedMotion=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
   const assetImages=new Map(),assetPromises=new Map();
   function ensureAsset(item){
@@ -102,6 +102,15 @@
   function canvasPoint(ev){const r=canvas.getBoundingClientRect();return{x:(ev.clientX-r.left)*W/r.width,y:(ev.clientY-r.top)*H/r.height}}
   function hitTest(p){for(let i=elements.length-1;i>=0;i--){const e=elements[i],r=elementRadius(e);if(Math.hypot(p.x-e.x,p.y-e.y)<=r*1.05)return i}return-1}
   function newCompositionKey(){return `topkku_${Date.now()}_${crypto.randomUUID?.()||Math.random().toString(36).slice(2)}`.replace(/[^A-Za-z0-9:_-]/g,'').slice(0,120)}
+  function loadReferenceSource(){
+    let raw='';try{raw=sessionStorage.getItem('nuguTopkkuReference')||''}catch{}
+    if(!raw){referenceSource=null;return}
+    try{const data=JSON.parse(raw);if(!data?.id||!data?.eventKey||!data?.display_url)throw new Error('invalid_reference');referenceSource=data}catch{referenceSource=null}
+    const panel=$('#topkkuReferencePanel');if(!panel)return;
+    if(!referenceSource){panel.hidden=true;panel.innerHTML='';return}
+    panel.hidden=false;panel.innerHTML=`<div class="reference-copy"><span>INSPIRED BY</span><b>${esc(referenceSource.artist_name||'다른 팬의 탑꾸')}</b><small>${esc(referenceSource.maker_name||'팬')}의 탑꾸를 옆에 두고 참고 중</small></div><img src="${esc(referenceSource.display_url)}" alt="참고 중인 탑꾸"><button type="button" id="clearTopkkuReference">참고 끝내기</button>`;
+    $('#clearTopkkuReference')?.addEventListener('click',()=>{referenceSource=null;try{sessionStorage.removeItem('nuguTopkkuReference')}catch{}panel.hidden=true;panel.innerHTML=''});
+  }
   function serverCatalogItem(id){return styleState?.items?.find?.(x=>x.id===id)||null}
   function accessFor(item){if(item.access==='free')return{unlocked:true,label:'FREE'};const server=serverCatalogItem(item.id);if(server)return{unlocked:!!server.unlocked,label:item.access==='points'?`${item.unlockCost}P`:`${item.minPoints}P 활동`};return{unlocked:false,label:item.access==='points'?`${item.unlockCost}P`:`${item.minPoints}P 활동`}}
   function previewGlyph(item){if(item.kind==='emoji')return item.value;return{tape:'▰',paper:'▤',pearl:'○',gem:'◆',chrome:item.variant==='heart'?'♡':'★',jelly:'♥',lace:'⌜',acrylic:'◉',frame:'▣',sparkle:'✦'}[item.kind]||'✦'}
@@ -144,7 +153,7 @@
     try{
       const key=compositionEventKey||newCompositionKey();compositionEventKey=key;
       const url=apiBase()+'/api/v1/community/topkku/'+encodeURIComponent(selectedArtist.slug)+'/save';
-      const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json',...(window.NUGU_AUTH?.authHeaders?.(identity)||{})},body:JSON.stringify({visitorId:identity.visitorId,eventKey:key,imageData:canvasPngData(),source:sourceMeta?.source==='watch'?'watch-topkku':'topkku',sourceContentUrl:sourceMeta?.contentUrl||'',sourceTitle:sourceMeta?.title||'',objectCount:elements.length,stickerIds:stickerIds(),effects:motionEffects()})});
+      const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json',...(window.NUGU_AUTH?.authHeaders?.(identity)||{})},body:JSON.stringify({visitorId:identity.visitorId,eventKey:key,imageData:canvasPngData(),source:sourceMeta?.source==='watch'?'watch-topkku':'topkku',sourceContentUrl:sourceMeta?.contentUrl||'',sourceTitle:sourceMeta?.title||'',objectCount:elements.length,stickerIds:stickerIds(),effects:motionEffects(),referenceEventKey:referenceSource?.eventKey||''})});
       const data=await r.json().catch(()=>({}));if(!r.ok)throw Object.assign(new Error(data.error||'save_failed'),{code:data.error,status:r.status,data});
       currentSavedId=Number(data.item?.id)||null;currentSavedPublished=!!data.published||!!data.item?.published_at;lastSavedEventKey=key;if(data.usage)vaultUsage={...(vaultUsage||{}),...data.usage};
       state.innerHTML='내 웹 보관함에 저장 완료 ♡ '+(data.item?.secure_url?'<a href="'+esc(data.item.secure_url)+'" target="_blank" rel="noopener">Cloudinary 원본 보기</a>':'');
@@ -169,7 +178,7 @@
   $('#webSaveBtn').onclick=()=>saveWeb();
   $('#publishBtn').onclick=async()=>{const saved=currentSavedId?{id:currentSavedId}:await saveWeb();if(saved?.id)await publishSaved(saved.id,selectedArtist?.slug)};
   $('#downloadBtn').onclick=()=>{const old=selected;selected=-1;draw();canvas.toBlob(blob=>{if(!blob)return;const a=document.createElement('a');const url=URL.createObjectURL(blob);const who=String(selectedArtist?.name||sourceMeta?.artist||'').trim().replace(/[^0-9A-Za-z가-힣_-]+/g,'-').replace(/^-+|-+$/g,'');a.href=url;a.download=`nugu-radar-topkku${who?`-${who}`:''}-${Date.now()}.png`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);selected=old;draw()},'image/png',1)};
-  function vaultCard(item){return '<article class="vault-card"><a href="'+esc(item.secure_url)+'" target="_blank" rel="noopener"><img src="'+esc(item.display_url||item.secure_url)+'" alt="'+esc(item.artist_name||'탑꾸')+'" loading="lazy"></a><div><b>'+esc(item.artist_name||item.artist_slug||'탑꾸')+'</b><span>'+(item.published_at?'아지트 공개됨':'내 보관함만')+'</span><div class="vault-actions">'+(item.published_at?'<a href="room.html?artist='+encodeURIComponent(item.artist_slug)+'&tab=topkku">벽 보기</a>':'<button type="button" data-vault-publish="'+Number(item.id)+'" data-vault-artist="'+esc(item.artist_slug)+'">아지트에 붙이기</button>')+'</div></div></article>'}
+  function vaultCard(item){return '<article class="vault-card" data-vault-id="'+Number(item.id)+'" data-bucket="'+esc(item.bucket_key||'inbox')+'"><a href="'+esc(item.secure_url)+'" target="_blank" rel="noopener"><img src="'+esc(item.display_url||item.secure_url)+'" alt="'+esc(item.artist_name||'탑꾸')+'" loading="lazy"></a><div><b>'+esc(item.artist_name||item.artist_slug||'탑꾸')+'</b><span>'+(item.published_at?'아지트 공개됨':'내 보관함만')+'</span><div class="vault-actions">'+(item.published_at?'<a href="room.html?artist='+encodeURIComponent(item.artist_slug)+'&tab=topkku">벽 보기</a>':'<button type="button" data-vault-publish="'+Number(item.id)+'" data-vault-artist="'+esc(item.artist_slug)+'">아지트에 붙이기</button>')+'</div></div></article>'}
   async function loadVault(){
     const state=$('#topkkuVaultState'),root=$('#topkkuVaultGrid');if(!state||!root)return;
     const sync=window.NUGU_AUTH?.getIdentitySync?.();
@@ -183,10 +192,10 @@
       state.textContent='오늘 웹 보관 '+Number(data.usage?.savedToday||0)+'/'+Number(data.usage?.saveLimit||30)+' · 아지트 공개 '+Number(data.usage?.publishedToday||0)+'/'+Number(data.usage?.publishLimit||10);
       root.innerHTML=data.items?.length?data.items.map(vaultCard).join(''):'<div class="topkku-vault-empty">아직 웹에 저장한 탑꾸가 없어요.</div>';
       root.querySelectorAll('[data-vault-publish]').forEach(b=>b.onclick=()=>publishSaved(Number(b.dataset.vaultPublish),b.dataset.vaultArtist));
-      renderUsage();
+      renderUsage();window.dispatchEvent(new CustomEvent('nugu-topkku-vault-rendered',{detail:{scope:'mine',items:data.items||[]}}));
     }catch(e){console.warn('vault',e);state.textContent='내 웹 보관함을 잠시 불러오지 못했어요.'}
   }
   async function loadArtistFromQuery(){const slug=new URLSearchParams(location.search).get('artist');if(!slug||!apiBase())return;try{const r=await fetch(`${apiBase()}/api/v1/community/topkku/${encodeURIComponent(slug)}?limit=1`,{headers:{Accept:'application/json'},cache:'no-store'});if(r.ok){const data=await r.json();if(data.artist?.slug)setArtist(data.artist)}}catch{}}
   window.addEventListener('nugu-auth-changed',()=>{loadStyleState();loadVault()});
-  $('#versionLabel').textContent=(window.NUGU_CONFIG||{}).build||'Updated 2026.09.12';preloadStickerAssets();setArtist(null);renderStickerProfile();renderStickerGrid();renderSaveState();draw();requestAnimationFrame(animationLoop);const incoming=loadIncoming();if(!incoming)loadArtistFromQuery();loadStyleState();loadVault();
+  window.NUGU_TOPKKU_LOAD_VAULT=loadVault;window.NUGU_TOPKKU_API_BASE=apiBase;$('#versionLabel').textContent=(window.NUGU_CONFIG||{}).build||'Updated 2026.09.12';preloadStickerAssets();setArtist(null);loadReferenceSource();renderStickerProfile();renderStickerGrid();renderSaveState();draw();requestAnimationFrame(animationLoop);const incoming=loadIncoming();if(!incoming)loadArtistFromQuery();loadStyleState();loadVault();
 })();
