@@ -9,6 +9,7 @@
 
   let kind='all',offset=0,cycle=0,loading=false,ended=false,active=null,soundOn=false,paused=false,generation=0;
   const items=new Map(),times=new Map();
+  const primed=new WeakSet(),priming=new WeakSet(),primeTimers=new WeakMap();
   const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
   const fmt=n=>Number.isFinite(Number(n))?new Intl.NumberFormat('ko',{notation:'compact',maximumFractionDigits:1}).format(Number(n)):'—';
   const keyOf=c=>String(c.platform)+':'+String(c.platform_content_id||c.content_id);
@@ -62,14 +63,42 @@
     };
     kick();[80,220,520,950].forEach(ms=>setTimeout(kick,ms));
   }
+  function cancelPrime(cardEl){
+    if(!cardEl)return;
+    const timer=primeTimers.get(cardEl);if(timer)clearTimeout(timer);
+    primeTimers.delete(cardEl);priming.delete(cardEl);
+  }
+  function finishPrime(cardEl,frame){
+    if(!cardEl||cardEl===active||!cardEl.isConnected)return;
+    const timer=primeTimers.get(cardEl);if(timer)clearTimeout(timer);
+    primeTimers.delete(cardEl);priming.delete(cardEl);primed.add(cardEl);cardEl.classList.add('player-ready');
+    send(frame,'pauseVideo');
+  }
+  function primeCard(cardEl){
+    if(!cardEl||cardEl===active||primed.has(cardEl)||priming.has(cardEl))return;
+    const frame=ensureFrame(cardEl,true);if(!frame)return;
+    priming.add(cardEl);
+    const kick=()=>{
+      if(cardEl===active||!cardEl.isConnected){cancelPrime(cardEl);return}
+      send(frame,'mute');send(frame,'playVideo');
+    };
+    kick();[90,240,520,1050].forEach(ms=>setTimeout(kick,ms));
+    const timer=setTimeout(()=>{
+      if(cardEl===active||!cardEl.isConnected){cancelPrime(cardEl);return}
+      send(frame,'pauseVideo');priming.delete(cardEl);primeTimers.delete(cardEl);
+    },3200);
+    primeTimers.set(cardEl,timer);
+  }
   function warmAround(el){
     const cards=[...feed.querySelectorAll('.mobile-reel')],idx=cards.indexOf(el);if(idx<0)return;
-    const keep=new Set([cards[idx-1],cards[idx],cards[idx+1]].filter(Boolean));
-    for(const cardEl of keep){
-      const frame=ensureFrame(cardEl,cardEl===el);if(cardEl!==el&&frame)send(frame,'pauseVideo');
-    }
+    const previous=cards[idx-1],next=cards[idx+1];
+    const keep=new Set([previous,cards[idx],next].filter(Boolean));
+    ensureFrame(cards[idx],true);
+    if(previous){const frame=ensureFrame(previous,false);if(frame)send(frame,'pauseVideo')}
+    if(next)primeCard(next);
     for(const cardEl of cards){
       if(keep.has(cardEl))continue;
+      cancelPrime(cardEl);primed.delete(cardEl);cardEl.classList.remove('player-ready');
       const host=cardEl.querySelector('.mobile-reel-player');if(host?.querySelector('iframe'))host.innerHTML='';
     }
   }
@@ -84,7 +113,8 @@
   function activate(el){
     if(!el)return;
     if(el===active){if(!paused)playActive(el);return}
-    deactivate(active);active=el;paused=false;el.classList.add('active');ensureFrame(el,true);playActive(el);warmAround(el);
+    cancelPrime(el);
+    deactivate(active);active=el;paused=false;el.classList.add('active');el.classList.toggle('player-ready',primed.has(el));ensureFrame(el,true);playActive(el);warmAround(el);
     const cards=[...feed.querySelectorAll('.mobile-reel')],idx=cards.indexOf(el);if(idx>=cards.length-4)loadMore();setTimeout(trimBehind,80);
   }
   function trimBehind(){
@@ -115,7 +145,7 @@
     }finally{if(gen===generation)loading=false}
   }
   function reset(nextKind){
-    generation++;deactivate(active);active=null;kind=nextKind;offset=0;cycle=0;ended=false;loading=false;items.clear();times.clear();feed.scrollTop=0;feed.innerHTML='<div class="mobile-reels-loading">검증된 영상을 불러오는 중…</div>';modeButtons.forEach(b=>b.classList.toggle('active',b.dataset.reelsKind===kind));loadMore();
+    generation++;deactivate(active);[...feed.querySelectorAll('.mobile-reel')].forEach(cancelPrime);active=null;kind=nextKind;offset=0;cycle=0;ended=false;loading=false;items.clear();times.clear();feed.scrollTop=0;feed.innerHTML='<div class="mobile-reels-loading">검증된 영상을 불러오는 중…</div>';modeButtons.forEach(b=>b.classList.toggle('active',b.dataset.reelsKind===kind));loadMore();
   }
   modeButtons.forEach(b=>b.addEventListener('click',()=>{if(!b.hidden)reset(b.dataset.reelsKind||'all')}));
   window.addEventListener('nugu-shorts-availability',e=>{
@@ -126,6 +156,8 @@
     const frames=[...feed.querySelectorAll('iframe')],frame=frames.find(x=>e.source===x.contentWindow);if(!frame)return;
     let data=e.data;try{if(typeof data==='string')data=JSON.parse(data)}catch{return}
     const cardEl=frame.closest('.mobile-reel'),t=Number(data?.info?.currentTime);if(cardEl&&Number.isFinite(t)&&t>=0)times.set(cardEl.dataset.key,t);
+    if(cardEl&&cardEl!==active&&priming.has(cardEl)&&Number.isFinite(t)&&t>=.12)finishPrime(cardEl,frame);
+    if(cardEl===active&&Number.isFinite(t)&&t>=.02)cardEl.classList.add('player-ready');
     if(cardEl===active&&(data?.event==='onReady'||data?.event==='initialDelivery')&&!paused)playActive(cardEl);
   });
   document.addEventListener('visibilitychange',()=>{if(document.hidden)send(active?.querySelector('iframe'),'pauseVideo');else if(active&&!paused)playActive(active)});

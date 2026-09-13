@@ -370,7 +370,7 @@
     const buttons=[...body.querySelectorAll('.frame-topkku-action button')];buttons.forEach(b=>b.disabled=true);
     const requested=targetTime(),id=videoId(),title=$('.player-title h2',body)?.textContent?.trim()||'NUGU RADAR Watch',mt=$('.player-title p',body)?.textContent?.trim()||'',artist=mt.split('·')[0]?.trim()||'',artistSlug=body.dataset.artistSlug||'',url=$('.player-title a',body)?.href||'';
     pauseSourcePlayer();
-    const transition=beginTopkkuTransition();
+    let transition=null;
     let stream=null,veil=null,stage=null,yt=null,done=false,phase='share-request';
     try{
       if(!id)throw new Error('video_id');
@@ -378,9 +378,13 @@
       const sharePromise=requestShare();
       stream=await sharePromise;
       phase='share-granted';
-      await wait(120);
+      setState('허용됐어요 · 캡처 화면을 연결하고 있어요.','working');toast('허용 완료 ✓ · 캡처 화면 연결 중…');
       const v=await streamVideo(stream);
-      toast('② 화면 중앙에 UI 없는 전용 영상 프레임을 만드는 중…');setState('허용 완료 · 깨끗한 영상 프레임을 준비하고 있어요.','working');
+      transition=beginTopkkuTransition();
+      if(!transition)throw new Error('transition_unavailable');
+      phase='transition';
+      await wait(120);
+      toast('② 화면 중앙에 UI 없는 전용 영상 프레임을 만드는 중…');setState('깨끗한 영상 프레임을 준비하고 있어요.','working');
       phase='clean-player';
       const clean=await makeCleanPlayer(id,requested);veil=clean.veil;stage=clean.stage;yt=clean.yt;
       phase='calibration';
@@ -434,7 +438,7 @@
       const diag={version:16,phase,name,message:c,at:new Date().toISOString()};
       try{sessionStorage.setItem('nuguTopkkuCaptureDiag',JSON.stringify(diag));}catch{}
       window.__NUGU_TOPKKU_CAPTURE_DIAG__=diag;
-      const msg=name==='InvalidStateError'?'브라우저가 화면 선택창을 열지 못했어요. 탑꾸 버튼을 다시 눌러 주세요.':name==='NotAllowedError'?'화면 선택이 취소되었거나 차단됐어요. 다시 눌러 현재 탭을 선택해 주세요.':name==='NotReadableError'?'현재 탭 화면을 읽지 못했어요. 다른 화면 공유를 닫고 다시 시도해 주세요.':c==='choose_tab'?'“현재 탭”을 선택해 주세요.':c==='frame_sync_failed'?'영상 장면이 안정적으로 재생되지 않아 저장하지 않았어요. 다시 시도해 주세요.':c==='clean_player_timeout'||c==='yt_api_timeout'?'캡처 전용 플레이어 준비가 지연됐어요. 다시 시도해 주세요.':c==='capture_surface_not_synced'?'현재 탭 캡처 화면이 영상 전용 프레임으로 바뀐 걸 확인하지 못했어요. 잘못된 영역은 저장하지 않았습니다.':c==='clean_frame_not_found'?'UI 없는 깨끗한 영상 프레임을 확인하지 못해 저장하지 않았어요.':c==='ratio_mismatch'?'영상 비율 검증에 실패해 잘못된 사진은 저장하지 않았어요.':c==='preview_unavailable'?'캡처 결과를 확인 화면에 표시하지 못해 편집기로 넘기지 않았어요. 다시 시도해 주세요.':'장면을 가져오지 못했어요. 다시 시도해 주세요.';
+      const msg=name==='InvalidStateError'?'브라우저가 화면 선택창을 열지 못했어요. 탑꾸 버튼을 다시 눌러 주세요.':name==='NotAllowedError'?'화면 선택이 취소되었거나 차단됐어요. 다시 눌러 현재 탭을 선택해 주세요.':name==='NotReadableError'?'현재 탭 화면을 읽지 못했어요. 다른 화면 공유를 닫고 다시 시도해 주세요.':c==='choose_tab'?'“현재 탭”을 선택해 주세요.':c==='frame_sync_failed'?'영상 장면이 안정적으로 재생되지 않아 저장하지 않았어요. 다시 시도해 주세요.':c==='clean_player_timeout'||c==='yt_api_timeout'?'캡처 전용 플레이어 준비가 지연됐어요. 다시 시도해 주세요.':c==='capture_surface_not_synced'?'현재 탭 캡처 화면이 영상 전용 프레임으로 바뀐 걸 확인하지 못했어요. 잘못된 영역은 저장하지 않았습니다.':c==='clean_frame_not_found'?'UI 없는 깨끗한 영상 프레임을 확인하지 못해 저장하지 않았어요.':c==='ratio_mismatch'?'영상 비율 검증에 실패해 잘못된 사진은 저장하지 않았어요.':c==='preview_unavailable'?'캡처 결과를 확인 화면에 표시하지 못해 편집기로 넘기지 않았어요. 다시 시도해 주세요.':c==='transition_unavailable'?'허용 후 캡처 화면 전환을 시작하지 못했어요. 다시 시도해 주세요.':'장면을 가져오지 못했어요. 다시 시도해 주세요.';
       setState(msg,'error');toast(msg,'error');setTimeout(hideToast,4200);
     }finally{
       try{yt?.destroy?.();}catch{}stage?.remove();veil?.remove();stream?.getTracks?.().forEach(t=>t.stop());
@@ -443,5 +447,8 @@
     }
   }
 
+  const prewarmCaptureRuntime=()=>{loadYT().catch(()=>{})};
+  window.addEventListener('nugu-watch-opened',prewarmCaptureRuntime);
+  if(dialog.open)prewarmCaptureRuntime();
   document.addEventListener('click',e=>{const b=e.target.closest?.('#frameTopkkuButton');if(!b)return;e.preventDefault();e.stopImmediatePropagation();capture();},true);
 })();
