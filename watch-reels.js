@@ -1,6 +1,7 @@
 (()=>{
   if(!window.NUGU_WATCH_REELS_MODE)return;
   const config=window.NUGU_CONFIG||{},params=new URLSearchParams(location.search);
+  const desktopReels=matchMedia('(min-width: 901px) and (pointer: fine)').matches;
   const api=String(config.apiBase||'').replace(/\/$/,''),artist=(params.get('artist')||'').trim().toLowerCase();
   const shell=document.getElementById('mobileReelsShell'),feed=document.getElementById('mobileReelsFeed');
   const modeButtons=[...document.querySelectorAll('[data-reels-kind]')];
@@ -39,7 +40,7 @@
       '<a class="mobile-reel-action reel-topkku" href="#"><strong>🎀</strong><span>탑꾸</span></a>'+
       '<a class="mobile-reel-action" href="'+roomHref(c)+'"><strong>🏠</strong><span>아지트</span></a>'+
       '<a class="mobile-reel-action" href="'+esc(c.content_url||'#')+'" target="_blank" rel="noopener"><strong>↗</strong><span>원본</span></a></div>'+
-      '<div class="mobile-reel-hint">위로 넘기면 다음 영상</div><div class="mobile-reel-state"></div></article>';
+      '<div class="mobile-reel-hint">'+(desktopReels?'마우스 휠 / ↑↓ 로 다음 영상':'위로 넘기면 다음 영상')+'</div><div class="mobile-reel-state"></div></article>';
   }
   function listenFrame(frame){
     if(!frame||frame.dataset.listenWired)return;frame.dataset.listenWired='1';
@@ -161,5 +162,13 @@
     if(cardEl===active&&(data?.event==='onReady'||data?.event==='initialDelivery')&&!paused)playActive(cardEl);
   });
   document.addEventListener('visibilitychange',()=>{if(document.hidden)send(active?.querySelector('iframe'),'pauseVideo');else if(active&&!paused)playActive(active)});
+  document.addEventListener('keydown',e=>{
+    if(!desktopReels||e.altKey||e.ctrlKey||e.metaKey)return;
+    if(e.key==='Escape'){e.preventDefault();listLink?.click();return}
+    if(!['ArrowDown','PageDown','ArrowUp','PageUp'].includes(e.key))return;
+    const cards=[...feed.querySelectorAll('.mobile-reel')],idx=cards.indexOf(active);if(idx<0)return;
+    const dir=(e.key==='ArrowDown'||e.key==='PageDown')?1:-1,next=cards[idx+dir];if(!next)return;
+    e.preventDefault();next.scrollIntoView({behavior:'smooth',block:'start'});
+  });
   reset('all');
 })();

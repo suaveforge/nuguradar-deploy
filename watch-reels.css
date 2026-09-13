@@ -1,10 +1,9 @@
 .mobile-reels-shell{display:none}
-@media(max-width:900px) and (pointer:coarse){
   body.mobile-reels-active{margin:0;background:#000;overflow:hidden}
   body.mobile-reels-active>.topbar,
   body.mobile-reels-active>.watch-shell,
   body.mobile-reels-active>footer{display:none!important}
-  .mobile-reels-shell{position:fixed;inset:0;z-index:70;display:block;background:#000;color:#fff}
+  body.mobile-reels-active .mobile-reels-shell{position:fixed;inset:0;z-index:70;display:block;background:#000;color:#fff}
   .mobile-reels-top{position:absolute;z-index:20;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:calc(env(safe-area-inset-top) + 10px) 14px 12px;background:linear-gradient(180deg,rgba(0,0,0,.62),transparent)}
   .mobile-reels-brand{color:#fff;text-decoration:none;font-weight:950;letter-spacing:-.04em;font-size:15px}.mobile-reels-brand span{opacity:.65;margin-left:3px}
   .mobile-reels-modes{display:flex;gap:6px;padding:4px;background:rgba(20,20,20,.42);border:1px solid rgba(255,255,255,.12);border-radius:999px;backdrop-filter:blur(10px)}
@@ -31,5 +30,14 @@
   .mobile-reels-loading{height:100dvh;display:grid;place-items:center;scroll-snap-align:start;color:rgba(255,255,255,.66);font:800 12px/1.4 system-ui;text-align:center;padding:20px}
   .mobile-reels-error button{margin-top:12px;border:0;border-radius:999px;padding:9px 13px;font-weight:900}
   .comment-signin-gate{padding:16px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(255,255,255,.04);margin:12px 0}.comment-signin-gate b,.comment-signin-gate span{display:block}.comment-signin-gate span{margin-top:5px;color:#9b9ba3;font-size:11px}.comment-signin-gate button{margin-top:11px;border:0;border-radius:999px;padding:9px 13px;background:#fff;color:#111;font-weight:900}
-}
 @media(prefers-reduced-motion:reduce){.mobile-reel-player,.mobile-reel-state{transition:none}}
+
+@media(min-width:901px) and (pointer:fine){
+  body.mobile-reels-active .mobile-reels-top{padding:16px 22px 18px}
+  body.mobile-reels-active .mobile-reel-meta{left:34px;right:124px;bottom:36px;max-width:min(760px,62vw)}
+  body.mobile-reels-active .mobile-reel-meta h2{font-size:22px}
+  body.mobile-reels-active .mobile-reel-artist b{font-size:16px}
+  body.mobile-reels-active .mobile-reel-actions{right:24px;bottom:38px;gap:14px}
+  body.mobile-reels-active .mobile-reel-action{width:58px;min-height:58px;border-radius:18px}
+  body.mobile-reels-active .mobile-reel-hint{bottom:12px;font-size:10px}
+}
