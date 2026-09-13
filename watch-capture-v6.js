@@ -153,14 +153,27 @@
     const stage=document.createElement('div');
     stage.className='nugu-capture-stage-v6';
     Object.assign(stage.style,{position:'fixed',width:`${box.w}px`,height:`${box.h}px`,left:'50%',top:'50%',transform:'translate(-50%,-50%)',zIndex:'2147483000',background:'#000',overflow:'hidden',pointerEvents:'none'});
-    const slot=document.createElement('div');slot.id=`nuguCapturePlayerV6_${Date.now()}_${Math.random().toString(36).slice(2)}`;Object.assign(slot.style,{width:'100%',height:'100%'});stage.appendChild(slot);
+
+    const frame=document.createElement('iframe');
+    frame.id=`nuguCapturePlayerV6_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    frame.title='NUGU clean capture player';
+    frame.referrerPolicy='strict-origin-when-cross-origin';
+    frame.allow='autoplay; encrypted-media; picture-in-picture';
+    frame.setAttribute('frameborder','0');
+    Object.assign(frame.style,{width:'100%',height:'100%',display:'block',border:'0',background:'#000'});
+    const origin=encodeURIComponent(location.origin);
+    frame.src=`https://www.youtube.com/embed/${encodeURIComponent(id)}?enablejsapi=1&autoplay=1&mute=1&controls=0&rel=0&playsinline=1&disablekb=1&fs=0&iv_load_policy=3&cc_load_policy=0&origin=${origin}`;
+    stage.appendChild(frame);
     document.body.appendChild(veil);document.body.appendChild(stage);
 
     const YT=await loadYT();let yt=null;
     try{
       yt=await new Promise((resolve,reject)=>{
         const timer=setTimeout(()=>reject(new Error('clean_player_timeout')),9000);
-        const p=new YT.Player(slot.id,{host:'https://www.youtube-nocookie.com',videoId:id,width:'100%',height:'100%',playerVars:{autoplay:1,mute:1,controls:0,rel:0,playsinline:1,disablekb:1,fs:0,iv_load_policy:3,cc_load_policy:0,modestbranding:1,origin:location.origin},events:{onReady:()=>{clearTimeout(timer);resolve(p);},onError:()=>{clearTimeout(timer);reject(new Error('clean_player_error'));}}});
+        const p=new YT.Player(frame.id,{events:{
+          onReady:()=>{clearTimeout(timer);resolve(p);},
+          onError:e=>{clearTimeout(timer);reject(new Error('clean_player_error_'+String(e?.data??'unknown')));}
+        }});
       });
       yt.mute();
       try{yt.setOption?.('captions','track',{});}catch{}
@@ -365,13 +378,52 @@
     });
   }
 
+  function showCaptureFailure(message,diag,transition){
+    const screen=transition?.screen;
+    if(!screen)return false;
+    hideToast();
+    screen.className='nugu-topkku-transition-screen nugu-topkku-failure';
+    screen.textContent='';
+
+    const panel=document.createElement('div');
+    panel.className='nugu-topkku-failure-panel';
+    const title=document.createElement('strong');
+    title.textContent='탑꾸 장면 준비를 끝내지 못했어요';
+    const bodyText=document.createElement('p');
+    bodyText.textContent=message;
+    const detail=document.createElement('small');
+    detail.textContent=`단계: ${diag.phase||'unknown'} · ${diag.message||diag.name||'unknown'}`;
+
+    const actions=document.createElement('div');
+    actions.className='nugu-topkku-preview-actions';
+    const cancel=document.createElement('button');
+    cancel.type='button';
+    cancel.className='nugu-topkku-preview-retry';
+    cancel.textContent='원래 영상 보기';
+    const retry=document.createElement('button');
+    retry.type='button';
+    retry.className='nugu-topkku-preview-confirm';
+    retry.textContent='다시 시도';
+    actions.append(cancel,retry);
+    panel.append(title,bodyText,detail,actions);
+    screen.append(panel);
+
+    cancel.addEventListener('click',()=>{endTopkkuTransition(transition);},{once:true});
+    retry.addEventListener('click',()=>{
+      endTopkkuTransition(transition);
+      capture();
+    },{once:true});
+    requestAnimationFrame(()=>retry.focus());
+    return true;
+  }
+
   async function capture(){
     if(busy)return;busy=true;
     const buttons=[...body.querySelectorAll('.frame-topkku-action button')];buttons.forEach(b=>b.disabled=true);
     const requested=targetTime(),id=videoId(),title=$('.player-title h2',body)?.textContent?.trim()||'NUGU RADAR Watch',mt=$('.player-title p',body)?.textContent?.trim()||'',artist=mt.split('·')[0]?.trim()||'',artistSlug=body.dataset.artistSlug||'',url=$('.player-title a',body)?.href||'';
     pauseSourcePlayer();
     let transition=null;
-    let stream=null,veil=null,stage=null,yt=null,done=false,phase='share-request';
+    let stream=null,veil=null,stage=null,yt=null,done=false,holdTransition=false,phase='share-request';
     try{
       if(!id)throw new Error('video_id');
       setState(`${timeLabel(requested)} 장면을 멈췄어요. 현재 탭 허용을 기다리고 있어요.`,'working');toast(`① ${timeLabel(requested)} 장면 고정 ✓ · 현재 탭을 허용해 주세요`);
@@ -438,11 +490,13 @@
       const diag={version:16,phase,name,message:c,at:new Date().toISOString()};
       try{sessionStorage.setItem('nuguTopkkuCaptureDiag',JSON.stringify(diag));}catch{}
       window.__NUGU_TOPKKU_CAPTURE_DIAG__=diag;
-      const msg=name==='InvalidStateError'?'브라우저가 화면 선택창을 열지 못했어요. 탑꾸 버튼을 다시 눌러 주세요.':name==='NotAllowedError'?'화면 선택이 취소되었거나 차단됐어요. 다시 눌러 현재 탭을 선택해 주세요.':name==='NotReadableError'?'현재 탭 화면을 읽지 못했어요. 다른 화면 공유를 닫고 다시 시도해 주세요.':c==='choose_tab'?'“현재 탭”을 선택해 주세요.':c==='frame_sync_failed'?'영상 장면이 안정적으로 재생되지 않아 저장하지 않았어요. 다시 시도해 주세요.':c==='clean_player_timeout'||c==='yt_api_timeout'?'캡처 전용 플레이어 준비가 지연됐어요. 다시 시도해 주세요.':c==='capture_surface_not_synced'?'현재 탭 캡처 화면이 영상 전용 프레임으로 바뀐 걸 확인하지 못했어요. 잘못된 영역은 저장하지 않았습니다.':c==='clean_frame_not_found'?'UI 없는 깨끗한 영상 프레임을 확인하지 못해 저장하지 않았어요.':c==='ratio_mismatch'?'영상 비율 검증에 실패해 잘못된 사진은 저장하지 않았어요.':c==='preview_unavailable'?'캡처 결과를 확인 화면에 표시하지 못해 편집기로 넘기지 않았어요. 다시 시도해 주세요.':c==='transition_unavailable'?'허용 후 캡처 화면 전환을 시작하지 못했어요. 다시 시도해 주세요.':'장면을 가져오지 못했어요. 다시 시도해 주세요.';
-      setState(msg,'error');toast(msg,'error');setTimeout(hideToast,4200);
+      const msg=name==='InvalidStateError'?'브라우저가 화면 선택창을 열지 못했어요. 탑꾸 버튼을 다시 눌러 주세요.':name==='NotAllowedError'?'화면 선택이 취소되었거나 차단됐어요. 다시 눌러 현재 탭을 선택해 주세요.':name==='NotReadableError'?'현재 탭 화면을 읽지 못했어요. 다른 화면 공유를 닫고 다시 시도해 주세요.':c==='choose_tab'?'“현재 탭”을 선택해 주세요.':c==='frame_sync_failed'?'영상 장면이 안정적으로 재생되지 않아 저장하지 않았어요. 다시 시도해 주세요.':c==='clean_player_timeout'||c==='yt_api_timeout'?'캡처 전용 플레이어 준비가 지연됐어요. 다시 시도해 주세요.':c.startsWith('clean_player_error_')?'캡처 전용 YouTube 플레이어가 장면을 열지 못했어요.':c==='capture_surface_not_synced'?'현재 탭 캡처 화면이 영상 전용 프레임으로 바뀐 걸 확인하지 못했어요. 잘못된 영역은 저장하지 않았습니다.':c==='clean_frame_not_found'?'UI 없는 깨끗한 영상 프레임을 확인하지 못해 저장하지 않았어요.':c==='ratio_mismatch'?'영상 비율 검증에 실패해 잘못된 사진은 저장하지 않았어요.':c==='preview_unavailable'?'캡처 결과를 확인 화면에 표시하지 못해 편집기로 넘기지 않았어요. 다시 시도해 주세요.':c==='transition_unavailable'?'허용 후 캡처 화면 전환을 시작하지 못했어요. 다시 시도해 주세요.':'장면을 가져오지 못했어요. 다시 시도해 주세요.';
+      setState(msg,'error');
+      holdTransition=showCaptureFailure(msg,diag,transition);
+      if(!holdTransition){toast(msg,'error');setTimeout(hideToast,4200);}
     }finally{
       try{yt?.destroy?.();}catch{}stage?.remove();veil?.remove();stream?.getTracks?.().forEach(t=>t.stop());
-      if(!done)endTopkkuTransition(transition);
+      if(!done&&!holdTransition)endTopkkuTransition(transition);
       buttons.forEach(b=>b.disabled=false);busy=false;
     }
   }

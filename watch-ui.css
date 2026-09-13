@@ -32,5 +32,10 @@ html.nugu-watch-modal-open,body.nugu-watch-modal-open{overflow:hidden!important;
 .nugu-topkku-preview-retry{border:1px solid rgba(255,255,255,.28);background:rgba(10,12,16,.62);color:#fff;backdrop-filter:blur(10px)}
 .nugu-topkku-preview-confirm{border:1px solid rgba(255,255,255,.14);background:#f4eaff;color:#231626;box-shadow:0 8px 24px rgba(0,0,0,.25)}
 .nugu-topkku-preview-actions button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.nugu-topkku-failure{display:grid;place-items:center;padding:18px;background:#08090b}
+.nugu-topkku-failure-panel{width:min(430px,92%);display:grid;gap:10px;padding:18px;border:1px solid rgba(255,255,255,.14);border-radius:18px;background:rgba(16,18,23,.96);box-shadow:0 18px 50px rgba(0,0,0,.38);text-align:left}
+.nugu-topkku-failure-panel strong{color:#fff;font:900 14px/1.35 system-ui,sans-serif}
+.nugu-topkku-failure-panel p{margin:0;color:#d6d9df;font:700 11px/1.5 system-ui,sans-serif}
+.nugu-topkku-failure-panel small{color:#7f8792;font:700 9px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;overflow-wrap:anywhere}
 @media(max-width:760px){.nugu-topkku-preview-ui{align-items:stretch;flex-direction:column;gap:9px;padding:52px 10px 10px}.nugu-topkku-preview-actions{display:grid;grid-template-columns:1fr 1fr}.nugu-topkku-preview-actions button{min-height:42px}.nugu-topkku-preview-copy strong{font-size:11px}}
 @media(max-width:760px){.frame-topkku-minimal{right:8px;bottom:8px}.frame-topkku-minimal #frameTopkkuButton{width:auto;min-height:0;padding:9px 11px}}
