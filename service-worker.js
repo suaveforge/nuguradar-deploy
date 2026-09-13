@@ -1,5 +1,5 @@
-const CACHE='nugu-radar-shell-v1';
-const PRECACHE=['/','/index.html','/styles.css','/offline.html','/watch.html','/watch.css','/watch-reels.css','/topkku.html','/community.html','/room.html','/fan-board.html','/hall-of-fame.html'];
+const CACHE='nugu-radar-shell-v2';
+const PRECACHE=['/','/index.html','/styles.css','/offline.html','/manifest.webmanifest','/assets/pwa/icon-192.png','/assets/pwa/icon-512.png','/assets/pwa/maskable-512.png','/assets/pwa/apple-touch-icon.png','/watch.html','/watch.css','/watch-reels.css','/topkku.html','/community.html','/room.html','/fan-board.html','/hall-of-fame.html'];
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(PRECACHE)).then(()=>self.skipWaiting()));
 });
