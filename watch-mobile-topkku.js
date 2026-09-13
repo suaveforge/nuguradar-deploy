@@ -4,7 +4,10 @@
   const canDirectCapture=()=>typeof navigator.mediaDevices?.getDisplayMedia==='function';
   if(canDirectCapture())return;
 
+  const config=window.NUGU_CONFIG||{},api=String(config.apiBase||'').replace(/\/$/,'');
   const $=(s,r=document)=>r.querySelector(s);
+  let busy=false;
+
   const setState=(text,state='')=>{
     const el=$('#frameTopkkuState',body);
     if(!el)return;
@@ -21,101 +24,135 @@
     const mt=$('.player-title p',body)?.textContent?.trim()||'';
     const artist=mt.split('·')[0]?.trim()||'';
     const url=$('.player-title a',body)?.href||'';
-    return{title,artist,artistSlug:body.dataset.artistSlug||'',url,time:targetTime()};
+    return{title,artist,artistSlug:body.dataset.artistSlug||'',videoId:body.dataset.playbackId||'',url,time:targetTime()};
   };
+  const dataUrl=blob=>new Promise((resolve,reject)=>{
+    const r=new FileReader();r.onerror=()=>reject(new Error('read'));r.onload=()=>resolve(String(r.result||''));r.readAsDataURL(blob);
+  });
+  const pauseSource=()=>{
+    const frame=$('.player-frame iframe',body);
+    try{frame?.contentWindow?.postMessage(JSON.stringify({event:'command',func:'pauseVideo',args:[]}),'*')}catch{}
+  };
+
+  function manualButton(show=false){
+    const wrap=$('.frame-topkku-action',body);if(!wrap)return null;
+    let b=$('#frameTopkkuManualFallback',wrap);
+    if(!b){
+      b=document.createElement('button');
+      b.id='frameTopkkuManualFallback';b.type='button';b.className='frame-topkku-manual';
+      b.textContent='사진에서 직접 고르기';b.hidden=true;wrap.appendChild(b);
+      b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openPicker()});
+    }
+    b.hidden=!show;return b;
+  }
 
   function decorate(){
     const b=$('#frameTopkkuButton',body);
-    if(!b||b.dataset.mobileFallback==='1')return;
-
-    // Set the guard before mutating descendants. The MutationObserver watches
-    // playerBody, so doing this first prevents the text/state changes below
-    // from recursively re-entering decorate() on iOS Safari.
-    b.dataset.mobileFallback='1';
-    b.textContent='🖼 스크린샷으로 탑꾸';
-    b.title='iPhone/iPad에서는 현재 탭 자동 캡처 대신 스크린샷이나 사진을 골라 탑꾸로 이어집니다.';
-    setState('iPhone에서는 원하는 장면을 크게 띄워 스크린샷을 찍은 뒤 이 버튼에서 사진을 골라주세요.','mobile');
+    if(!b||b.dataset.mobileServerFrame==='1')return;
+    b.dataset.mobileServerFrame='1';
+    b.textContent='✨ 탑꾸';
+    b.title='현재 재생 장면을 자동으로 가져와 탑꾸로 이어갑니다.';
+    setState('현재 장면을 자동으로 준비해요.','mobile-auto');
+    manualButton(false);
   }
 
   function picker(){
     let input=document.getElementById('nuguMobileTopkkuPicker');
     if(input)return input;
     input=document.createElement('input');
-    input.id='nuguMobileTopkkuPicker';
-    input.type='file';
-    input.accept='image/*';
-    input.hidden=true;
-    document.body.appendChild(input);
-    return input;
+    input.id='nuguMobileTopkkuPicker';input.type='file';input.accept='image/*';input.hidden=true;
+    document.body.appendChild(input);return input;
   }
-
   function readImage(file){
     return new Promise((resolve,reject)=>{
-      const reader=new FileReader();
-      reader.onerror=()=>reject(new Error('read'));
-      reader.onload=()=>{
-        const img=new Image();
-        img.onerror=()=>reject(new Error('image'));
-        img.onload=()=>resolve(img);
-        img.src=String(reader.result||'');
-      };
+      const reader=new FileReader();reader.onerror=()=>reject(new Error('read'));
+      reader.onload=()=>{const img=new Image();img.onerror=()=>reject(new Error('image'));img.onload=()=>resolve(img);img.src=String(reader.result||'')};
       reader.readAsDataURL(file);
     });
   }
-
   async function compressedData(file,max=1800){
     const img=await readImage(file),scale=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));
-    const c=document.createElement('canvas');
-    c.width=Math.max(1,Math.round(img.naturalWidth*scale));
-    c.height=Math.max(1,Math.round(img.naturalHeight*scale));
-    const g=c.getContext('2d');
-    g.imageSmoothingEnabled=true;
-    g.imageSmoothingQuality='high';
-    g.drawImage(img,0,0,c.width,c.height);
-    const data=await new Promise((resolve,reject)=>c.toBlob(blob=>{
-      if(!blob)return reject(new Error('encode'));
-      const r=new FileReader();
-      r.onerror=()=>reject(new Error('encode'));
-      r.onload=()=>resolve(String(r.result||''));
-      r.readAsDataURL(blob);
-    },'image/jpeg',.92));
+    const c=document.createElement('canvas');c.width=Math.max(1,Math.round(img.naturalWidth*scale));c.height=Math.max(1,Math.round(img.naturalHeight*scale));
+    const g=c.getContext('2d');g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(img,0,0,c.width,c.height);
+    const data=await new Promise((resolve,reject)=>c.toBlob(blob=>blob?dataUrl(blob).then(resolve,reject):reject(new Error('encode')),'image/jpeg',.92));
     return{data,width:c.width,height:c.height};
+  }
+
+  function showPreview(payload){
+    const frame=$('.player-frame',body);if(!frame||!payload?.image)throw new Error('preview');
+    frame.querySelector('.nugu-mobile-topkku-preview')?.remove();
+    const layer=document.createElement('div');layer.className='nugu-mobile-topkku-preview';
+    const img=document.createElement('img');img.src=payload.image;img.alt='탑꾸에 들어갈 현재 장면';
+    const bar=document.createElement('div');bar.className='nugu-mobile-topkku-preview-bar';
+    const copy=document.createElement('div');copy.innerHTML='<strong>이 장면이 그대로 탑꾸에 들어가요</strong><span>'+payload.width+'×'+payload.height+' · '+Number(payload.capturedVideoTime||payload.time||0).toFixed(1)+'초</span>';
+    const actions=document.createElement('div');
+    const retry=document.createElement('button');retry.type='button';retry.textContent='다시 고르기';
+    const confirm=document.createElement('button');confirm.type='button';confirm.textContent='이 장면으로 탑꾸';confirm.className='confirm';
+    actions.append(retry,confirm);bar.append(copy,actions);layer.append(img,bar);frame.appendChild(layer);
+    retry.onclick=()=>{layer.remove();setState('원하는 장면에서 다시 탑꾸를 눌러주세요.','picked')};
+    confirm.onclick=()=>{
+      try{sessionStorage.setItem('nuguTopkkuIncoming',JSON.stringify(payload))}
+      catch{setState('이미지를 임시 저장하지 못했어요. 다시 시도해 주세요.','error');return}
+      location.href='topkku.html?from=watch-mobile-auto';
+    };
+  }
+
+  async function automaticFrame(){
+    if(busy)return;
+    pauseSource();
+    await new Promise(r=>setTimeout(r,80));
+    const m=meta(),button=$('#frameTopkkuButton',body);
+    if(!api||!m.videoId){setState('현재 영상 정보를 확인하지 못했어요. 사진에서 직접 골라주세요.','error');manualButton(true);return}
+    busy=true;if(button)button.disabled=true;manualButton(false);
+    setState('현재 장면을 깨끗하게 준비하는 중…','working');
+    const ac=new AbortController(),timer=setTimeout(()=>ac.abort(),28000);
+    try{
+      const r=await fetch(api+'/api/v1/media/youtube-frame',{
+        method:'POST',headers:{'Content-Type':'application/json',Accept:'image/jpeg'},
+        body:JSON.stringify({videoId:m.videoId,time:m.time}),signal:ac.signal
+      });
+      if(!r.ok){
+        let code='frame_render_failed';try{const j=await r.json();code=j.error||code}catch{}
+        throw new Error(code);
+      }
+      const blob=await r.blob(),image=await dataUrl(blob);
+      const width=Number(r.headers.get('X-NUGU-Frame-Width')||0),height=Number(r.headers.get('X-NUGU-Frame-Height')||0);
+      const capturedVideoTime=Number(r.headers.get('X-NUGU-Frame-Time')||m.time);
+      if(!image||width<64||height<64)throw new Error('invalid_frame');
+      const payload={version:18,source:'watch',image,artist:m.artist,artistSlug:m.artistSlug||'',title:m.title,contentUrl:m.url,time:m.time,capturedVideoTime,capturedAt:new Date().toISOString(),cleanCapture:true,videoOnly:true,strictCapture:true,manualCapture:false,captureMode:'mobile-server-youtube-frame-v1',width,height};
+      setState('현재 장면을 가져왔어요 ✓','success');
+      showPreview(payload);
+    }catch(err){
+      console.error('mobile automatic Topkku frame failed',err);
+      const msg=err?.name==='AbortError'?'장면 준비 시간이 너무 길어졌어요. 다시 시도하거나 사진에서 직접 골라주세요.':'현재 장면을 자동으로 가져오지 못했어요. 다시 시도하거나 사진에서 직접 골라주세요.';
+      setState(msg,'error');manualButton(true);
+    }finally{
+      clearTimeout(timer);if(button)button.disabled=false;busy=false;
+    }
   }
 
   async function usePhoto(file){
     if(!file)return;
-    const m=meta();
-    setState('사진을 탑꾸에 맞게 준비하고 있어요…','working');
+    const m=meta();setState('사진을 탑꾸에 맞게 준비하고 있어요…','working');
     try{
       const img=await compressedData(file);
-      const payload={version:17,source:'watch',image:img.data,artist:m.artist,artistSlug:m.artistSlug||'',title:m.title,contentUrl:m.url,time:m.time,capturedAt:new Date().toISOString(),cleanCapture:false,videoOnly:false,strictCapture:false,manualCapture:true,captureMode:'mobile-photo-picker-fallback',width:img.width,height:img.height};
-      sessionStorage.setItem('nuguTopkkuIncoming',JSON.stringify(payload));
-      setState('사진을 가져왔어요 ✓ 탑꾸로 이동합니다.','success');
-      location.href='topkku.html?from=watch-mobile';
+      const payload={version:18,source:'watch',image:img.data,artist:m.artist,artistSlug:m.artistSlug||'',title:m.title,contentUrl:m.url,time:m.time,capturedAt:new Date().toISOString(),cleanCapture:false,videoOnly:false,strictCapture:false,manualCapture:true,captureMode:'mobile-photo-picker-fallback',width:img.width,height:img.height};
+      setState('사진을 가져왔어요 ✓','success');showPreview(payload);
     }catch(err){
-      console.error('mobile topkku photo fallback failed',err);
-      setState('사진을 불러오지 못했어요. 다른 스크린샷이나 사진을 골라주세요.','error');
+      console.error('mobile Topkku photo fallback failed',err);setState('사진을 불러오지 못했어요. 다른 사진을 골라주세요.','error');
     }
+  }
+  function openPicker(){
+    const input=picker();input.value='';input.onchange=()=>usePhoto(input.files?.[0]);input.click();
   }
 
   const observer=new MutationObserver(()=>{
-    // Only touch the DOM when a newly rendered Topkku button still needs
-    // mobile decoration. Other player mutations (time labels, state text,
-    // iframe changes) are ignored, preventing observer feedback loops.
-    if(body.querySelector('#frameTopkkuButton:not([data-mobile-fallback="1"])'))decorate();
+    if(body.querySelector('#frameTopkkuButton:not([data-mobile-server-frame="1"])'))decorate();
   });
-  observer.observe(body,{childList:true,subtree:true});
-  decorate();
+  observer.observe(body,{childList:true,subtree:true});decorate();
 
   window.addEventListener('click',e=>{
-    const b=e.target.closest?.('#frameTopkkuButton');
-    if(!b)return;
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    const input=picker();
-    input.value='';
-    input.onchange=()=>usePhoto(input.files?.[0]);
-    setState('스크린샷 또는 사진을 골라주세요. 영상 장면을 크게 띄운 스크린샷이 가장 예쁘게 나와요.','working');
-    input.click();
+    const b=e.target.closest?.('#frameTopkkuButton');if(!b)return;
+    e.preventDefault();e.stopImmediatePropagation();automaticFrame();
   },true);
 })();
