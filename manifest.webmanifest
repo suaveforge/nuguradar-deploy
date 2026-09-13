@@ -1,0 +1,20 @@
+{
+  "id": "/",
+  "name": "NUGU RADAR",
+  "short_name": "NUGU RADAR",
+  "description": "Small and rising K-pop discovery, Watch, Topkku and fan hideouts.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui", "browser"],
+  "orientation": "any",
+  "background_color": "#090a0c",
+  "theme_color": "#090a0c",
+  "lang": "ko-KR",
+  "categories": ["entertainment", "social"],
+  "shortcuts": [
+    {"name":"Watch","short_name":"Watch","url":"/watch.html"},
+    {"name":"탑꾸","short_name":"탑꾸","url":"/topkku.html"},
+    {"name":"Community","short_name":"Community","url":"/community.html"}
+  ]
+}

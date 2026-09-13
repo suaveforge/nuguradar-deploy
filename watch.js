@@ -17,8 +17,20 @@ function wireCards(){$$('.watch-card:not([data-card-wired])').forEach(el=>{el.da
 function wireContextAction(){const start=$('#startFeed');if(start)start.onclick=async()=>{if(!offset)await load();$('#watchFeed').scrollIntoView({behavior:'smooth',block:'start'})}}
 function setContext(){if(artist){$('#watchContext').innerHTML=`<span class="verified-pill">ARTIST FILTER</span><b>${esc(artist.replace(/-/g,' '))}</b><button id="clearArtist">Clear</button>`;$('#clearArtist').onclick=()=>{artist='';history.replaceState({},'',location.pathname);reset()}}else{$('#watchContext').innerHTML='<span class="verified-pill">ALL VERIFIED ACTS</span><button class="watch-jump" id="startFeed" type="button">Infinite feed ↓</button>';wireContextAction()}}
 function nearSentinel(){const r=$('#watchSentinel').getBoundingClientRect();return r.top<innerHeight+800}
+async function updateShortsAvailability(){
+  const buttons=$('[data-kind="Shorts"],[data-reels-kind="Shorts"]');if(!buttons.length)return;
+  buttons.forEach(b=>b.hidden=true);
+  try{
+    const base=apiBase();if(!base)return;
+    const q=new URLSearchParams({limit:'4',offset:'0',cycle:'0',platform:'youtube',kind:'Shorts',sort:'newest'});if(artist)q.set('artist',artist);
+    const r=await fetch(`${base}/api/v1/content?${q}`,{headers:{Accept:'application/json'},cache:'no-store'});if(!r.ok)return;
+    const data=await r.json(),has=(Array.isArray(data.items)?data.items:[]).some(x=>x.playable&&x.playback_provider==='youtube'&&x.playback_id);
+    buttons.forEach(b=>b.hidden=!has);
+    window.dispatchEvent(new CustomEvent('nugu-shorts-availability',{detail:{available:has}}));
+  }catch{}
+}
 async function load(){if(loading||!hasMore)return;const myGen=generation;loading=true;$('#watchStatus').textContent=offset?`Loading more · cycle ${cycle+1}…`:'Loading verified content…';try{const base=apiBase();if(!base)throw new Error('API unavailable');const q=new URLSearchParams({limit:'24',offset:String(offset),cycle:String(cycle),platform,kind,sort});if(artist)q.set('artist',artist);const r=await fetch(`${base}/api/v1/content?${q}`,{headers:{Accept:'application/json'},cache:'no-store'});if(!r.ok)throw new Error(`HTTP ${r.status}`);const data=await r.json();if(myGen!==generation)return;const items=Array.isArray(data.items)?data.items:[];if(!items.length){hasMore=false;$('#watchStatus').textContent=offset?'All current filtered results loaded.':'No verified content for this filter.';return}$('#watchFeed').insertAdjacentHTML('beforeend',items.map(card).join(''));wireThumbFallbacks();wireCards();offset=Number(data.nextOffset||offset+items.length);hasMore=Boolean(data.hasMore);if(hasMore){$('#watchStatus').textContent=`Loaded ${offset} · keep scrolling`;}else if(continuousMode()){cycle+=1;offset=0;hasMore=true;$('#watchStatus').textContent=`All current items seen once · continuing with rotation ${cycle+1}`;if(nearSentinel())setTimeout(()=>load(),350)}else{$('#watchStatus').textContent=`All current filtered results loaded · ${offset} items`}}catch(e){if(myGen===generation)$('#watchStatus').textContent='Could not load verified content. Retry by changing a filter.';console.warn(e)}finally{if(myGen===generation)loading=false}}
-function reset(){generation++;offset=0;cycle=0;hasMore=true;loading=false;contentStore.clear();$('#watchFeed').innerHTML='';setContext();load()}
+function reset(){generation++;offset=0;cycle=0;hasMore=true;loading=false;contentStore.clear();$('#watchFeed').innerHTML='';setContext();updateShortsAvailability();load()}
 function wireGroup(root,attr,setter){$$(root+' button').forEach(b=>b.onclick=()=>{$$(root+' button').forEach(x=>x.classList.remove('active'));b.classList.add('active');setter(b.dataset[attr]);reset()})}
 function visitorProfile(){const a=window.NUGU_AUTH?.getIdentitySync?.();if(a)return{id:a.visitorId,name:a.displayName||localStorage.getItem('nuguCommentName')||'',authenticated:!!a.authenticated};let id=localStorage.getItem('nuguVisitorId');if(!id){id=(globalThis.crypto?.randomUUID?.()||`${Date.now()}-${Math.random()}-${Math.random()}`).replace(/[^A-Za-z0-9_-]/g,'');localStorage.setItem('nuguVisitorId',id)}return{id,name:localStorage.getItem('nuguCommentName')||'',authenticated:false}}
 function avatarLetter(name){return esc(String(name||'?').trim().slice(0,1).toUpperCase()||'?')}
@@ -35,5 +47,5 @@ async function openDirectContent(){if(!directVideo||!/^[A-Za-z0-9_-]{6,200}$/.te
 wireGroup('#platformFilters','platform',v=>platform=v);wireGroup('#kindFilters','kind',v=>kind=v);wireGroup('#sortFilters','sort',v=>sort=v);window.NUGU_WATCH_OPEN_CONTENT=openContent;
 $('#playerClose').onclick=closePlayer;$('#watchPlayer').addEventListener('click',e=>{if(e.target===$('#watchPlayer'))closePlayer()});$('#watchPlayer').addEventListener('close',()=>{const body=$('#playerBody');body.innerHTML='';delete body.dataset.artistSlug;currentContent=null});
 window.addEventListener('nugu-auth-changed',()=>{if(currentContent&&$('#watchPlayer').open)loadComments(currentContent)});
-$('#versionLabel').textContent=config.build||'Updated 2026.09.12';setContext();
+$('#versionLabel').textContent=config.build||'Updated 2026.09.12';setContext();updateShortsAvailability();
 if(!mobileReelsMode){const observer=new IntersectionObserver(entries=>{if(entries.some(e=>e.isIntersecting))load()},{rootMargin:'800px 0px'});observer.observe($('#watchSentinel'));load()}openDirectContent();
