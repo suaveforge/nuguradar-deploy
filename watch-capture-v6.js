@@ -185,10 +185,10 @@
     return{x:Math.max(0,x),y:Math.max(0,y),w:Math.min(w,full.width-Math.max(0,x)),h:Math.min(h,full.height-Math.max(0,y)),sx,sy};
   }
   const CAL_MARKERS=[
-    {key:'tl',rgb:[17,241,169],style:{left:'6px',top:'6px'}},
-    {key:'tr',rgb:[247,27,174],style:{right:'6px',top:'6px'}},
-    {key:'bl',rgb:[20,177,255],style:{left:'6px',bottom:'6px'}},
-    {key:'br',rgb:[255,214,20],style:{right:'6px',bottom:'6px'}}
+    {key:'tl',rgb:[0,255,0],style:{left:'8px',top:'8px'}},
+    {key:'tr',rgb:[255,0,255],style:{right:'8px',top:'8px'}},
+    {key:'bl',rgb:[0,190,255],style:{left:'8px',bottom:'8px'}},
+    {key:'br',rgb:[255,230,0],style:{right:'8px',bottom:'8px'}}
   ];
   function mountCalibration(stage){
     const layer=document.createElement('div');
@@ -197,44 +197,65 @@
     for(const m of CAL_MARKERS){
       const dot=document.createElement('i');
       dot.dataset.marker=m.key;
-      Object.assign(dot.style,{position:'absolute',width:'16px',height:'16px',borderRadius:'2px',boxShadow:'0 0 0 2px #000',background:`rgb(${m.rgb.join(',')})`,...m.style});
+      Object.assign(dot.style,{position:'absolute',width:'32px',height:'32px',borderRadius:'4px',boxShadow:'0 0 0 4px #000',background:`rgb(${m.rgb.join(',')})`,...m.style});
       layer.appendChild(dot);
     }
     stage.appendChild(layer);
     return layer;
   }
-  function markerCenter(src,rgb){
-    const d=src.getContext('2d',{willReadFrequently:true}).getImageData(0,0,src.width,src.height).data;
+  function markerPixelMatch(key,R,G,B){
+    if(key==='tl')return G>155&&G>R+65&&G>B+45;
+    if(key==='tr')return R>155&&B>125&&R>G+65&&B>G+45;
+    if(key==='bl')return B>155&&G>95&&B>R+70&&G>R+25;
+    if(key==='br')return R>165&&G>135&&B<125&&R>B+70&&G>B+55;
+    return false;
+  }
+  function markerCenter(src,key,rough){
+    const ctx=src.getContext('2d',{willReadFrequently:true}),d=ctx.getImageData(0,0,src.width,src.height).data;
+    const padX=Math.max(48,rough.w*.08),padY=Math.max(48,rough.h*.10);
+    const corner={
+      tl:[rough.x,rough.y],
+      tr:[rough.x+rough.w,rough.y],
+      bl:[rough.x,rough.y+rough.h],
+      br:[rough.x+rough.w,rough.y+rough.h]
+    }[key];
+    if(!corner)return null;
+    const x0=Math.max(0,Math.floor(corner[0]-padX)),x1=Math.min(src.width-1,Math.ceil(corner[0]+padX));
+    const y0=Math.max(0,Math.floor(corner[1]-padY)),y1=Math.min(src.height-1,Math.ceil(corner[1]+padY));
     let minX=src.width,minY=src.height,maxX=-1,maxY=-1,n=0;
-    for(let y=0;y<src.height;y++){
-      for(let x=0;x<src.width;x++){
-        const i=(y*src.width+x)*4;
-        if(Math.abs(d[i]-rgb[0])<=12&&Math.abs(d[i+1]-rgb[1])<=12&&Math.abs(d[i+2]-rgb[2])<=12){
+    for(let y=y0;y<=y1;y++){
+      for(let x=x0;x<=x1;x++){
+        const i=(y*src.width+x)*4,R=d[i],G=d[i+1],B=d[i+2];
+        if(markerPixelMatch(key,R,G,B)){
           minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);n++;
         }
       }
     }
-    if(n<12||maxX<minX||maxY<minY)return null;
-    return{x:(minX+maxX)/2,y:(minY+maxY)/2,w:maxX-minX+1,h:maxY-minY+1,n};
+    if(n<45||maxX<minX||maxY<minY)return null;
+    const w=maxX-minX+1,h=maxY-minY+1;
+    if(w<6||h<6||w>padX*1.6||h>padY*1.6)return null;
+    return{x:(minX+maxX)/2,y:(minY+maxY)/2,w,h,n};
   }
   function calibrationRect(stage,full){
+    const rough=geometryRect(stage,full);
+    if(!rough)return null;
     const pts={};
-    for(const m of CAL_MARKERS){const p=markerCenter(full,m.rgb);if(!p)return null;pts[m.key]=p;}
-    const css=stage.getBoundingClientRect(),cssDx=Math.max(1,css.width-28),cssDy=Math.max(1,css.height-28);
+    for(const m of CAL_MARKERS){const p=markerCenter(full,m.key,rough);if(!p)return null;pts[m.key]=p;}
+    const css=stage.getBoundingClientRect(),cssDx=Math.max(1,css.width-48),cssDy=Math.max(1,css.height-48);
     const dx=((pts.tr.x-pts.tl.x)+(pts.br.x-pts.bl.x))/2;
     const dy=((pts.bl.y-pts.tl.y)+(pts.br.y-pts.tr.y))/2;
     const sx=dx/cssDx,sy=dy/cssDy;
     if(!Number.isFinite(sx)||!Number.isFinite(sy)||sx<=0||sy<=0)return null;
-    if(Math.abs(sx-sy)/Math.max(sx,sy)>.10)return null;
-    const left=((pts.tl.x+pts.bl.x)/2)-14*sx;
-    const top=((pts.tl.y+pts.tr.y)/2)-14*sy;
+    if(Math.abs(sx-sy)/Math.max(sx,sy)>.14)return null;
+    const left=((pts.tl.x+pts.bl.x)/2)-24*sx;
+    const top=((pts.tl.y+pts.tr.y)/2)-24*sy;
     const w=css.width*sx,h=css.height*sy;
     const x=Math.max(0,Math.round(left)),y=Math.max(0,Math.round(top));
     const ww=Math.min(full.width-x,Math.round(w)),hh=Math.min(full.height-y,Math.round(h));
     if(ww<MIN_CAPTURE_PX||hh<MIN_CAPTURE_PX||x+ww>full.width||y+hh>full.height)return null;
     return{x,y,w:ww,h:hh,sx,sy,calibrated:true};
   }
-  async function waitForCalibration(streamVideoEl,stage,timeout=2200){
+  async function waitForCalibration(streamVideoEl,stage,timeout=5200){
     const start=performance.now();
     while(performance.now()-start<timeout){
       const full=snap(streamVideoEl),rect=calibrationRect(stage,full);
