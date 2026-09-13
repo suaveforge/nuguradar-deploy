@@ -88,6 +88,29 @@
     await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
     return v;
   }
+  async function tryRegionCapture(stream,v,stage,expectedRatio){
+    const track=stream?.getVideoTracks?.()[0];
+    if(!track||typeof track.cropTo!=='function'||typeof globalThis.CropTarget?.fromElement!=='function')return null;
+    try{
+      const target=await globalThis.CropTarget.fromElement(stage);
+      await track.cropTo(target);
+    }catch(err){
+      const name=String(err?.name||'');
+      if(name==='NotSupportedError'||name==='TypeError')return null;
+      const e=new Error(name==='NotAllowedError'||name==='InvalidStateError'?'region_capture_wrong_tab':'region_capture_failed_'+(name||'unknown'));
+      e.regionError=name||String(err?.message||'unknown');throw e;
+    }
+    const start=performance.now();
+    while(performance.now()-start<3500){
+      await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+      const w=Number(v.videoWidth||0),h=Number(v.videoHeight||0),ratio=h?w/h:0;
+      if(w>=MIN_CAPTURE_PX&&h>=MIN_CAPTURE_PX&&ratio>0&&Math.abs(ratio-expectedRatio)/expectedRatio<=.08){
+        return{rect:{x:0,y:0,w,h,sx:1,sy:1,regionCapture:true},mode:'region-capture'};
+      }
+      await wait(55);
+    }
+    const e=new Error('region_capture_resize_timeout');e.captureSize=`${v.videoWidth||0}x${v.videoHeight||0}`;throw e;
+  }
   function snap(v){
     const c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;
     c.getContext('2d').drawImage(v,0,0);return c;
@@ -440,12 +463,21 @@
       toast('② 화면 중앙에 UI 없는 전용 영상 프레임을 만드는 중…');setState('깨끗한 영상 프레임을 준비하고 있어요.','working');
       phase='clean-player';
       const clean=await makeCleanPlayer(id,requested);veil=clean.veil;stage=clean.stage;yt=clean.yt;
-      phase='calibration';
-      const calibration=mountCalibration();
-      const synced=await waitForCalibration(v,stage);
-      const rect=synced.rect;
-      calibration.remove();
-      await wait(120);
+
+      let rect=null,captureGeometryMode='calibration',calibration=null;
+      phase='region-crop';
+      const region=await tryRegionCapture(stream,v,stage,clean.ratio);
+      if(region){
+        rect=region.rect;captureGeometryMode=region.mode;
+        setState('브라우저가 영상 영역만 직접 분리했어요.','working');
+      }else{
+        phase='calibration';
+        calibration=mountCalibration();
+        const synced=await waitForCalibration(v,stage);
+        rect=synced.rect;
+        calibration.remove();calibration=null;
+        await wait(120);
+      }
 
       if(clean.duration>.75&&requested>clean.duration-.38)toast(`③ 영상 끝 UI를 피해서 ${timeLabel(clean.target)} 장면으로 자동 보정했어요`);
       else toast(`③ ${timeLabel(clean.target)} 장면을 깨끗하게 맞추는 중…`);
@@ -459,10 +491,10 @@
         if(i)await wait(8);
         let state=-99,t=-1;try{state=yt.getPlayerState();t=Number(yt.getCurrentTime());}catch{}
         if(state!==YT.PlayerState.PLAYING)continue;
-        const full=snap(v),freshRect={...rect};
+        const full=snap(v),freshRect=captureGeometryMode==='region-capture'?{x:0,y:0,w:full.width,h:full.height,sx:1,sy:1,regionCapture:true}:{...rect};
         if(!freshRect)continue;
         const shot=crop(full,freshRect.x,freshRect.y,freshRect.w,freshRect.h),quality=frameQuality(shot);
-        candidates.push({canvas:shot,quality,time:t,geometry:{sx:+freshRect.sx.toFixed(4),sy:+freshRect.sy.toFixed(4)}});
+        candidates.push({canvas:shot,quality,time:t,geometry:{sx:+freshRect.sx.toFixed(4),sy:+freshRect.sy.toFixed(4),mode:captureGeometryMode}});
       }
       candidates.sort((a,b)=>a.quality.score-b.quality.score);
       const best=candidates.find(x=>!x.quality.bad);
@@ -491,12 +523,14 @@
       const diag={version:16,phase,name,message:c,captureSize:err?.captureSize||'',at:new Date().toISOString()};
       try{sessionStorage.setItem('nuguTopkkuCaptureDiag',JSON.stringify(diag));}catch{}
       window.__NUGU_TOPKKU_CAPTURE_DIAG__=diag;
-      const msg=name==='InvalidStateError'?'브라우저가 화면 선택창을 열지 못했어요. 탑꾸 버튼을 다시 눌러 주세요.':name==='NotAllowedError'?'화면 선택이 취소되었거나 차단됐어요. 다시 눌러 현재 탭을 선택해 주세요.':name==='NotReadableError'?'현재 탭 화면을 읽지 못했어요. 다른 화면 공유를 닫고 다시 시도해 주세요.':c==='choose_tab'?'“현재 탭”을 선택해 주세요.':c==='frame_sync_failed'?'영상 장면이 안정적으로 재생되지 않아 저장하지 않았어요. 다시 시도해 주세요.':c==='clean_player_timeout'||c==='yt_api_timeout'?'캡처 전용 플레이어 준비가 지연됐어요. 다시 시도해 주세요.':c.startsWith('clean_player_error_')?'캡처 전용 YouTube 플레이어가 장면을 열지 못했어요.':c==='capture_surface_not_synced'?'현재 탭 캡처 화면이 영상 전용 프레임으로 바뀐 걸 확인하지 못했어요. 잘못된 영역은 저장하지 않았습니다.':c==='clean_frame_not_found'?'UI 없는 깨끗한 영상 프레임을 확인하지 못해 저장하지 않았어요.':c==='ratio_mismatch'?'영상 비율 검증에 실패해 잘못된 사진은 저장하지 않았어요.':c==='preview_unavailable'?'캡처 결과를 확인 화면에 표시하지 못해 편집기로 넘기지 않았어요. 다시 시도해 주세요.':c==='transition_unavailable'?'허용 후 캡처 화면 전환을 시작하지 못했어요. 다시 시도해 주세요.':'장면을 가져오지 못했어요. 다시 시도해 주세요.';
+      const msg=name==='InvalidStateError'?'브라우저가 화면 선택창을 열지 못했어요. 탑꾸 버튼을 다시 눌러 주세요.':name==='NotAllowedError'?'화면 선택이 취소되었거나 차단됐어요. 다시 눌러 현재 탭을 선택해 주세요.':name==='NotReadableError'?'현재 탭 화면을 읽지 못했어요. 다른 화면 공유를 닫고 다시 시도해 주세요.':c==='region_capture_wrong_tab'?'탑꾸가 열린 현재 NUGU RADAR 탭을 선택해 주세요. 다른 탭은 영상 영역만 분리할 수 없어요.':c.startsWith('region_capture_failed_')||c==='region_capture_resize_timeout'?'브라우저가 영상 영역 분리를 완료하지 못했어요. 다시 시도해 주세요.':c==='choose_tab'?'“현재 탭”을 선택해 주세요.':c==='frame_sync_failed'?'영상 장면이 안정적으로 재생되지 않아 저장하지 않았어요. 다시 시도해 주세요.':c==='clean_player_timeout'||c==='yt_api_timeout'?'캡처 전용 플레이어 준비가 지연됐어요. 다시 시도해 주세요.':c.startsWith('clean_player_error_')?'캡처 전용 YouTube 플레이어가 장면을 열지 못했어요.':c==='capture_surface_not_synced'?'현재 탭 캡처 화면이 영상 전용 프레임으로 바뀐 걸 확인하지 못했어요. 잘못된 영역은 저장하지 않았습니다.':c==='clean_frame_not_found'?'UI 없는 깨끗한 영상 프레임을 확인하지 못해 저장하지 않았어요.':c==='ratio_mismatch'?'영상 비율 검증에 실패해 잘못된 사진은 저장하지 않았어요.':c==='preview_unavailable'?'캡처 결과를 확인 화면에 표시하지 못해 편집기로 넘기지 않았어요. 다시 시도해 주세요.':c==='transition_unavailable'?'허용 후 캡처 화면 전환을 시작하지 못했어요. 다시 시도해 주세요.':'장면을 가져오지 못했어요. 다시 시도해 주세요.';
       setState(msg,'error');
       holdTransition=showCaptureFailure(msg,diag,transition);
       if(!holdTransition){toast(msg,'error');setTimeout(hideToast,4200);}
     }finally{
-      try{yt?.destroy?.();}catch{}stage?.remove();veil?.remove();stream?.getTracks?.().forEach(t=>t.stop());
+      try{yt?.destroy?.();}catch{}
+      try{document.querySelector('.nugu-capture-calibration-v6')?.remove();}catch{}
+      stage?.remove();veil?.remove();stream?.getTracks?.().forEach(t=>t.stop());
       if(!done&&!holdTransition)endTopkkuTransition(transition);
       buttons.forEach(b=>b.disabled=false);busy=false;
     }

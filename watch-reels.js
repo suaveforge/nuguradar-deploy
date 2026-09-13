@@ -2,13 +2,14 @@
   if(!window.NUGU_WATCH_REELS_MODE)return;
   const config=window.NUGU_CONFIG||{},params=new URLSearchParams(location.search);
   const desktopReels=matchMedia('(min-width: 901px) and (pointer: fine)').matches;
+  const startId=(params.get('start')||'').trim();
   const api=String(config.apiBase||'').replace(/\/$/,''),artist=(params.get('artist')||'').trim().toLowerCase();
   const shell=document.getElementById('mobileReelsShell'),feed=document.getElementById('mobileReelsFeed');
   const modeButtons=[...document.querySelectorAll('[data-reels-kind]')];
   if(!api||!shell||!feed)return;
   document.body.classList.add('mobile-reels-active');shell.hidden=false;
 
-  let kind='all',offset=0,cycle=0,loading=false,ended=false,active=null,soundOn=false,paused=false,generation=0;
+  let kind='all',offset=0,cycle=0,loading=false,ended=false,active=null,soundOn=false,paused=false,generation=0,startLoaded=!startId;
   const items=new Map(),times=new Map();
   const primed=new WeakSet(),priming=new WeakSet(),primeTimers=new WeakMap();
   const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
@@ -127,7 +128,7 @@
     if(best)activate(best.target);
   },{root:feed,threshold:[.2,.38,.55,.75,.92]});
   function append(rows){
-    const playable=rows.filter(x=>x.playable&&x.playback_provider==='youtube'&&x.playback_id);if(!playable.length)return 0;
+    const playable=rows.filter(x=>x.playable&&x.playback_provider==='youtube'&&x.playback_id&&!items.has(keyOf(x)));if(!playable.length)return 0;
     feed.querySelector('.mobile-reels-loading')?.remove();feed.insertAdjacentHTML('beforeend',playable.map(card).join(''));
     [...feed.querySelectorAll('.mobile-reel:not([data-observed])')].forEach(el=>{el.dataset.observed='1';wireCard(el);observer.observe(el)});
     if(active)warmAround(active);
@@ -136,6 +137,13 @@
   async function loadMore(){
     if(loading||ended)return;loading=true;const gen=generation;
     try{
+      if(!startLoaded){
+        startLoaded=true;
+        try{
+          const sr=await fetch(api+'/api/v1/content/youtube/'+encodeURIComponent(startId),{headers:{Accept:'application/json'},cache:'no-store'});
+          if(sr.ok){const first=await sr.json();if(gen===generation)append([first]);}
+        }catch(e){console.warn('reels start item load failed',e)}
+      }
       const q=new URLSearchParams({limit:'12',offset:String(offset),cycle:String(cycle),platform:'youtube',kind,sort:'newest'});if(artist)q.set('artist',artist);
       const r=await fetch(api+'/api/v1/content?'+q.toString(),{headers:{Accept:'application/json'},cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);
       const data=await r.json();if(gen!==generation)return;const rows=Array.isArray(data.items)?data.items:[];append(rows);offset=Number(data.nextOffset||offset+rows.length);
@@ -146,7 +154,7 @@
     }finally{if(gen===generation)loading=false}
   }
   function reset(nextKind){
-    generation++;deactivate(active);[...feed.querySelectorAll('.mobile-reel')].forEach(cancelPrime);active=null;kind=nextKind;offset=0;cycle=0;ended=false;loading=false;items.clear();times.clear();feed.scrollTop=0;feed.innerHTML='<div class="mobile-reels-loading">검증된 영상을 불러오는 중…</div>';modeButtons.forEach(b=>b.classList.toggle('active',b.dataset.reelsKind===kind));loadMore();
+    generation++;deactivate(active);[...feed.querySelectorAll('.mobile-reel')].forEach(cancelPrime);active=null;kind=nextKind;offset=0;cycle=0;ended=false;loading=false;items.clear();times.clear();feed.scrollTop=0;feed.innerHTML='<div class="mobile-reels-loading">검증된 영상을 불러오는 중…</div>';modeButtons.forEach(b=>b.classList.toggle('active',b.dataset.reelsKind===kind));if(nextKind!=='all')startLoaded=true;loadMore();
   }
   modeButtons.forEach(b=>b.addEventListener('click',()=>{if(!b.hidden)reset(b.dataset.reelsKind||'all')}));
   window.addEventListener('nugu-shorts-availability',e=>{
