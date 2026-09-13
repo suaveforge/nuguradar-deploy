@@ -141,10 +141,9 @@
     if(!frame||frame.querySelector('#frameTopkkuButton'))return;
     enableYoutubeApi();
     const wrap=document.createElement('div');
-    wrap.className='frame-topkku-action frame-topkku-dock';
-    wrap.innerHTML=`<div class="frame-scene-head"><b>딱 이 표정으로</b><strong id="frameTopkkuTime">${preciseTimeLabel(latestTime)}</strong></div><div class="frame-nudge" aria-label="장면 미세 선택"><button type="button" data-step="-0.2">−0.2초</button><button type="button" data-step="-0.1">−0.1초</button><button type="button" data-step="0.1">+0.1초</button><button type="button" data-step="0.2">+0.2초</button></div><button id="frameTopkkuButton" type="button">⏸ 이 장면 멈추고 탑꾸</button><span id="frameTopkkuState">누르는 순간 영상을 멈추고, 그 장면만 가져와요.</span>`;
+    wrap.className='frame-topkku-action frame-topkku-minimal';
+    wrap.innerHTML=`<strong id="frameTopkkuTime" hidden>${preciseTimeLabel(latestTime)}</strong><button id="frameTopkkuButton" type="button" aria-label="이 장면으로 탑꾸하기">✨ 탑꾸</button><span id="frameTopkkuState" class="sr-only">현재 장면으로 탑꾸를 시작해요.</span>`;
     frame.appendChild(wrap);
-    wrap.querySelectorAll('.frame-nudge button').forEach(b=>b.addEventListener('click',()=>nudgeFrame(Number(b.dataset.step))));
     updateSceneTime();
   }
 
