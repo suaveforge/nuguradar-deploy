@@ -307,6 +307,62 @@
     const p={version:16,source:'watch',image:await dataUrl(c),artist:m.artist,artistSlug:m.artistSlug||'',title:m.title,contentUrl:m.url,time:m.requestedTime,capturedAt:new Date().toISOString(),cleanCapture:true,videoOnly:true,strictCapture:true,captureMode:'canonical-fixed-render-v6',width:c.width,height:c.height,portrait:m.portrait,renderRatio:m.renderRatio,duration:m.duration,capturedVideoTime:m.capturedVideoTime,quality:m.quality,geometry:m.geometry};
     try{sessionStorage.setItem('nuguTopkkuIncoming',JSON.stringify(p));}
     catch{const k=Math.min(1,1100/Math.max(c.width,c.height)),d=document.createElement('canvas');d.width=Math.round(c.width*k);d.height=Math.round(c.height*k);d.getContext('2d').drawImage(c,0,0,d.width,d.height);p.image=await dataUrl(d,.86);p.width=d.width;p.height=d.height;sessionStorage.setItem('nuguTopkkuIncoming',JSON.stringify(p));}
+    return p;
+  }
+  function discardIncoming(){
+    try{sessionStorage.removeItem('nuguTopkkuIncoming');}catch{}
+  }
+  function showCapturedPreview(payload,transition){
+    return new Promise((resolve,reject)=>{
+      const screen=transition?.screen;
+      if(!screen||!payload?.image){reject(new Error('preview_unavailable'));return;}
+      hideToast();
+      screen.className='nugu-topkku-transition-screen nugu-topkku-preview';
+      screen.textContent='';
+
+      const image=document.createElement('img');
+      image.className='nugu-topkku-preview-image';
+      image.alt='탑꾸에 들어갈 캡처 결과';
+      image.src=payload.image;
+
+      const ui=document.createElement('div');
+      ui.className='nugu-topkku-preview-ui';
+      const copy=document.createElement('div');
+      copy.className='nugu-topkku-preview-copy';
+      const strong=document.createElement('strong');
+      strong.textContent='이 장면이 그대로 탑꾸에 들어가요';
+      const meta=document.createElement('span');
+      meta.textContent=`${payload.width}×${payload.height} · ${timeLabel(payload.capturedVideoTime??payload.time)}`;
+      copy.append(strong,meta);
+
+      const actions=document.createElement('div');
+      actions.className='nugu-topkku-preview-actions';
+      const retry=document.createElement('button');
+      retry.type='button';
+      retry.className='nugu-topkku-preview-retry';
+      retry.textContent='다시 고르기';
+      const confirm=document.createElement('button');
+      confirm.type='button';
+      confirm.className='nugu-topkku-preview-confirm';
+      confirm.textContent='이 장면으로 탑꾸';
+      actions.append(retry,confirm);
+      ui.append(copy,actions);
+      screen.append(image,ui);
+
+      let settled=false;
+      const finish=accepted=>{
+        if(settled)return;
+        settled=true;
+        dialog.removeEventListener('close',onClose);
+        if(!accepted)discardIncoming();
+        resolve(accepted);
+      };
+      const onClose=()=>finish(false);
+      dialog.addEventListener('close',onClose,{once:true});
+      retry.addEventListener('click',()=>finish(false),{once:true});
+      confirm.addEventListener('click',()=>finish(true),{once:true});
+      requestAnimationFrame(()=>confirm.focus());
+    });
   }
 
   async function capture(){
@@ -357,16 +413,28 @@
       const expected=clean.ratio,got=best.canvas.width/best.canvas.height;
       if(Math.abs(got-expected)/expected>.055)throw new Error('ratio_mismatch');
 
-      await save(best.canvas,{artist,artistSlug,title,url,requestedTime:requested,portrait:clean.portrait,renderRatio:+clean.ratio.toFixed(4),duration:+clean.duration.toFixed(3),capturedVideoTime:Number.isFinite(best.time)?best.time:actualTime,quality:best.quality,geometry:best.geometry});
+      const payload=await save(best.canvas,{artist,artistSlug,title,url,requestedTime:requested,portrait:clean.portrait,renderRatio:+clean.ratio.toFixed(4),duration:+clean.duration.toFixed(3),capturedVideoTime:Number.isFinite(best.time)?best.time:actualTime,quality:best.quality,geometry:best.geometry});
+
+      try{yt?.destroy?.();}catch{}yt=null;
+      stage?.remove();stage=null;
+      veil?.remove();veil=null;
+      stream?.getTracks?.().forEach(t=>t.stop());stream=null;
+
+      phase='preview';
+      setState(`영상 프레임만 가져왔어요 ✓ ${payload.width}×${payload.height}`,'success');
+      const accepted=await showCapturedPreview(payload,transition);
+      if(!accepted){setState('장면을 다시 골라주세요.','picked');return;}
       done=true;
-      setState(`영상 프레임만 가져왔어요 ✓ ${best.canvas.width}×${best.canvas.height}`,'success');toast('완료 ✓ 탑꾸로 이동합니다','success');await wait(180);location.href='topkku.html?from=watch';
+      toast('탑꾸 편집기로 이동합니다','success');
+      await wait(120);
+      location.href='topkku.html?from=watch';
     }catch(err){
       console.error('topkku capture v6 failed',err);
       const c=String(err?.message||err),name=String(err?.name||'');
       const diag={version:16,phase,name,message:c,at:new Date().toISOString()};
       try{sessionStorage.setItem('nuguTopkkuCaptureDiag',JSON.stringify(diag));}catch{}
       window.__NUGU_TOPKKU_CAPTURE_DIAG__=diag;
-      const msg=name==='InvalidStateError'?'브라우저가 화면 선택창을 열지 못했어요. 탑꾸 버튼을 다시 눌러 주세요.':name==='NotAllowedError'?'화면 선택이 취소되었거나 차단됐어요. 다시 눌러 현재 탭을 선택해 주세요.':name==='NotReadableError'?'현재 탭 화면을 읽지 못했어요. 다른 화면 공유를 닫고 다시 시도해 주세요.':c==='choose_tab'?'“현재 탭”을 선택해 주세요.':c==='frame_sync_failed'?'영상 장면이 안정적으로 재생되지 않아 저장하지 않았어요. 다시 시도해 주세요.':c==='clean_player_timeout'||c==='yt_api_timeout'?'캡처 전용 플레이어 준비가 지연됐어요. 다시 시도해 주세요.':c==='capture_surface_not_synced'?'현재 탭 캡처 화면이 영상 전용 프레임으로 바뀐 걸 확인하지 못했어요. 잘못된 영역은 저장하지 않았습니다.':c==='clean_frame_not_found'?'UI 없는 깨끗한 영상 프레임을 확인하지 못해 저장하지 않았어요.':c==='ratio_mismatch'?'영상 비율 검증에 실패해 잘못된 사진은 저장하지 않았어요.':'장면을 가져오지 못했어요. 다시 시도해 주세요.';
+      const msg=name==='InvalidStateError'?'브라우저가 화면 선택창을 열지 못했어요. 탑꾸 버튼을 다시 눌러 주세요.':name==='NotAllowedError'?'화면 선택이 취소되었거나 차단됐어요. 다시 눌러 현재 탭을 선택해 주세요.':name==='NotReadableError'?'현재 탭 화면을 읽지 못했어요. 다른 화면 공유를 닫고 다시 시도해 주세요.':c==='choose_tab'?'“현재 탭”을 선택해 주세요.':c==='frame_sync_failed'?'영상 장면이 안정적으로 재생되지 않아 저장하지 않았어요. 다시 시도해 주세요.':c==='clean_player_timeout'||c==='yt_api_timeout'?'캡처 전용 플레이어 준비가 지연됐어요. 다시 시도해 주세요.':c==='capture_surface_not_synced'?'현재 탭 캡처 화면이 영상 전용 프레임으로 바뀐 걸 확인하지 못했어요. 잘못된 영역은 저장하지 않았습니다.':c==='clean_frame_not_found'?'UI 없는 깨끗한 영상 프레임을 확인하지 못해 저장하지 않았어요.':c==='ratio_mismatch'?'영상 비율 검증에 실패해 잘못된 사진은 저장하지 않았어요.':c==='preview_unavailable'?'캡처 결과를 확인 화면에 표시하지 못해 편집기로 넘기지 않았어요. 다시 시도해 주세요.':'장면을 가져오지 못했어요. 다시 시도해 주세요.';
       setState(msg,'error');toast(msg,'error');setTimeout(hideToast,4200);
     }finally{
       try{yt?.destroy?.();}catch{}stage?.remove();veil?.remove();stream?.getTracks?.().forEach(t=>t.stop());
