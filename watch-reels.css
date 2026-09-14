@@ -41,3 +41,14 @@
   body.mobile-reels-active .mobile-reel-action{width:58px;min-height:58px;border-radius:18px}
   body.mobile-reels-active .mobile-reel-hint{bottom:12px;font-size:10px}
 }
+
+.reel-topkku.busy{opacity:.55;pointer-events:none}
+.reel-topkku-preview{position:absolute;inset:0;z-index:40;background:#000;overflow:hidden}
+.reel-topkku-preview>img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
+.reel-topkku-preview-bar{position:absolute;left:0;right:0;bottom:0;z-index:2;display:grid;gap:10px;padding:52px 14px 16px;background:linear-gradient(to bottom,transparent,rgba(0,0,0,.88));color:#fff}
+.reel-topkku-preview-copy{display:grid;gap:3px}
+.reel-topkku-preview-copy strong{font:900 13px/1.3 system-ui}
+.reel-topkku-preview-copy span{color:rgba(255,255,255,.7);font:700 9px/1.3 system-ui;font-variant-numeric:tabular-nums}
+.reel-topkku-preview-actions{display:grid;grid-template-columns:1fr 1.25fr;gap:8px}
+.reel-topkku-preview-actions button{min-height:44px;border:1px solid rgba(255,255,255,.22);border-radius:999px;background:rgba(10,12,16,.72);color:#fff;font:900 10px/1 system-ui}
+.reel-topkku-preview-actions button.confirm{background:#f4eaff;color:#231626;border-color:#f4eaff}

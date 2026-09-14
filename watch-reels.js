@@ -22,6 +22,8 @@
   function send(frame,func,args=[]){try{frame?.contentWindow?.postMessage(JSON.stringify({event:'command',func,args}),'*')}catch{}}
   function flash(card,text){const el=card?.querySelector('.mobile-reel-state');if(!el)return;el.textContent=text;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),650)}
   function currentSeconds(card=active){return Math.max(0,Math.floor(Number(times.get(card?.dataset.key)||0)))}
+  function currentTopkkuTime(card=active){return Math.max(0,Math.round(Number(times.get(card?.dataset.key)||0)*10)/10)}
+  const blobDataUrl=blob=>new Promise((resolve,reject)=>{const r=new FileReader();r.onerror=()=>reject(new Error('read'));r.onload=()=>resolve(String(r.result||''));r.readAsDataURL(blob)});
   function iframeUrl(c,start,autoplay=false){
     const id=encodeURIComponent(c.playback_id),origin=encodeURIComponent(location.origin);
     return 'https://www.youtube-nocookie.com/embed/'+id+'?autoplay='+(autoplay?1:0)+'&mute=1&controls=0&playsinline=1&rel=0&enablejsapi=1&origin='+origin+'&loop=1&playlist='+id+'&fs=0&disablekb=1'+(start?'&start='+start:'');
@@ -104,12 +106,62 @@
       const host=cardEl.querySelector('.mobile-reel-player');if(host?.querySelector('iframe'))host.innerHTML='';
     }
   }
+  function reelTopkkuPreview(el,payload){
+    el.querySelector('.reel-topkku-preview')?.remove();
+    const layer=document.createElement('div');layer.className='reel-topkku-preview';
+    const img=document.createElement('img');img.src=payload.image;img.alt='탑꾸에 들어갈 현재 장면';
+    const bar=document.createElement('div');bar.className='reel-topkku-preview-bar';
+    const copy=document.createElement('div');copy.className='reel-topkku-preview-copy';
+    const strong=document.createElement('strong');strong.textContent='이 장면이 그대로 탑꾸에 들어가요';
+    const meta=document.createElement('span');meta.textContent=payload.width+'×'+payload.height+' · '+Number(payload.capturedVideoTime||payload.time||0).toFixed(1)+'초';
+    copy.append(strong,meta);
+    const actions=document.createElement('div');actions.className='reel-topkku-preview-actions';
+    const retry=document.createElement('button');retry.type='button';retry.textContent='다시 고르기';
+    const confirm=document.createElement('button');confirm.type='button';confirm.className='confirm';confirm.textContent='이 장면으로 탑꾸';
+    actions.append(retry,confirm);bar.append(copy,actions);layer.append(img,bar);el.append(layer);
+    retry.onclick=e=>{e.preventDefault();e.stopPropagation();layer.remove();if(el===active){paused=false;playActive(el)}};
+    confirm.onclick=e=>{
+      e.preventDefault();e.stopPropagation();
+      try{sessionStorage.setItem('nuguTopkkuIncoming',JSON.stringify(payload))}
+      catch{flash(el,'이미지를 임시 저장하지 못했어요');return}
+      location.href='topkku.html?from=watch-reels';
+    };
+  }
+  async function directReelTopkku(el,c){
+    if(el.dataset.topkkuBusy==='1')return;
+    el.dataset.topkkuBusy='1';
+    const frame=ensureFrame(el,el===active),time=currentTopkkuTime(el);
+    send(frame,'pauseVideo');if(el===active)paused=true;flash(el,'현재 장면 준비 중…');
+    const button=el.querySelector('.reel-topkku');button?.classList.add('busy');
+    const ac=new AbortController(),timer=setTimeout(()=>ac.abort(),28000);
+    try{
+      const r=await fetch(api+'/api/v1/media/youtube-frame',{
+        method:'POST',headers:{'Content-Type':'application/json',Accept:'image/jpeg'},
+        body:JSON.stringify({videoId:c.playback_id,time}),signal:ac.signal
+      });
+      if(!r.ok){
+        let code='frame_render_failed';try{const j=await r.json();code=j.error||code}catch{}
+        throw new Error(code);
+      }
+      const blob=await r.blob(),image=await blobDataUrl(blob);
+      const width=Number(r.headers.get('X-NUGU-Frame-Width')||0),height=Number(r.headers.get('X-NUGU-Frame-Height')||0);
+      const capturedVideoTime=Number(r.headers.get('X-NUGU-Frame-Time')||time);
+      if(!image||width<64||height<64)throw new Error('invalid_frame');
+      reelTopkkuPreview(el,{version:18,source:'watch',image,artist:c.artist_name||'',artistSlug:c.artist_slug||'',title:c.title||'',contentUrl:c.content_url||'',time,capturedVideoTime,capturedAt:new Date().toISOString(),cleanCapture:true,videoOnly:true,strictCapture:true,manualCapture:false,captureMode:'mobile-server-youtube-frame-v1',width,height});
+    }catch(err){
+      console.error('reels Topkku frame failed',err);
+      flash(el,err?.name==='AbortError'?'장면 준비가 지연됐어요 · 다시 눌러주세요':'장면을 가져오지 못했어요 · 다시 눌러주세요');
+      if(el===active){paused=false;playActive(el)}
+    }finally{
+      clearTimeout(timer);delete el.dataset.topkkuBusy;button?.classList.remove('busy');
+    }
+  }
   function wireCard(el){
     if(el.dataset.wired)return;el.dataset.wired='1';const c=items.get(el.dataset.key);
     el.querySelector('.mobile-reel-gesture')?.addEventListener('click',()=>{const frame=ensureFrame(el,el===active);if(!frame)return;paused=!paused;send(frame,paused?'pauseVideo':'playVideo');if(!paused)playActive(el);flash(el,paused?'일시정지':'재생')});
     el.querySelector('.reel-sound')?.addEventListener('click',e=>{e.stopPropagation();soundOn=!soundOn;const frame=ensureFrame(el,el===active);send(frame,soundOn?'unMute':'mute');if(soundOn)send(frame,'setVolume',[100]);if(el===active&&!paused)send(frame,'playVideo');document.querySelectorAll('.reel-sound').forEach(b=>{b.classList.toggle('sound-on',soundOn);b.querySelector('strong').textContent=soundOn?'🔊':'🔇';b.querySelector('span').textContent=soundOn?'소리 켬':'소리'});flash(el,soundOn?'소리 켬':'음소거')});
     el.querySelector('.reel-comments')?.addEventListener('click',e=>{e.stopPropagation();const frame=el.querySelector('iframe');send(frame,'pauseVideo');paused=true;window.NUGU_WATCH_OPEN_CONTENT?.(c,currentSeconds(el))});
-    el.querySelector('.reel-topkku')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();location.href='watch.html?artist='+encodeURIComponent(c.artist_slug||'')+'&video='+encodeURIComponent(c.playback_id||'')+'&t='+currentSeconds(el)+'&topkku=1'});
+    el.querySelector('.reel-topkku')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();directReelTopkku(el,c)});
   }
   function deactivate(el){if(!el)return;send(el.querySelector('iframe'),'pauseVideo');el.classList.remove('active')}
   function activate(el){
