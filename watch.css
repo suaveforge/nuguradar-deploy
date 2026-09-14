@@ -2,11 +2,8 @@
 
 
 .watch-thumb{position:relative}
-.watch-card-reels{position:absolute;z-index:4;right:12px;bottom:12px;width:34px;height:34px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.24);border-radius:50%;background:rgba(8,10,13,.72);color:#fff;font:900 16px/1 system-ui;cursor:pointer;backdrop-filter:blur(10px);box-shadow:0 8px 22px rgba(0,0,0,.28)}
-.watch-card-reels:hover,.watch-card-reels:focus-visible{background:#fff;color:#0a0b0d;border-color:#fff;outline:none}
-@media(max-width:900px) and (pointer:coarse){.watch-card-reels{display:none}}
 
 .player-frame{position:relative}
-.player-reels-open{position:absolute;z-index:6;left:14px;top:14px;border:1px solid rgba(255,255,255,.24);border-radius:999px;background:rgba(8,10,13,.7);color:#fff;padding:9px 12px;font:900 10px/1 system-ui;cursor:pointer;backdrop-filter:blur(10px);box-shadow:0 8px 22px rgba(0,0,0,.3)}
+.player-reels-open{position:absolute;text-decoration:none;z-index:6;left:14px;top:14px;border:1px solid rgba(255,255,255,.24);border-radius:999px;background:rgba(8,10,13,.7);color:#fff;padding:9px 12px;font:900 10px/1 system-ui;cursor:pointer;backdrop-filter:blur(10px);box-shadow:0 8px 22px rgba(0,0,0,.3)}
 .player-reels-open:hover,.player-reels-open:focus-visible{background:#fff;color:#0a0b0d;border-color:#fff;outline:none}
 @media(max-width:900px) and (pointer:coarse){.player-reels-open{display:none}}

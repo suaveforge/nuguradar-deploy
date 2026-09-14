@@ -4,6 +4,7 @@
   if(!dialog||!body)return;
 
   let busy=false;
+  const config=window.NUGU_CONFIG||{},api=String(config.apiBase||'').replace(/\/$/,'');
   const MIN_STAGE_CSS=120;
   const MIN_CAPTURE_PX=64;
   const $=(s,r=document)=>r.querySelector(s);
@@ -340,6 +341,8 @@
   }
 
   async function dataUrl(c,q=.94){return await new Promise((ok,bad)=>c.toBlob(b=>{if(!b)return bad(new Error('encode'));const r=new FileReader;r.onload=()=>ok(String(r.result||''));r.onerror=()=>bad(new Error('encode'));r.readAsDataURL(b);},'image/jpeg',q));}
+  async function blobDataUrl(blob){return await new Promise((ok,bad)=>{const r=new FileReader;r.onload=()=>ok(String(r.result||''));r.onerror=()=>bad(new Error('read'));r.readAsDataURL(blob);});}
+  function storeIncomingPayload(p){sessionStorage.setItem('nuguTopkkuIncoming',JSON.stringify(p));return p;}
   async function save(c,m){
     const p={version:16,source:'watch',image:await dataUrl(c),artist:m.artist,artistSlug:m.artistSlug||'',title:m.title,contentUrl:m.url,time:m.requestedTime,capturedAt:new Date().toISOString(),cleanCapture:true,videoOnly:true,strictCapture:true,captureMode:'canonical-fixed-render-v6',width:c.width,height:c.height,portrait:m.portrait,renderRatio:m.renderRatio,duration:m.duration,capturedVideoTime:m.capturedVideoTime,quality:m.quality,geometry:m.geometry};
     try{sessionStorage.setItem('nuguTopkkuIncoming',JSON.stringify(p));}
@@ -446,6 +449,73 @@
     const buttons=[...body.querySelectorAll('.frame-topkku-action button')];buttons.forEach(b=>b.disabled=true);
     const requested=targetTime(),id=videoId(),title=$('.player-title h2',body)?.textContent?.trim()||'NUGU RADAR Watch',mt=$('.player-title p',body)?.textContent?.trim()||'',artist=mt.split('·')[0]?.trim()||'',artistSlug=body.dataset.artistSlug||'',url=$('.player-title a',body)?.href||'';
     pauseSourcePlayer();
+    let transition=null,done=false,holdTransition=false,phase='server-frame';
+    try{
+      if(!id)throw new Error('video_id');
+      if(!api)throw new Error('api_unavailable');
+      await wait(80);
+      transition=beginTopkkuTransition();
+      if(!transition)throw new Error('transition_unavailable');
+      setState(`${timeLabel(requested)} 장면에서 YouTube UI 없는 영상 프레임을 만드는 중…`,'working');
+      toast(`${timeLabel(requested)} · 순수 영상 프레임 준비 중…`);
+
+      const ac=new AbortController(),timer=setTimeout(()=>ac.abort(),28000);
+      let r;
+      try{
+        r=await fetch(api+'/api/v1/media/youtube-frame',{
+          method:'POST',
+          headers:{'Content-Type':'application/json',Accept:'image/jpeg'},
+          body:JSON.stringify({videoId:id,time:requested}),
+          signal:ac.signal
+        });
+      }finally{clearTimeout(timer);}
+      if(!r.ok){
+        let code='server_frame_failed';
+        try{const j=await r.json();code=j.error||code}catch{}
+        throw new Error(code);
+      }
+      phase='server-frame-read';
+      const blob=await r.blob(),image=await blobDataUrl(blob);
+      const width=Number(r.headers.get('X-NUGU-Frame-Width')||0),height=Number(r.headers.get('X-NUGU-Frame-Height')||0);
+      const capturedVideoTime=Number(r.headers.get('X-NUGU-Frame-Time')||requested);
+      if(!image||width<MIN_CAPTURE_PX||height<MIN_CAPTURE_PX)throw new Error('invalid_server_frame');
+
+      const payload=storeIncomingPayload({
+        version:18,source:'watch',image,artist,artistSlug,title,contentUrl:url,time:requested,
+        capturedVideoTime,capturedAt:new Date().toISOString(),cleanCapture:true,videoOnly:true,strictCapture:true,
+        manualCapture:false,captureMode:'server-decoded-video-frame-v1',width,height,
+        quality:{uiFree:true,source:'decoded-video-element'},geometry:{mode:'server-video-element'}
+      });
+
+      phase='preview';
+      setState(`YouTube UI 없는 영상 프레임을 가져왔어요 ✓ ${width}×${height}`,'success');
+      const accepted=await showCapturedPreview(payload,transition);
+      if(!accepted){setState('장면을 다시 골라주세요.','picked');return;}
+      done=true;
+      toast('탑꾸 편집기로 이동합니다','success');
+      await wait(120);
+      location.href='topkku.html?from=watch-clean-frame';
+    }catch(err){
+      console.error('server clean-frame Topkku failed',err);
+      const c=String(err?.message||err),name=String(err?.name||'');
+      const diag={version:18,phase,name,message:c,at:new Date().toISOString()};
+      try{sessionStorage.setItem('nuguTopkkuCaptureDiag',JSON.stringify(diag));}catch{}
+      window.__NUGU_TOPKKU_CAPTURE_DIAG__=diag;
+      const msg=name==='AbortError'?'UI 없는 영상 프레임 준비가 지연됐어요. 다시 시도해 주세요.':c==='invalid_server_frame'?'서버가 영상 프레임을 만들었지만 결과 검증에 실패했어요.':c==='video_id'?'현재 영상 ID를 확인하지 못했어요.':c==='api_unavailable'?'탑꾸 프레임 서버에 연결할 수 없어요.':'UI 없는 영상 프레임을 만들지 못했어요. 다시 시도해 주세요.';
+      setState(msg,'error');
+      holdTransition=showCaptureFailure(msg,diag,transition);
+      if(!holdTransition){toast(msg,'error');setTimeout(hideToast,4200);}
+    }finally{
+      if(!done&&!holdTransition)endTopkkuTransition(transition);
+      buttons.forEach(b=>b.disabled=false);busy=false;
+    }
+  }
+
+  async function captureBrowserFallback(){
+    if(busy)return;busy=true;
+    const buttons=[...body.querySelectorAll('.frame-topkku-action button')];buttons.forEach(b=>b.disabled=true);
+    const requested=targetTime(),id=videoId(),title=$('.player-title h2',body)?.textContent?.trim()||'NUGU RADAR Watch',mt=$('.player-title p',body)?.textContent?.trim()||'',artist=mt.split('·')[0]?.trim()||'',artistSlug=body.dataset.artistSlug||'',url=$('.player-title a',body)?.href||'';
+    pauseSourcePlayer();
     let transition=null;
     let stream=null,veil=null,stage=null,yt=null,done=false,holdTransition=false,phase='share-request';
     try{
@@ -536,6 +606,7 @@
     }
   }
 
+  window.__NUGU_TOPKKU_BROWSER_FALLBACK__=captureBrowserFallback;
   const prewarmCaptureRuntime=()=>{loadYT().catch(()=>{})};
   window.addEventListener('nugu-watch-opened',prewarmCaptureRuntime);
   if(dialog.open)prewarmCaptureRuntime();
