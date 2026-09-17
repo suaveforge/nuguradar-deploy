@@ -82,9 +82,18 @@
     try{frame.contentWindow.postMessage(JSON.stringify({event:'command',func,args}),'*')}catch{}
   }
 
+  function lockYoutubeCapabilities(){
+    const frame=playerIframe();
+    if(!frame)return;
+    frame.setAttribute('allow','autoplay; encrypted-media; picture-in-picture');
+    frame.removeAttribute('allowfullscreen');
+    frame.dataset.nuguShareBlocked='1';
+  }
+
   function enableYoutubeApi(){
     const frame=playerIframe();
     if(!frame||frame.dataset.nuguApiReady)return;
+    lockYoutubeCapabilities();
     frame.dataset.nuguApiReady='1';
     const listen=()=>{
       try{frame.contentWindow?.postMessage(JSON.stringify({event:'listening',id:'nugu-radar-watch'}),'*')}catch{}
@@ -143,7 +152,19 @@
     enableYoutubeApi();
     const wrap=document.createElement('div');
     wrap.className='frame-topkku-action frame-topkku-minimal';
+    wrap.style.cssText='position:absolute;right:0;bottom:0;z-index:2147483000;width:176px;height:168px;display:flex;align-items:flex-end;justify-content:flex-end;padding:12px;box-sizing:border-box;pointer-events:auto;isolation:isolate';
     wrap.innerHTML=`<strong id="frameTopkkuTime" hidden>${preciseTimeLabel(latestTime)}</strong><button id="frameTopkkuButton" type="button" aria-label="이 장면으로 탑꾸하기">✨ 탑꾸</button><span id="frameTopkkuState" class="sr-only">현재 장면으로 탑꾸를 시작해요.</span>`;
+    const button=wrap.querySelector('#frameTopkkuButton');
+    button.style.position='relative';
+    button.style.zIndex='2';
+    button.style.pointerEvents='auto';
+    button.addEventListener('pointerdown',e=>{
+      e.stopPropagation();
+      sendYoutube('pauseVideo');
+    },true);
+    wrap.addEventListener('pointerdown',e=>{
+      if(e.target!==button)e.stopPropagation();
+    },true);
     frame.appendChild(wrap);
     updateSceneTime();
   }
@@ -153,6 +174,7 @@
     const title=(playerBody.querySelector('.player-title h2')?.textContent||'').toLowerCase();
     const portrait=portraitNext||title.includes('#shorts')||title.includes(' shorts');
     player.classList.toggle('is-vertical',portrait);
+    lockYoutubeCapabilities();
     wireFrameAction();
     enableYoutubeApi();
     updateSceneTime();
