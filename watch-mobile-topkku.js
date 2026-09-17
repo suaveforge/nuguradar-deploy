@@ -15,6 +15,8 @@
     if(el.dataset.state!==state)el.dataset.state=state;
   };
   const targetTime=()=>{
+    const exact=Number(body.dataset.sceneTime);
+    if(Number.isFinite(exact)&&exact>=0)return exact;
     const raw=(($('#frameTopkkuTime',body)?.textContent)||'0:00').trim(),p=raw.split(':').map(Number);
     if(p.length===3)return Math.max(0,(p[0]||0)*3600+(p[1]||0)*60+(p[2]||0));
     return Math.max(0,(p[0]||0)*60+(p[1]||0));

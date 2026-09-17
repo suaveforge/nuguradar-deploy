@@ -22,7 +22,7 @@
   function send(frame,func,args=[]){try{frame?.contentWindow?.postMessage(JSON.stringify({event:'command',func,args}),'*')}catch{}}
   function flash(card,text){const el=card?.querySelector('.mobile-reel-state');if(!el)return;el.textContent=text;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),650)}
   function currentSeconds(card=active){return Math.max(0,Math.floor(Number(times.get(card?.dataset.key)||0)))}
-  function currentTopkkuTime(card=active){return Math.max(0,Math.round(Number(times.get(card?.dataset.key)||0)*10)/10)}
+  function currentTopkkuTime(card=active){return Math.max(0,Math.round(Number(times.get(card?.dataset.key)||0)*100)/100)}
   const blobDataUrl=blob=>new Promise((resolve,reject)=>{const r=new FileReader();r.onerror=()=>reject(new Error('read'));r.onload=()=>resolve(String(r.result||''));r.readAsDataURL(blob)});
   function iframeUrl(c,start,autoplay=false){
     const id=encodeURIComponent(c.playback_id),origin=encodeURIComponent(location.origin);
@@ -130,8 +130,10 @@
   async function directReelTopkku(el,c){
     if(el.dataset.topkkuBusy==='1')return;
     el.dataset.topkkuBusy='1';
-    const frame=ensureFrame(el,el===active),time=currentTopkkuTime(el);
+    const frame=ensureFrame(el,el===active);
     send(frame,'pauseVideo');if(el===active)paused=true;flash(el,'현재 장면 준비 중…');
+    await new Promise(r=>setTimeout(r,80));
+    const time=currentTopkkuTime(el);
     const button=el.querySelector('.reel-topkku');button?.classList.add('busy');
     const ac=new AbortController(),timer=setTimeout(()=>ac.abort(),28000);
     try{

@@ -37,6 +37,8 @@
     if(el){el.textContent=text;el.dataset.state=state;}
   }
   function targetTime(){
+    const exact=Number(body.dataset.sceneTime);
+    if(Number.isFinite(exact)&&exact>=0)return exact;
     const raw=(($('#frameTopkkuTime',body)?.textContent)||'0:00').trim();
     const p=raw.split(':').map(Number);
     if(p.length===3)return Math.max(0,(p[0]||0)*3600+(p[1]||0)*60+(p[2]||0));
@@ -447,13 +449,14 @@
   async function capture(){
     if(busy)return;busy=true;
     const buttons=[...body.querySelectorAll('.frame-topkku-action button')];buttons.forEach(b=>b.disabled=true);
-    const requested=targetTime(),id=videoId(),title=$('.player-title h2',body)?.textContent?.trim()||'NUGU RADAR Watch',mt=$('.player-title p',body)?.textContent?.trim()||'',artist=mt.split('·')[0]?.trim()||'',artistSlug=body.dataset.artistSlug||'',url=$('.player-title a',body)?.href||'';
+    const id=videoId(),title=$('.player-title h2',body)?.textContent?.trim()||'NUGU RADAR Watch',mt=$('.player-title p',body)?.textContent?.trim()||'',artist=mt.split('·')[0]?.trim()||'',artistSlug=body.dataset.artistSlug||'',url=$('.player-title a',body)?.href||'';
     pauseSourcePlayer();
     let transition=null,done=false,holdTransition=false,phase='server-frame';
     try{
       if(!id)throw new Error('video_id');
       if(!api)throw new Error('api_unavailable');
       await wait(80);
+      const requested=targetTime();
       transition=beginTopkkuTransition();
       if(!transition)throw new Error('transition_unavailable');
       setState(`${timeLabel(requested)} 장면에서 YouTube UI 없는 영상 프레임을 만드는 중…`,'working');

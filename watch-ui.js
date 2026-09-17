@@ -95,10 +95,11 @@
 
   const preciseTimeLabel=s=>{
     const n=Math.max(0,Number(s)||0),m=Math.floor(n/60),sec=n-m*60;
-    return `${m}:${sec.toFixed(1).padStart(4,'0')}`;
+    return `${m}:${sec.toFixed(2).padStart(5,'0')}`;
   };
 
   function updateSceneTime(){
+    playerBody.dataset.sceneTime=String(Math.max(0,Number(latestTime)||0));
     const el=playerBody.querySelector('#frameTopkkuTime');
     if(el)el.textContent=preciseTimeLabel(latestTime);
   }
@@ -180,5 +181,6 @@
     player.classList.remove('is-vertical');
     portraitNext=false;
     latestTime=0;
+    delete playerBody.dataset.sceneTime;
   });
 })();
