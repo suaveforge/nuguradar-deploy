@@ -1,8 +1,11 @@
 {
   "schema_version": "1",
   "contract": "sitehub-videoseo",
-  "generated_at": "2026-09-18T10:17:47.710Z",
+  "generated_at": "2026-09-18T10:31:41.624Z",
   "total_pages": 4936,
   "playable_pages": 4936,
-  "source_unavailable_pages": 0
+  "source_unavailable_pages": 0,
+  "artist_pages": 303,
+  "artist_index_url": "https://nuguradar.suaveforge.com/artists/",
+  "artist_sitemap_url": "https://nuguradar.suaveforge.com/artist-sitemap.xml"
 }
