@@ -106,26 +106,10 @@
       const host=cardEl.querySelector('.mobile-reel-player');if(host?.querySelector('iframe'))host.innerHTML='';
     }
   }
-  function reelTopkkuPreview(el,payload){
-    el.querySelector('.reel-topkku-preview')?.remove();
-    const layer=document.createElement('div');layer.className='reel-topkku-preview';
-    const img=document.createElement('img');img.src=payload.image;img.alt='탑꾸에 들어갈 현재 장면';
-    const bar=document.createElement('div');bar.className='reel-topkku-preview-bar';
-    const copy=document.createElement('div');copy.className='reel-topkku-preview-copy';
-    const strong=document.createElement('strong');strong.textContent='이 장면이 그대로 탑꾸에 들어가요';
-    const meta=document.createElement('span');meta.textContent=payload.width+'×'+payload.height+' · '+Number(payload.capturedVideoTime||payload.time||0).toFixed(1)+'초';
-    copy.append(strong,meta);
-    const actions=document.createElement('div');actions.className='reel-topkku-preview-actions';
-    const retry=document.createElement('button');retry.type='button';retry.textContent='다시 고르기';
-    const confirm=document.createElement('button');confirm.type='button';confirm.className='confirm';confirm.textContent='이 장면으로 탑꾸';
-    actions.append(retry,confirm);bar.append(copy,actions);layer.append(img,bar);el.append(layer);
-    retry.onclick=e=>{e.preventDefault();e.stopPropagation();layer.remove();if(el===active){paused=false;playActive(el)}};
-    confirm.onclick=e=>{
-      e.preventDefault();e.stopPropagation();
-      try{sessionStorage.setItem('nuguTopkkuIncoming',JSON.stringify(payload))}
-      catch{flash(el,'이미지를 임시 저장하지 못했어요');return}
-      location.href='topkku.html?from=watch-reels';
-    };
+  function handoffReelTopkku(el,payload){
+    try{sessionStorage.setItem('nuguTopkkuIncoming',JSON.stringify(payload))}
+    catch{flash(el,'이미지를 임시 저장하지 못했어요');throw new Error('handoff_storage')}
+    location.href='topkku.html?from=watch-reels';
   }
   async function directReelTopkku(el,c){
     if(el.dataset.topkkuBusy==='1')return;
@@ -149,7 +133,7 @@
       const width=Number(r.headers.get('X-NUGU-Frame-Width')||0),height=Number(r.headers.get('X-NUGU-Frame-Height')||0);
       const capturedVideoTime=Number(r.headers.get('X-NUGU-Frame-Time')||time);
       if(!image||width<64||height<64)throw new Error('invalid_frame');
-      reelTopkkuPreview(el,{version:18,source:'watch',image,artist:c.artist_name||'',artistSlug:c.artist_slug||'',title:c.title||'',contentUrl:c.content_url||'',time,capturedVideoTime,capturedAt:new Date().toISOString(),cleanCapture:true,videoOnly:true,strictCapture:true,manualCapture:false,captureMode:'mobile-server-youtube-frame-v1',width,height});
+      handoffReelTopkku(el,{version:18,source:'watch',image,artist:c.artist_name||'',artistSlug:c.artist_slug||'',title:c.title||'',contentUrl:c.content_url||'',time,capturedVideoTime,capturedAt:new Date().toISOString(),cleanCapture:true,videoOnly:true,strictCapture:true,manualCapture:false,captureMode:'mobile-server-youtube-frame-v1',width,height});
     }catch(err){
       console.error('reels Topkku frame failed',err);
       flash(el,err?.name==='AbortError'?'장면 준비가 지연됐어요 · 다시 눌러주세요':'장면을 가져오지 못했어요 · 다시 눌러주세요');
