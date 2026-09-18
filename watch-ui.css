@@ -15,6 +15,7 @@ html.nugu-watch-modal-open,body.nugu-watch-modal-open{overflow:hidden!important;
 
 
 /* Minimal Topkku affordance: keep the video visually dominant until the user opts in. */
+.frame-topkku-action[hidden]{display:none!important;pointer-events:none!important}
 .frame-topkku-minimal{position:absolute;right:12px;bottom:12px;z-index:19;display:block}
 .frame-topkku-minimal #frameTopkkuButton{width:auto;min-height:0;padding:9px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:rgba(10,12,16,.72);color:#fff;box-shadow:0 8px 22px rgba(0,0,0,.28);backdrop-filter:blur(10px);font-size:10px;font-weight:900}
 .frame-topkku-minimal #frameTopkkuButton:hover,.frame-topkku-minimal #frameTopkkuButton:focus-visible{background:rgba(20,23,29,.9);border-color:rgba(255,255,255,.26)}
