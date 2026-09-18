@@ -1,6 +1,6 @@
 source_repository=suaveforge/nuguradar
-source_sha=c2a23b7e22f99e63f34d1d84c2a4dcd4201dd214
-build_id=20260917-115149
+source_sha=aff72ea95d7f5a891c3703243d4f0496bf403dd6
+build_id=20260918-011825
 api_base=https://api-nuguradar.suaveforge.com:18042
-built_at_utc=2026-09-17T11:52:48Z
+built_at_utc=2026-09-18T01:19:20Z
 runner=123-suaveforge-org-01
