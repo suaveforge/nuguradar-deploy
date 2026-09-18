@@ -3,7 +3,9 @@
   if(!canvas)return;
   const ctx=canvas.getContext('2d');
   const W=canvas.width,H=canvas.height;
-  const photoBox={x:96,y:126,w:528,h:792,r:30};
+  const DEFAULT_PHOTO_BOX={x:96,y:126,w:528,h:792,r:30};
+  const WATCH_PHOTO_BOUNDS={x:48,y:48,w:624,h:984};
+  const photoBox={...DEFAULT_PHOTO_BOX};
   const themes={
     lavender:{bg:'#eee9ff',ink:'#57468b',frame:'#b9a8f5',accent:'#ff86bb',paper:'#fffdf8'},
     pink:{bg:'#ffe8f1',ink:'#8a4564',frame:'#ff9dc4',accent:'#ffc55f',paper:'#fffaf7'},
@@ -45,11 +47,29 @@
   function heartPath(size){const s=size/100;ctx.beginPath();ctx.moveTo(0,35*s);ctx.bezierCurveTo(-58*s,-4*s,-45*s,-55*s,-10*s,-43*s);ctx.bezierCurveTo(0,-58*s,38*s,-56*s,48*s,-27*s);ctx.bezierCurveTo(62*s,10*s,24*s,35*s,0,55*s);ctx.bezierCurveTo(-24*s,35*s,-62*s,10*s,-48*s,-27*s);ctx.bezierCurveTo(-38*s,-56*s,0,-58*s,10*s,-43*s);ctx.closePath()}
   function starPath(size,points=5){const outer=size*.52,inner=outer*.43;ctx.beginPath();for(let i=0;i<points*2;i++){const r=i%2?inner:outer,a=-Math.PI/2+i*Math.PI/points,x=Math.cos(a)*r,y=Math.sin(a)*r;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)}ctx.closePath()}
   function gradient(stops,x1,y1,x2,y2){const g=ctx.createLinearGradient(x1,y1,x2,y2);for(const [p,col] of stops)g.addColorStop(p,col);return g}
+  function resetPhotoBox(){Object.assign(photoBox,DEFAULT_PHOTO_BOX)}
+  function fitBoxToSource(img,bounds=WATCH_PHOTO_BOUNDS){
+    const sw=Number(img?.naturalWidth||0),sh=Number(img?.naturalHeight||0);
+    if(sw<1||sh<1)return{...DEFAULT_PHOTO_BOX};
+    const ratio=sw/sh;
+    let w=bounds.w,h=w/ratio;
+    if(h>bounds.h){h=bounds.h;w=h*ratio}
+    w=Math.max(1,Math.min(bounds.w,w));h=Math.max(1,Math.min(bounds.h,h));
+    return{
+      x:(W-w)/2,
+      y:(H-h)/2,
+      w,
+      h,
+      r:Math.min(30,Math.max(18,Math.min(w,h)*.055))
+    };
+  }
+  function configurePhotoBox(img,meta){
+    resetPhotoBox();
+    if(meta?.source==='watch')Object.assign(photoBox,fitBoxToSource(img));
+  }
   function coverImage(img,x,y,w,h){const base=Math.max(w/img.naturalWidth,h/img.naturalHeight),scale=base*photoView.zoom;const dw=img.naturalWidth*scale,dh=img.naturalHeight*scale;const maxX=Math.max(0,(dw-w)/2),maxY=Math.max(0,(dh-h)/2);photoView.x=clamp(photoView.x,-maxX,maxX);photoView.y=clamp(photoView.y,-maxY,maxY);ctx.drawImage(img,x+(w-dw)/2+photoView.x,y+(h-dh)/2+photoView.y,dw,dh)}
   function fitWatchImage(img,x,y,w,h){
-    const cover=Math.max(w/img.naturalWidth,h/img.naturalHeight);
-    const bw=img.naturalWidth*cover,bh=img.naturalHeight*cover;
-    ctx.save();ctx.globalAlpha=.26;ctx.filter='blur(22px) brightness(.72)';ctx.drawImage(img,x+(w-bw)/2,y+(h-bh)/2,bw,bh);ctx.restore();
+    if(photoView.zoom===1&&photoView.x===0&&photoView.y===0){ctx.drawImage(img,x,y,w,h);return}
     const fit=Math.min(w/img.naturalWidth,h/img.naturalHeight),scale=fit*photoView.zoom;
     const dw=img.naturalWidth*scale,dh=img.naturalHeight*scale,maxX=Math.max(0,(dw-w)/2),maxY=Math.max(0,(dh-h)/2);
     photoView.x=clamp(photoView.x,-maxX,maxX);photoView.y=clamp(photoView.y,-maxY,maxY);
@@ -133,7 +153,7 @@
   async function handleStickerClick(id){const item=itemById(id);if(!item)return;const access=accessFor(item);if(!access.unlocked){if(item.access==='points'){await unlockSticker(item);return}const identity=window.NUGU_AUTH?.getIdentitySync?.();if(!identity?.authenticated){await signedIdentity('꾸미기 서랍은 로그인 후 덕질 기록과 연결돼요.');return}guide('조금 더 놀다 보면 다음 꾸미기 서랍이 편지와 함께 열려요. ♡');return}if(item.asset){try{await ensureAsset(item)}catch{guide(`${item.label} 벡터 장식을 불러오지 못했어요. 다시 눌러줘.`);return}}addStickerItem(item)}
   async function loadStyleState(){const sync=window.NUGU_AUTH?.getIdentitySync?.();if(!sync?.authenticated){styleState=null;renderStickerProfile();renderStickerGrid();emitStyleState();return}try{const identity=await window.NUGU_AUTH.getIdentity();if(!identity?.authenticated)return;const r=await fetch(`${apiBase()}/api/v1/community/style/me?visitorId=${encodeURIComponent(identity.visitorId)}`,{headers:{Accept:'application/json',...(window.NUGU_AUTH?.authHeaders?.(identity)||{})},cache:'no-store'});const data=await r.json();if(!r.ok)throw new Error(data.error||'style_failed');styleState=data}catch(e){console.warn('style state',e);styleState=null}renderStickerProfile();renderStickerGrid();emitStyleState()}
   function setArtist(artist){const next=artist?.slug?{slug:String(artist.slug).toLowerCase(),name:String(artist.name||artist.korean_name||artist.slug)}:null;if(selectedArtist?.slug!==next?.slug)markDirty();selectedArtist=next;const box=$('#topkkuArtistConnected');if(box)box.innerHTML=selectedArtist?`<b>${esc(selectedArtist.name)}</b><span>웹 보관함과 아지트 공개 대상을 이 팀으로 연결했어요.</span>`:'아직 팀이 연결되지 않았어요.';const results=$('#topkkuArtistResults');if(results)results.innerHTML='';const input=$('#topkkuArtistSearch');if(input&&selectedArtist)input.value=selectedArtist.name}
-  function loadPhotoData(src,meta=null){if(!src)return;const img=new Image();img.onload=()=>{photo=img;photoView=defaultPhotoView();sourceMeta=meta;compositionEventKey=newCompositionKey();currentSavedId=null;currentSavedPublished=false;lastSavedEventKey='';if(meta?.artistSlug)setArtist({slug:meta.artistSlug,name:meta.artist||meta.artistSlug});selected=-1;draw();renderSaveState()};img.onerror=()=>{sourceMeta=null;compositionEventKey='';draw()};img.src=src}
+  function loadPhotoData(src,meta=null){if(!src)return;const img=new Image();img.onload=()=>{photo=img;photoView=defaultPhotoView();sourceMeta=meta;configurePhotoBox(img,meta);compositionEventKey=newCompositionKey();currentSavedId=null;currentSavedPublished=false;lastSavedEventKey='';if(meta?.artistSlug)setArtist({slug:meta.artistSlug,name:meta.artist||meta.artistSlug});selected=-1;draw();renderSaveState()};img.onerror=()=>{sourceMeta=null;resetPhotoBox();compositionEventKey='';draw()};img.src=src}
   function loadIncoming(){let raw='';try{raw=sessionStorage.getItem('nuguTopkkuIncoming')||'';sessionStorage.removeItem('nuguTopkkuIncoming')}catch{}if(!raw)return false;try{const data=JSON.parse(raw);if(!data?.image)return false;loadPhotoData(data.image,data);return true}catch{return false}}
   canvas.addEventListener('pointerdown',ev=>{const p=canvasPoint(ev),i=hitTest(p);selected=i;if(i>=0){markDirty();drag={dx:p.x-elements[i].x,dy:p.y-elements[i].y,before:{...elements[i]}};canvas.setPointerCapture?.(ev.pointerId)}draw()});
   canvas.addEventListener('pointermove',ev=>{if(!drag||selected<0)return;const p=canvasPoint(ev),e=elements[selected];e.x=clamp(p.x-drag.dx,24,W-24);e.y=clamp(p.y-drag.dy,24,H-24);draw()});
@@ -148,7 +168,7 @@
   function editSelected(fn){if(selected<0)return;saveHistory();fn(elements[selected]);draw()}
   $('#smaller').onclick=()=>editSelected(e=>e.size=clamp(e.size*.88,18,180));$('#bigger').onclick=()=>editSelected(e=>e.size=clamp(e.size*1.12,18,180));$('#rotateLeft').onclick=()=>editSelected(e=>e.rotation-=Math.PI/18);$('#rotateRight').onclick=()=>editSelected(e=>e.rotation+=Math.PI/18);$('#deleteElement').onclick=()=>{if(selected<0)return;saveHistory();elements.splice(selected,1);selected=-1;draw()};
   $('#undoBtn').onclick=()=>restore(history.pop());
-  $('#resetBtn').onclick=()=>{if(!photo&&!elements.length&&theme==='lavender')return;saveHistory();photo=null;photoView=defaultPhotoView();sourceMeta=null;compositionEventKey='';elements=[];selected=-1;theme='lavender';currentSavedId=null;currentSavedPublished=false;lastSavedEventKey='';setArtist(null);$$('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme==='lavender'));$('#photoInput').value='';draw();renderSaveState()};
+  $('#resetBtn').onclick=()=>{if(!photo&&!elements.length&&theme==='lavender')return;saveHistory();photo=null;photoView=defaultPhotoView();sourceMeta=null;resetPhotoBox();compositionEventKey='';elements=[];selected=-1;theme='lavender';currentSavedId=null;currentSavedPublished=false;lastSavedEventKey='';setArtist(null);$$('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme==='lavender'));$('#photoInput').value='';draw();renderSaveState()};
   function visitorId(){const a=window.NUGU_AUTH?.getIdentitySync?.();if(a?.visitorId)return a.visitorId;let id=localStorage.getItem('nuguVisitorId');if(!id){id=(crypto.randomUUID?.()||`${Date.now()}-${Math.random()}`).replace(/[^A-Za-z0-9_-]/g,'');localStorage.setItem('nuguVisitorId',id)}return id}
   async function searchArtists(q){const root=$('#topkkuArtistResults'),base=apiBase();if(!root||!base||q.trim().length<1){if(root)root.innerHTML='';return}try{const r=await fetch(`${base}/api/v1/search?q=${encodeURIComponent(q.trim())}`,{headers:{Accept:'application/json'},cache:'no-store'});const data=await r.json();const rows=(data.items||[]).slice(0,6);root.innerHTML=rows.length?rows.map(a=>`<button type="button" data-topkku-artist="${esc(a.slug)}" data-topkku-name="${esc(a.name)}">${a.image_url?`<img src="${esc(a.image_url)}" alt="">`:''}<span><b>${esc(a.name)}</b><small>${esc(a.korean_name||a.agency||'')}</small></span></button>`).join(''):'<div class="topkku-team-empty">검색되는 팀이 없어요.</div>';root.querySelectorAll('[data-topkku-artist]').forEach(b=>b.onclick=()=>setArtist({slug:b.dataset.topkkuArtist,name:b.dataset.topkkuName}))}catch{root.innerHTML='<div class="topkku-team-empty">팀 검색을 잠시 불러오지 못했어요.</div>'}}
   $('#topkkuArtistSearch')?.addEventListener('input',e=>{clearTimeout(searchTimer);const q=e.currentTarget.value;searchTimer=setTimeout(()=>searchArtists(q),220)});
@@ -208,6 +228,7 @@
     }catch(e){console.warn('vault',e);state.textContent='내 웹 보관함을 잠시 불러오지 못했어요.'}
   }
   async function loadArtistFromQuery(){const slug=new URLSearchParams(location.search).get('artist');if(!slug||!apiBase())return;try{const r=await fetch(`${apiBase()}/api/v1/community/topkku/${encodeURIComponent(slug)}?limit=1`,{headers:{Accept:'application/json'},cache:'no-store'});if(r.ok){const data=await r.json();if(data.artist?.slug)setArtist(data.artist)}}catch{}}
+  window.__NUGU_TOPKKU_FRAME_STATE__=()=>({photoBox:{...photoBox},source:sourceMeta?.source||'',sourceSize:photo?{width:photo.naturalWidth,height:photo.naturalHeight}:null,zoom:photoView.zoom});
   window.addEventListener('nugu-auth-changed',()=>{loadStyleState();loadVault()});
   window.NUGU_TOPKKU_LOAD_VAULT=loadVault;window.NUGU_TOPKKU_LOAD_STYLE=loadStyleState;window.NUGU_TOPKKU_API_BASE=apiBase;$('#versionLabel').textContent=(window.NUGU_CONFIG||{}).build||'Updated 2026.09.12';preloadStickerAssets();setArtist(null);loadReferenceSource();renderStickerProfile();renderStickerGrid();renderSaveState();draw();requestAnimationFrame(animationLoop);const incoming=loadIncoming();if(!incoming)loadArtistFromQuery();loadStyleState();loadVault();
 })();
