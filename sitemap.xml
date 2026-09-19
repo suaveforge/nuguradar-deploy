@@ -1,19 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <sitemap>
-    <loc>https://nuguradar.suaveforge.com/sitemap-pages.xml</loc>
-    <lastmod>2026-09-19T15:39:03.311Z</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://nuguradar.suaveforge.com/video-sitemap.xml</loc>
-    <lastmod>2026-09-19T15:39:03.311Z</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://nuguradar.suaveforge.com/artist-sitemap.xml</loc>
-    <lastmod>2026-09-19T15:39:03.311Z</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://nuguradar.suaveforge.com/member-sitemap.xml</loc>
-    <lastmod>2026-09-19T15:39:03.311Z</lastmod>
-  </sitemap>
+  <sitemap><loc>https://nuguradar.suaveforge.com/sitemap-pages.xml</loc></sitemap>
+  <sitemap><loc>https://nuguradar.suaveforge.com/artist-sitemap.xml</loc></sitemap>
+  <sitemap><loc>https://nuguradar.suaveforge.com/member-sitemap.xml</loc></sitemap>
+  <sitemap><loc>https://nuguradar.suaveforge.com/track-sitemap.xml</loc></sitemap>
+  <sitemap><loc>https://nuguradar.suaveforge.com/archive-sitemap.xml</loc></sitemap>
+  <sitemap><loc>https://nuguradar.suaveforge.com/video-sitemap.xml</loc></sitemap>
 </sitemapindex>
