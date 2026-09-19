@@ -1,14 +1,17 @@
 {
   "schema_version": "2",
   "contract": "sitehub-videoseo",
-  "generated_at": "2026-09-19T14:50:01.206Z",
+  "generated_at": "2026-09-19T15:25:58.134Z",
   "total_pages": 5077,
   "playable_pages": 5077,
   "source_unavailable_pages": 0,
   "artist_pages": 521,
   "artist_catalog_pages": 438,
+  "member_pages": 25,
   "archive_export_complete": true,
   "max_static_video_pages": 50000,
   "artist_index_url": "https://nuguradar.suaveforge.com/artists/",
-  "artist_sitemap_url": "https://nuguradar.suaveforge.com/artist-sitemap.xml"
+  "artist_sitemap_url": "https://nuguradar.suaveforge.com/artist-sitemap.xml",
+  "member_index_url": "https://nuguradar.suaveforge.com/members/",
+  "member_sitemap_url": "https://nuguradar.suaveforge.com/member-sitemap.xml"
 }
