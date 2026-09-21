@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
   <url>
+    <loc>https://nuguradar.suaveforge.com/watch/youtube/4s55065WZd0/</loc>
+    <video:video>
+      <video:thumbnail_loc>https://i.ytimg.com/vi/4s55065WZd0/maxresdefault.jpg</video:thumbnail_loc>
+      <video:title>#If_I_Die_Tomorrow with @ALL_H_OURS</video:title>
+      <video:description>#어센트 #ASC2NT #ON_N #온</video:description>
+      <video:player_loc>https://www.youtube-nocookie.com/embed/4s55065WZd0</video:player_loc>
+      <video:publication_date>2026-09-21T07:53:03.000Z</video:publication_date>
+      <video:duration>22</video:duration>
+    </video:video>
+  </url>
+  <url>
     <loc>https://nuguradar.suaveforge.com/watch/youtube/oWQlBkjSTR0/</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/oWQlBkjSTR0/maxresdefault.jpg</video:thumbnail_loc>
@@ -2186,17 +2197,6 @@
       <video:player_loc>https://www.youtube-nocookie.com/embed/xJHwHML1RpE</video:player_loc>
       <video:publication_date>2026-09-18T12:00:18.000Z</video:publication_date>
       <video:duration>67</video:duration>
-    </video:video>
-  </url>
-  <url>
-    <loc>https://nuguradar.suaveforge.com/watch/youtube/rYxMBZzqwJo/</loc>
-    <video:video>
-      <video:thumbnail_loc>https://i.ytimg.com/vi/rYxMBZzqwJo/maxresdefault.jpg</video:thumbnail_loc>
-      <video:title>[ZOOM OUT] &#39;On My Knees&#39; 뮤직비디오 촬영 비하인드 | TRENDZ(트렌드지) Behind The Scenes (ENG SUB)</video:title>
-      <video:description>Official Platform https://trendz.kr X(Twitter) https://twitter.com/TRENDZ_OFFCL Instagram https://www.instagram.com/trendz_offcl TikTok https://www.tiktok.com/@trendz_offcl #TRENDZ #트렌드지</video:description>
-      <video:player_loc>https://www.youtube-nocookie.com/embed/rYxMBZzqwJo</video:player_loc>
-      <video:publication_date>2026-09-18T12:00:17.000Z</video:publication_date>
-      <video:duration>936</video:duration>
     </video:video>
   </url>
 </urlset>

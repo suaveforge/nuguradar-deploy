@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
   <url>
+    <loc>https://nuguradar.suaveforge.com/watch/youtube/4s55065WZd0/</loc>
+    <video:video>
+      <video:thumbnail_loc>https://i.ytimg.com/vi/4s55065WZd0/maxresdefault.jpg</video:thumbnail_loc>
+      <video:title>#If_I_Die_Tomorrow with @ALL_H_OURS</video:title>
+      <video:description>#어센트 #ASC2NT #ON_N #온</video:description>
+      <video:player_loc>https://www.youtube-nocookie.com/embed/4s55065WZd0</video:player_loc>
+      <video:publication_date>2026-09-21T07:53:03.000Z</video:publication_date>
+      <video:duration>22</video:duration>
+    </video:video>
+  </url>
+  <url>
     <loc>https://nuguradar.suaveforge.com/watch/youtube/oWQlBkjSTR0/</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/oWQlBkjSTR0/maxresdefault.jpg</video:thumbnail_loc>
