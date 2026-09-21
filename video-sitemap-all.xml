@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
   <url>
+    <loc>https://nuguradar.suaveforge.com/watch/youtube/CUcTXfBA8Pc/</loc>
+    <video:video>
+      <video:thumbnail_loc>https://i.ytimg.com/vi/CUcTXfBA8Pc/maxresdefault.jpg</video:thumbnail_loc>
+      <video:title>잠깐 막내s 왔어요😜</video:title>
+      <video:description>🍬Welcome to Candy Shop🍬 🍭 X : https://twitter.com/BRAVE_CandyShop 🍭 Facebook : https://www.facebook.com/CandyShop.Brave/ 🍭 Instagram : https://www.instagram.com/brave_candyshop/ 🍭 Tiktok : https://www.tiktok.com/@brave.candyshop</video:description>
+      <video:player_loc>https://www.youtube-nocookie.com/embed/CUcTXfBA8Pc</video:player_loc>
+      <video:publication_date>2026-09-21T09:35:25.000Z</video:publication_date>
+      <video:duration>3580</video:duration>
+    </video:video>
+  </url>
+  <url>
     <loc>https://nuguradar.suaveforge.com/watch/youtube/Pn9ld39Pn1I/</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/Pn9ld39Pn1I/maxresdefault.jpg</video:thumbnail_loc>
@@ -9,6 +20,17 @@
       <video:player_loc>https://www.youtube-nocookie.com/embed/Pn9ld39Pn1I</video:player_loc>
       <video:publication_date>2026-09-21T09:30:32.000Z</video:publication_date>
       <video:duration>41</video:duration>
+    </video:video>
+  </url>
+  <url>
+    <loc>https://nuguradar.suaveforge.com/watch/youtube/GFwo3jN8kvc/</loc>
+    <video:video>
+      <video:thumbnail_loc>https://i.ytimg.com/vi/GFwo3jN8kvc/maxresdefault.jpg</video:thumbnail_loc>
+      <video:title>Cheetos tos🤭 #XIN #엑신 #ESHA #이샤 #shorts</video:title>
+      <video:description>Official video &quot;Cheetos tos🤭 #XIN #엑신 #ESHA #이샤 #shorts&quot; from X:IN, published 2026-09-21 via X:IN. NUGU RADAR keeps the verified original-source link, artist context and permanent watch URL.</video:description>
+      <video:player_loc>https://www.youtube-nocookie.com/embed/GFwo3jN8kvc</video:player_loc>
+      <video:publication_date>2026-09-21T09:30:03.000Z</video:publication_date>
+      <video:duration>11</video:duration>
     </video:video>
   </url>
   <url>
@@ -361,17 +383,6 @@
       <video:player_loc>https://www.youtube-nocookie.com/embed/rqgB3sXAOmY</video:player_loc>
       <video:publication_date>2026-09-21T08:00:16.000Z</video:publication_date>
       <video:duration>1054</video:duration>
-    </video:video>
-  </url>
-  <url>
-    <loc>https://nuguradar.suaveforge.com/watch/youtube/CUcTXfBA8Pc/</loc>
-    <video:video>
-      <video:thumbnail_loc>https://i.ytimg.com/vi/CUcTXfBA8Pc/maxresdefault_live.jpg</video:thumbnail_loc>
-      <video:title>잠깐 막내s 왔어요😜</video:title>
-      <video:description>🍬Welcome to Candy Shop🍬 🍭 X : https://twitter.com/BRAVE_CandyShop 🍭 Facebook : https://www.facebook.com/CandyShop.Brave/ 🍭 Instagram : https://www.instagram.com/brave_candyshop/ 🍭 Tiktok : https://www.tiktok.com/@brave.candyshop</video:description>
-      <video:player_loc>https://www.youtube-nocookie.com/embed/CUcTXfBA8Pc</video:player_loc>
-      <video:publication_date>2026-09-21T07:58:32.000Z</video:publication_date>
-      <video:duration>3580</video:duration>
     </video:video>
   </url>
   <url>
