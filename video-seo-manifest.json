@@ -1,7 +1,7 @@
 {
   "schema_version": "2",
   "contract": "sitehub-videoseo",
-  "generated_at": "2026-09-21T15:41:55.857Z",
+  "generated_at": "2026-09-21T15:53:57.297Z",
   "total_pages": 5299,
   "playable_pages": 5299,
   "source_unavailable_pages": 0,
@@ -41,5 +41,6 @@
   "full_artist_sitemap_url": "https://nuguradar.suaveforge.com/artist-sitemap-all.xml",
   "full_member_sitemap_url": "https://nuguradar.suaveforge.com/member-sitemap-all.xml",
   "full_track_sitemap_url": "https://nuguradar.suaveforge.com/track-sitemap-all.xml",
-  "full_video_sitemap_url": "https://nuguradar.suaveforge.com/video-sitemap-all.xml"
+  "full_video_sitemap_url": "https://nuguradar.suaveforge.com/video-sitemap-all.xml",
+  "atom_feed_url": "https://nuguradar.suaveforge.com/feed.xml"
 }

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>NUGU RADAR updates</title>
+  <id>https://nuguradar.suaveforge.com/</id>
+  <link rel="alternate" href="https://nuguradar.suaveforge.com/"/>
+  <link rel="self" type="application/atom+xml" href="https://nuguradar.suaveforge.com/feed.xml"/>
+  <link rel="hub" href="https://pubsubhubbub.appspot.com/"/>
+  <updated>2026-09-21T15:54:25.397Z</updated>
+  <entry>
+    <title>ALL(H)OURS — NUGU RADAR</title>
+    <id>https://nuguradar.suaveforge.com/artists/allhours/</id>
+    <link rel="alternate" href="https://nuguradar.suaveforge.com/artists/allhours/"/>
+    <updated>2026-09-21T15:54:25.397Z</updated>
+    <summary>ALL(H)OURS (올아워즈) on NUGU RADAR. 1 verified official video archive entries and permanent watch pages. Members: KUNHO, YOUMIN, XAYDEN, MINJE, MASAMI, HYUNBIN, ON:N.</summary>
+  </entry>
+  <entry>
+    <title>8TURN — NUGU RADAR</title>
+    <id>https://nuguradar.suaveforge.com/artists/8turn/</id>
+    <link rel="alternate" href="https://nuguradar.suaveforge.com/artists/8turn/"/>
+    <updated>2026-09-21T08:00:37.000Z</updated>
+    <summary>8TURN (에잇턴) on NUGU RADAR. 44 verified official video archive entries and permanent watch pages. Members: MYUNGHO, JAEYUN, MINHO, YOONSUNG, HAEMIN, KYUNGMIN, YUNGYU, SEUNGHEON.</summary>
+  </entry>
+  <entry>
+    <title>YOUNG POSSE — NUGU RADAR</title>
+    <id>https://nuguradar.suaveforge.com/artists/young-posse/</id>
+    <link rel="alternate" href="https://nuguradar.suaveforge.com/artists/young-posse/"/>
+    <updated>2026-09-21T03:00:18.000Z</updated>
+    <summary>YOUNG POSSE (영파씨) on NUGU RADAR. 31 verified official video archive entries and permanent watch pages. Members: Sunhye, Yeonjung, Jiana, Doeun, Jieun.</summary>
+  </entry>
+  <entry>
+    <title>RESCENE — NUGU RADAR</title>
+    <id>https://nuguradar.suaveforge.com/artists/rescene/</id>
+    <link rel="alternate" href="https://nuguradar.suaveforge.com/artists/rescene/"/>
+    <updated>2026-09-20T07:00:05.000Z</updated>
+    <summary>RESCENE (리센느) on NUGU RADAR. 36 verified official video archive entries and permanent watch pages. Members: Woni, Liv, Minami, May, Zena.</summary>
+  </entry>
+</feed>
