@@ -1,7 +1,7 @@
 {
   "schema_version": "2",
   "contract": "sitehub-videoseo",
-  "generated_at": "2026-09-21T16:40:58.600Z",
+  "generated_at": "2026-09-22T00:37:38.555Z",
   "total_pages": 5299,
   "playable_pages": 5299,
   "source_unavailable_pages": 0,
@@ -43,8 +43,11 @@
   "full_member_sitemap_url": "https://nuguradar.suaveforge.com/member-sitemap-all.xml",
   "full_track_sitemap_url": "https://nuguradar.suaveforge.com/track-sitemap-all.xml",
   "full_video_sitemap_url": "https://nuguradar.suaveforge.com/video-sitemap-all.xml",
-  "radar_note_pages": 1,
+  "radar_note_pages": 2,
   "radar_note_index_url": "https://nuguradar.suaveforge.com/radar-notes/",
   "radar_note_sitemap_url": "https://nuguradar.suaveforge.com/radar-notes-sitemap.xml",
+  "post_recovery_note_group": "8turn",
+  "post_recovery_note_url": "https://nuguradar.suaveforge.com/radar-notes/8turn-post-recovery-snapshot-20260922/",
+  "post_recovery_note_published_at": "2026-09-22T00:35:00.000Z",
   "atom_feed_url": "https://nuguradar.suaveforge.com/feed.xml"
 }
