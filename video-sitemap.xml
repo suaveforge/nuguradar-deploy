@@ -132,4 +132,15 @@
       <video:duration>26</video:duration>
     </video:video>
   </url>
+  <url>
+    <loc>https://nuguradar.suaveforge.com/watch/youtube/0d9RI3E1suQ/</loc>
+    <video:video>
+      <video:thumbnail_loc>https://i.ytimg.com/vi/0d9RI3E1suQ/maxresdefault.jpg</video:thumbnail_loc>
+      <video:title>It’s my birthday 🐤 #TNX #티엔엑스 #천준혁 #JUNHYEOK</video:title>
+      <video:description>Official video &quot;It’s my birthday 🐤 #TNX #티엔엑스 #천준혁 #JUNHYEOK&quot; from The New Six, published 2026-09-20 via TNX. NUGU RADAR keeps the verified original-source link, artist context and permanent watch URL.</video:description>
+      <video:player_loc>https://www.youtube-nocookie.com/embed/0d9RI3E1suQ</video:player_loc>
+      <video:publication_date>2026-09-20T06:00:20.000Z</video:publication_date>
+      <video:duration>9</video:duration>
+    </video:video>
+  </url>
 </urlset>
