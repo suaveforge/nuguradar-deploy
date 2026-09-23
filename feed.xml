@@ -1,37 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>NUGU RADAR artist updates</title>
-  <id>https://nuguradar.suaveforge.com/</id>
-  <link rel="alternate" href="https://nuguradar.suaveforge.com/"/>
-  <link rel="self" type="application/atom+xml" href="https://nuguradar.suaveforge.com/feed.xml"/>
+  <id>https://idol.suaveforge.com/</id>
+  <link rel="alternate" href="https://idol.suaveforge.com/"/>
+  <link rel="self" type="application/atom+xml" href="https://idol.suaveforge.com/feed.xml"/>
   <link rel="hub" href="https://pubsubhubbub.appspot.com/"/>
-  <updated>2026-09-23T03:05:55.062Z</updated>
+  <updated>2026-09-23T03:36:02.843Z</updated>
   <entry>
     <title>ALL(H)OURS — NUGU RADAR 활동 변화</title>
-    <id>https://nuguradar.suaveforge.com/artists/allhours/</id>
-    <link rel="alternate" href="https://nuguradar.suaveforge.com/artists/allhours/"/>
-    <updated>2026-09-23T03:05:55.062Z</updated>
+    <id>https://idol.suaveforge.com/artists/allhours/</id>
+    <link rel="alternate" href="https://idol.suaveforge.com/artists/allhours/"/>
+    <updated>2026-09-23T03:36:02.843Z</updated>
     <summary>ALL(H)OURS (올아워즈) 활동 변화: NUGU RADAR momentum rank #9, score 50, signal coverage 23%, measured 2026-09-08. Verified platform signals, members and official activity in one page.</summary>
   </entry>
   <entry>
     <title>8TURN — NUGU RADAR 활동 변화</title>
-    <id>https://nuguradar.suaveforge.com/artists/8turn/</id>
-    <link rel="alternate" href="https://nuguradar.suaveforge.com/artists/8turn/"/>
-    <updated>2026-09-23T03:05:53.300Z</updated>
+    <id>https://idol.suaveforge.com/artists/8turn/</id>
+    <link rel="alternate" href="https://idol.suaveforge.com/artists/8turn/"/>
+    <updated>2026-09-23T03:35:58.729Z</updated>
     <summary>8TURN (에잇턴) 활동 변화: NUGU RADAR momentum rank #7, score 50, signal coverage 51%, measured 2026-09-23. Verified platform signals, members and official activity in one page.</summary>
   </entry>
   <entry>
     <title>RESCENE — NUGU RADAR 활동 변화</title>
-    <id>https://nuguradar.suaveforge.com/artists/rescene/</id>
-    <link rel="alternate" href="https://nuguradar.suaveforge.com/artists/rescene/"/>
-    <updated>2026-09-23T03:05:40.018Z</updated>
+    <id>https://idol.suaveforge.com/artists/rescene/</id>
+    <link rel="alternate" href="https://idol.suaveforge.com/artists/rescene/"/>
+    <updated>2026-09-23T03:35:37.695Z</updated>
     <summary>RESCENE (리센느) 활동 변화: NUGU RADAR momentum rank #48, score 50, signal coverage 51%, measured 2026-09-23. Verified platform signals, members and official activity in one page.</summary>
   </entry>
   <entry>
     <title>YOUNG POSSE — NUGU RADAR 활동 변화</title>
-    <id>https://nuguradar.suaveforge.com/artists/young-posse/</id>
-    <link rel="alternate" href="https://nuguradar.suaveforge.com/artists/young-posse/"/>
-    <updated>2026-09-23T03:05:40.018Z</updated>
+    <id>https://idol.suaveforge.com/artists/young-posse/</id>
+    <link rel="alternate" href="https://idol.suaveforge.com/artists/young-posse/"/>
+    <updated>2026-09-23T03:35:37.695Z</updated>
     <summary>YOUNG POSSE (영파씨) 활동 변화: NUGU RADAR momentum rank #68, score 50, signal coverage 51%, measured 2026-09-23. Verified platform signals, members and official activity in one page.</summary>
   </entry>
 </feed>

@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
-Sitemap: https://nuguradar.suaveforge.com/sitemap.xml
-Sitemap: https://nuguradar.suaveforge.com/feed.xml
+Sitemap: https://idol.suaveforge.com/sitemap.xml
+Sitemap: https://idol.suaveforge.com/feed.xml
