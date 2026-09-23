@@ -1,6 +1,6 @@
 (()=>{
   const style=document.createElement('style');
-  style.textContent='.nugu-image-unavailable{position:absolute;inset:0;display:grid;place-items:center;padding:12px;background:linear-gradient(135deg,#111,#1b1b1b);color:#9b9b9b;font:600 11px/1.2 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;text-align:center}.feed-thumb,.watch-thumb,.artist-card,.breakout-card,.compact-artist,.detail-hero,.watch-artist,.community-card,.spotlight-card,.room-hero{position:relative}';
+  style.textContent='.nugu-image-unavailable{position:absolute;inset:0;display:grid;place-items:center;padding:12px;background:linear-gradient(135deg,#111,#1b1b1b);color:#9b9b9b;font:600 11px/1.2 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;text-align:center;pointer-events:none}.feed-thumb,.watch-thumb,.artist-card,.breakout-card,.compact-artist,.detail-hero,.watch-artist,.community-card,.spotlight-card,.room-hero{position:relative}';
   document.head.appendChild(style);
   const cfg=window.NUGU_CONFIG||{};
   const api=String(cfg.apiBase||'').replace(/\/$/,'');
@@ -43,6 +43,10 @@
     img.style.visibility='hidden';
     const box=img.parentElement;
     if(box&&!box.querySelector('.nugu-image-unavailable')){
+      if(box!==document.body&&box!==document.documentElement&&getComputedStyle(box).position==='static'){
+        box.style.position='relative';
+        box.dataset.nuguFallbackContainer='1';
+      }
       const p=document.createElement('span');p.className='nugu-image-unavailable';p.textContent=label||'Image unavailable';box.appendChild(p);
     }
   }
