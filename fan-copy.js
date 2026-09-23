@@ -42,7 +42,7 @@
     [/Signed in with AuthHub · history syncs across devices/g,'Signed in · your history follows you across devices'],
     [/Searching verified catalog…/g,'Radar에서 찾는 중…'],
     [/No verified artist matched that search\./g,'검색한 이름과 맞는 팀을 찾지 못했어요.'],
-    [/That act has crossed the NUGU RADAR mainstream gate\./g,'이 팀은 이제 Radar를 졸업했어요. Hall of Fame에서 만날 수 있어요.'],
+    [/That act has crossed the IDOL mainstream gate\./g,'이 팀은 이제 Radar를 졸업했어요. Hall of Fame에서 만날 수 있어요.'],
     [/OUTSIDE RADAR/g,'RADAR GRADUATE'],
     [/momentum warming/g,'rise building'],
     [/Giant signal/g,'Big breakthrough'],
@@ -63,7 +63,7 @@
     [/Outside Radar — history preserved\./g,'Radar graduate — your memories stay.'],
     [/Earliest supporters keep their original timestamp\. You cannot buy or backdate this\./g,'먼저 좋아했던 사람의 자리는 그대로 남아요. 나중에 돈으로 살 수도, 시간을 되돌릴 수도 없어요.'],
     [/Name comes from your AuthHub account/g,'Name comes from your signed-in profile'],
-    [/This act has crossed the NUGU RADAR mainstream gate\./g,'이 팀은 이제 Radar를 졸업했어요.'],
+    [/This act has crossed the IDOL mainstream gate\./g,'이 팀은 이제 Radar를 졸업했어요.'],
     [/This room has graduated outside the Radar\./g,'이 방의 팀은 이제 Radar를 졸업했어요.'],
     [/Archived room · new posts paused/g,'Hall of Fame room · 추억만 남겨두는 공간이에요']
   ];

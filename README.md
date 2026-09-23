@@ -1,6 +1,6 @@
-# NUGU RADAR
+# IDOL — FOR MY IDOL
 
-NUGU RADAR is a public K-pop discovery platform with permanent artist, member, track and verified official-video pages.
+IDOL is a public K-pop fan and discovery platform with permanent artist, member, track and verified official-video pages.
 
 - Live site: https://idol.suaveforge.com/
 - Artists: https://idol.suaveforge.com/artists/

@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "NUGU RADAR",
-  "short_name": "NUGU RADAR",
-  "description": "Small and rising K-pop discovery, Watch, Topkku and fan hideouts.",
+  "name": "IDOL — FOR MY IDOL",
+  "short_name": "IDOL",
+  "description": "For my idol: signals, Watch, Topkku and fan hideouts.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
