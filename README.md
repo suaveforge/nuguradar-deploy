@@ -2,7 +2,6 @@
 
 NUGU RADAR is a public K-pop discovery platform with permanent artist, member, track and verified official-video pages.
 
-- Project brief: https://suaveforge.com/work/nuguradar/
 - Live site: https://nuguradar.suaveforge.com/
 - Artists: https://nuguradar.suaveforge.com/artists/
 - Members: https://nuguradar.suaveforge.com/members/
