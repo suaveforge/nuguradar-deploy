@@ -1,9 +1,1 @@
-User-agent: *
-Allow: /
-Disallow: /watch/
-Disallow: /members/
-Disallow: /videos/
-Disallow: /radar-notes/
-Disallow: /artists/qid-
-Sitemap: https://idol.suaveforge.com/sitemap.xml
-Sitemap: https://idol.suaveforge.com/feed.xml
+User-agent: *\nAllow: /\nDisallow: /watch/\nDisallow: /members/\nDisallow: /videos/\nDisallow: /radar-notes/\nDisallow: /artists/qid-\nDisallow: /tracks/\nAllow: /tracks/$\nAllow: /tracks/8turn/8pm/\nAllow: /tracks/8turn/besame/\nAllow: /tracks/8turn/bruise/\nAllow: /tracks/8turn/stagefright/\nAllow: /tracks/allhours/ready-2-rumble/\nAllow: /tracks/rescene/deja-vu/\nAllow: /tracks/young-posse/young-posse-up/\nSitemap: https://idol.suaveforge.com/sitemap.xml\nSitemap: https://idol.suaveforge.com/feed.xml\n
