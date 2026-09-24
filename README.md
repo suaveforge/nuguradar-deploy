@@ -1,17 +1,25 @@
 # IDOL — FOR MY IDOL
 
-IDOL is a public K-pop fan and discovery platform with permanent artist, member, track and verified official-video pages.
+IDOL is a SuaveForge K-pop discovery service built around verified artist identity, official activity and first-party platform-change signals.
 
-- Live site: https://idol.suaveforge.com/
-- Artists: https://idol.suaveforge.com/artists/
-- Members: https://idol.suaveforge.com/members/
+Project brief: https://suaveforge.com/work/nuguradar/
+Live service: https://idol.suaveforge.com/
+
+Search-focused public pages:
+- Signal Lab: https://idol.suaveforge.com/artists/
+- 8TURN (에잇턴): https://idol.suaveforge.com/artists/8turn/
+- ALL(H)OURS (올아워즈): https://idol.suaveforge.com/artists/allhours/
+- RESCENE (리센느): https://idol.suaveforge.com/artists/rescene/
+- YOUNG POSSE (영파씨): https://idol.suaveforge.com/artists/young-posse/
 - Tracks: https://idol.suaveforge.com/tracks/
-- Official video archive: https://idol.suaveforge.com/videos/
-- Sitemap: https://idol.suaveforge.com/sitemap.xml
 
-Representative pages:
-- ALL(H)OURS: https://idol.suaveforge.com/artists/allhours/
-- XAYDEN: https://idol.suaveforge.com/members/allhours/xayden/
-- READY 2 RUMBLE: https://idol.suaveforge.com/tracks/allhours/ready-2-rumble/
+Focused track pages:
+- 8PM — 8TURN: https://idol.suaveforge.com/tracks/8turn/8pm/
+- BESAME — 8TURN: https://idol.suaveforge.com/tracks/8turn/besame/
+- BRUISE(불씨) — 8TURN: https://idol.suaveforge.com/tracks/8turn/bruise/
+- Stagefright — 8TURN: https://idol.suaveforge.com/tracks/8turn/stagefright/
+- READY 2 RUMBLE — ALL(H)OURS: https://idol.suaveforge.com/tracks/allhours/ready-2-rumble/
+- Deja Vu — RESCENE: https://idol.suaveforge.com/tracks/rescene/deja-vu/
+- YOUNG POSSE UP — YOUNG POSSE: https://idol.suaveforge.com/tracks/young-posse/young-posse-up/
 
-This repository contains the generated public frontend served at the live site.
+The large member/video/archive inventory remains part of the user-facing service, but only the focused artist and track surfaces above are intentionally advertised as Google Search entry points.
