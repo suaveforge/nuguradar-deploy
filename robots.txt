@@ -1,1 +1,18 @@
-User-agent: *\nAllow: /\nDisallow: /watch/\nDisallow: /members/\nDisallow: /videos/\nDisallow: /radar-notes/\nDisallow: /artists/qid-\nDisallow: /tracks/\nAllow: /tracks/$\nAllow: /tracks/8turn/8pm/\nAllow: /tracks/8turn/besame/\nAllow: /tracks/8turn/bruise/\nAllow: /tracks/8turn/stagefright/\nAllow: /tracks/allhours/ready-2-rumble/\nAllow: /tracks/rescene/deja-vu/\nAllow: /tracks/young-posse/young-posse-up/\nSitemap: https://idol.suaveforge.com/sitemap.xml\nSitemap: https://idol.suaveforge.com/feed.xml\n
+User-agent: *
+Allow: /
+Disallow: /watch/
+Disallow: /members/
+Disallow: /videos/
+Disallow: /radar-notes/
+Disallow: /artists/qid-
+Disallow: /tracks/
+Allow: /tracks/$
+Allow: /tracks/8turn/8pm/
+Allow: /tracks/8turn/besame/
+Allow: /tracks/8turn/bruise/
+Allow: /tracks/8turn/stagefright/
+Allow: /tracks/allhours/ready-2-rumble/
+Allow: /tracks/rescene/deja-vu/
+Allow: /tracks/young-posse/young-posse-up/
+Sitemap: https://idol.suaveforge.com/sitemap.xml
+Sitemap: https://idol.suaveforge.com/feed.xml
