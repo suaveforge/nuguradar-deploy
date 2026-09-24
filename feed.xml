@@ -5,7 +5,21 @@
   <link rel="alternate" href="https://idol.suaveforge.com/"/>
   <link rel="self" type="application/atom+xml" href="https://idol.suaveforge.com/feed.xml"/>
   <link rel="hub" href="https://pubsubhubbub.appspot.com/"/>
-  <updated>2026-09-24T07:21:01.823Z</updated>
+  <updated>2026-09-24T07:24:39.343Z</updated>
+  <entry>
+    <title>YOUNG POSSE — IDOL 활동 변화</title>
+    <id>https://idol.suaveforge.com/artists/young-posse/</id>
+    <link rel="alternate" href="https://idol.suaveforge.com/artists/young-posse/"/>
+    <updated>2026-09-24T07:24:39.343Z</updated>
+    <summary>YOUNG POSSE (영파씨) 활동 변화: IDOL momentum rank #47, score 50.1, signal coverage 51%, measured 2026-09-24. Verified platform signals, members and official activity in one page.</summary>
+  </entry>
+  <entry>
+    <title>RESCENE — IDOL 활동 변화</title>
+    <id>https://idol.suaveforge.com/artists/rescene/</id>
+    <link rel="alternate" href="https://idol.suaveforge.com/artists/rescene/"/>
+    <updated>2026-09-24T07:23:35.534Z</updated>
+    <summary>RESCENE (리센느) 활동 변화: IDOL momentum rank #9, score 50.7, signal coverage 51%, measured 2026-09-24. Verified platform signals, members and official activity in one page.</summary>
+  </entry>
   <entry>
     <title>8TURN — IDOL 활동 변화</title>
     <id>https://idol.suaveforge.com/artists/8turn/</id>
@@ -19,19 +33,5 @@
     <link rel="alternate" href="https://idol.suaveforge.com/artists/allhours/"/>
     <updated>2026-09-24T07:20:54.148Z</updated>
     <summary>ALL(H)OURS (올아워즈) 활동 변화: IDOL momentum rank #9, score 50, signal coverage 23%, measured 2026-09-08. Verified platform signals, members and official activity in one page.</summary>
-  </entry>
-  <entry>
-    <title>RESCENE — IDOL 활동 변화</title>
-    <id>https://idol.suaveforge.com/artists/rescene/</id>
-    <link rel="alternate" href="https://idol.suaveforge.com/artists/rescene/"/>
-    <updated>2026-09-24T07:20:40.016Z</updated>
-    <summary>RESCENE (리센느) 활동 변화: IDOL momentum rank #9, score 50.7, signal coverage 51%, measured 2026-09-24. Verified platform signals, members and official activity in one page.</summary>
-  </entry>
-  <entry>
-    <title>YOUNG POSSE — IDOL 활동 변화</title>
-    <id>https://idol.suaveforge.com/artists/young-posse/</id>
-    <link rel="alternate" href="https://idol.suaveforge.com/artists/young-posse/"/>
-    <updated>2026-09-24T07:20:40.016Z</updated>
-    <summary>YOUNG POSSE (영파씨) 활동 변화: IDOL momentum rank #47, score 50.1, signal coverage 51%, measured 2026-09-24. Verified platform signals, members and official activity in one page.</summary>
   </entry>
 </feed>
