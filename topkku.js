@@ -209,7 +209,7 @@
     const base=Math.max(0,Number(sourceMeta.time)||0);guide('같은 영상의 바로 앞·뒤 장면을 가져오는 중…');
     try{
       await ensureSceneImage(sourceMeta.image);
-      const [before,after]=await Promise.all([fetchWatchSceneFrame(Math.max(0,base-.45)),fetchWatchSceneFrame(base+.45)]);
+      const before=await fetchWatchSceneFrame(Math.max(0,base-.45));const after=await fetchWatchSceneFrame(base+.45);
       saveHistory();elements.push({type:'scene-filmstrip',images:[before.image,sourceMeta.image,after.image],label:String(sourceMeta.artist||'FILM 400'),x:105,y:360,size:132,rotation:-.035});selected=elements.length-1;guide('같은 순간의 앞·현재·뒤 프레임을 필름 3컷으로 붙였어 ♡');draw();
     }catch(e){console.warn('film strip scene cuts',e);guide('같은 영상의 인접 프레임을 가져오지 못했어요. 메인 장면은 그대로 유지돼요.')}
   }
@@ -245,7 +245,7 @@
     guide('같은 Watch 순간을 실제 필름·폴라로이드·메모 조각으로 모으는 중…');
     try{
       await ensureSceneImage(sourceMeta.image);
-      const [before,after]=await Promise.all([fetchWatchSceneFrame(Math.max(0,base-.45)),fetchWatchSceneFrame(base+.45)]);
+      const before=await fetchWatchSceneFrame(Math.max(0,base-.45));const after=await fetchWatchSceneFrame(base+.45);
       const additions=[
         {type:'scene-filmstrip',images:[before.image,sourceMeta.image,after.image],label:String(sourceMeta.artist||'FILM 400'),x:92,y:330,size:118,rotation:-.035,preset:'blue-stage'},
         {type:'scene-polaroid',image:after.image,caption:'favorite cut ♡',x:W-115,y:182,size:112,rotation:.055,preset:'blue-stage'},
