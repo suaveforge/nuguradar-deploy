@@ -6,13 +6,5 @@ Disallow: /videos/
 Disallow: /radar-notes/
 Disallow: /artists/qid-
 Disallow: /tracks/
-Allow: /tracks/$
-Allow: /tracks/8turn/8pm/
-Allow: /tracks/8turn/besame/
-Allow: /tracks/8turn/bruise/
-Allow: /tracks/8turn/stagefright/
-Allow: /tracks/allhours/ready-2-rumble/
-Allow: /tracks/rescene/deja-vu/
-Allow: /tracks/young-posse/young-posse-up/
 Sitemap: https://idol.suaveforge.com/sitemap.xml
 Sitemap: https://idol.suaveforge.com/feed.xml
