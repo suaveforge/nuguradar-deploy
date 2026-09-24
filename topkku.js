@@ -104,7 +104,7 @@
   function canAddItem(item){if(elements.length>=limits.totalObjects)return{ok:false,msg:`한 작품에는 최대 ${limits.totalObjects}개까지 붙일 수 있어요.`};if(item.motion&&motionCount()>=limits.motionObjects)return{ok:false,msg:`움직이는 장식은 한 작품에 ${limits.motionObjects}개까지 써요.`};if(item.maxPerCanvas&&itemCount(item.id)>=item.maxPerCanvas)return{ok:false,msg:`${item.label}은 한 작품에 ${item.maxPerCanvas}개까지 쓸 수 있어요.`};return{ok:true}}
   function addStickerItem(item){const check=canAddItem(item);if(!check.ok){guide(check.msg);return}saveHistory();const size=item.kind==='frame'?100:item.kind==='tape'?90:item.kind==='lace'?86:76;const y=item.kind==='frame'?photoBox.y+photoBox.h/2:H/2;elements.push({type:'sticker',stickerId:item.id,value:item.value||'',x:W/2,y,size,rotation:0});selected=elements.length-1;guide(`${item.label} 붙였어 ♡`);draw()}
   function addText(value,textStyle='default'){const text=String(value||'').trim();if(!text)return;if(elements.length>=limits.totalObjects){guide(`한 작품에는 최대 ${limits.totalObjects}개 오브젝트까지 붙일 수 있어요.`);return}saveHistory();elements.push({type:'text',value:text,textStyle,x:W/2,y:H-112,size:textStyle==='handwritten'?38:34,rotation:0});selected=elements.length-1;draw();$('#textInput').value=''}
-  function elementRadius(e){if(e.type==='scene-filmstrip')return e.size*1.42;if(e.type==='scene-polaroid')return e.size*1.08;if(e.type==='scene-crop')return e.size*.92;if(e.type!=='sticker')return Math.max(e.size*1.1,String(e.value||'').length*e.size*.27);const item=itemById(e.stickerId);if(item?.kind==='frame'&&!item?.asset)return Math.max(photoBox.w,photoBox.h)*.48;return e.size*.75*Number(item?.assetScale||1)}
+  function elementRadius(e){if(e.type==='scene-filmstrip')return e.size*1.42;if(e.type==='scene-polaroid')return e.size*1.08;if(e.type==='scene-crop')return e.size*.92;if(e.type==='scene-scrap-note')return e.size*1.42;if(e.type==='scene-ticket')return e.size*1.5;if(e.type!=='sticker')return Math.max(e.size*1.1,String(e.value||'').length*e.size*.27);const item=itemById(e.stickerId);if(item?.kind==='frame'&&!item?.asset)return Math.max(photoBox.w,photoBox.h)*.48;return e.size*.75*Number(item?.assetScale||1)}
   function drawBackdrop(t){ctx.fillStyle=t.bg;ctx.fillRect(0,0,W,H);const g=ctx.createRadialGradient(W*.18,H*.12,20,W*.18,H*.12,420);g.addColorStop(0,t.accent+'55');g.addColorStop(1,t.bg+'00');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.save();ctx.globalAlpha=.22;ctx.strokeStyle=t.frame;ctx.lineWidth=2;for(let y=30;y<H;y+=46){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y-18);ctx.stroke()}ctx.restore()}
   function drawFrame(t){ctx.save();ctx.shadowColor='rgba(0,0,0,.20)';ctx.shadowBlur=28;ctx.shadowOffsetY=18;roundedPath(photoBox.x-24,photoBox.y-24,photoBox.w+48,photoBox.h+48,46);ctx.fillStyle=t.paper;ctx.fill();ctx.restore();ctx.save();roundedPath(photoBox.x,photoBox.y,photoBox.w,photoBox.h,photoBox.r);ctx.clip();if(photo)drawPhoto(photo,photoBox.x,photoBox.y,photoBox.w,photoBox.h);else{ctx.fillStyle=theme==='midnight'?'#313044':'#f4f1f7';ctx.fillRect(photoBox.x,photoBox.y,photoBox.w,photoBox.h);ctx.fillStyle=theme==='midnight'?'#aba5c6':'#90899b';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='700 28px system-ui,sans-serif';ctx.fillText('최애 사진을 올려주세요 ♡',W/2,H/2-8);ctx.font='500 17px system-ui,sans-serif';ctx.fillText('사진은 이 브라우저 밖으로 나가지 않아요',W/2,H/2+34)}ctx.restore();ctx.save();roundedPath(photoBox.x-11,photoBox.y-11,photoBox.w+22,photoBox.h+22,38);ctx.strokeStyle=t.frame;ctx.lineWidth=12;ctx.stroke();ctx.restore()}
   function drawStaticCover(img,x,y,w,h){if(!img?.naturalWidth||!img?.naturalHeight)return;const scale=Math.max(w/img.naturalWidth,h/img.naturalHeight),dw=img.naturalWidth*scale,dh=img.naturalHeight*scale;ctx.drawImage(img,x+(w-dw)/2,y+(h-dh)/2,dw,dh)}
@@ -148,6 +148,27 @@
     ctx.strokeStyle='rgba(58,77,111,.20)';ctx.lineWidth=2;ctx.strokeRect(-w/2,-h/2,w,h);
     ctx.restore();
   }
+  function drawScrapNote(e){
+    const s=e.size,w=s*2.1,h=s*1.22;
+    ctx.save();ctx.shadowColor='rgba(37,54,84,.15)';ctx.shadowBlur=10;ctx.shadowOffsetY=5;
+    ctx.fillStyle='#fffdf4';ctx.beginPath();ctx.moveTo(-w/2+8,-h/2);ctx.lineTo(w/2-5,-h/2+4);ctx.lineTo(w/2,h/2-8);ctx.lineTo(-w/2+4,h/2);ctx.lineTo(-w/2,-h/2+10);ctx.closePath();ctx.fill();
+    ctx.shadowBlur=0;ctx.strokeStyle='rgba(64,86,124,.16)';ctx.lineWidth=1.5;ctx.stroke();
+    ctx.strokeStyle='rgba(91,126,177,.16)';ctx.lineWidth=1;for(let y=-h*.20;y<h*.34;y+=18){ctx.beginPath();ctx.moveTo(-w*.39,y);ctx.lineTo(w*.39,y);ctx.stroke()}
+    ctx.fillStyle='#304b78';ctx.textAlign='left';ctx.font=`600 ${Math.max(15,s*.24)}px "Segoe Print","Bradley Hand","Comic Sans MS",cursive`;ctx.fillText(String(e.value||'same moment').slice(0,22),-w*.38,-h*.18);
+    ctx.font=`600 ${Math.max(12,s*.18)}px "Segoe Print","Bradley Hand","Comic Sans MS",cursive`;ctx.fillText(String(e.detail||'different feeling ♡').slice(0,28),-w*.34,h*.18);
+    ctx.restore();
+  }
+  function drawSceneTicket(e){
+    const s=e.size,w=s*2.16,h=s*.96;
+    ctx.save();ctx.shadowColor='rgba(37,54,84,.16)';ctx.shadowBlur=9;ctx.shadowOffsetY=5;
+    ctx.fillStyle='#f6ead4';roundedPath(-w/2,-h/2,w,h,7);ctx.fill();ctx.shadowBlur=0;
+    ctx.strokeStyle='rgba(74,87,112,.20)';ctx.lineWidth=1.5;ctx.stroke();
+    ctx.setLineDash([5,5]);ctx.beginPath();ctx.moveTo(-w*.27,-h*.34);ctx.lineTo(-w*.27,h*.34);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#2e456f';ctx.textAlign='left';ctx.font=`800 ${Math.max(13,s*.20)}px ui-monospace,monospace`;ctx.fillText(String(e.value||'WATCH CUT').slice(0,18),-w*.17,-h*.13);
+    ctx.font=`700 ${Math.max(10,s*.14)}px ui-monospace,monospace`;ctx.fillText(String(e.detail||'8TURN · SCENE').slice(0,26),-w*.17,h*.18);
+    ctx.strokeStyle='rgba(46,69,111,.55)';ctx.lineWidth=2;for(let i=0;i<9;i++){const x=-w*.43+i*3.3;ctx.beginPath();ctx.moveTo(x,-h*.20);ctx.lineTo(x,h*.20);ctx.stroke()}
+    ctx.restore();
+  }
   function drawMaterial(e,item,now){
     const s=e.size,t=(Number(now)||0)/1000;
     if(item.asset){
@@ -182,7 +203,7 @@
     if(item.kind==='frame'){const scale=s/100,w=(photoBox.w+50)*scale,h=(photoBox.h+50)*scale,phase=reducedMotion?.5:((t*.12)%1);ctx.lineWidth=18*scale;const g=ctx.createLinearGradient(-w/2,0,w/2,0);g.addColorStop(0,'#ffb8db');g.addColorStop(clamp(phase-.18,0,1),'#c9c5ff');g.addColorStop(phase,'#fff');g.addColorStop(clamp(phase+.18,0,1),'#bfeaff');g.addColorStop(1,'#ffe4a8');ctx.strokeStyle=g;roundedPath(-w/2,-h/2,w,h,44*scale);ctx.stroke();return}
     if(item.kind==='sparkle'){const phase=reducedMotion?1:(.72+.28*Math.sin(t*4));ctx.globalAlpha=phase;ctx.fillStyle=gradient([[0,'#fff'],[.35,'#d4c2ff'],[.66,'#ff9dce'],[1,'#a7efff']],-s/2,0,s/2,0);ctx.beginPath();ctx.moveTo(0,-s*.55);ctx.quadraticCurveTo(s*.08,-s*.08,s*.55,0);ctx.quadraticCurveTo(s*.08,s*.08,0,s*.55);ctx.quadraticCurveTo(-s*.08,s*.08,-s*.55,0);ctx.quadraticCurveTo(-s*.08,-s*.08,0,-s*.55);ctx.fill();ctx.globalAlpha=1}
   }
-  function drawElement(e,i,t,now){ctx.save();ctx.translate(e.x,e.y);ctx.rotate(e.rotation);ctx.textAlign='center';ctx.textBaseline='middle';if(e.type==='sticker'){const item=itemById(e.stickerId);if(item)drawMaterial(e,item,now)}else if(e.type==='scene-filmstrip')drawFilmStrip(e);else if(e.type==='scene-polaroid')drawPolaroid(e);else if(e.type==='scene-crop')drawSceneCrop(e);else if(e.textStyle==='date-label'){const label=String(e.value||'').slice(0,24),w=Math.max(120,label.length*12+30),h=34;ctx.shadowColor='rgba(37,54,84,.16)';ctx.shadowBlur=7;ctx.fillStyle='#edf3fc';roundedPath(-w/2,-h/2,w,h,4);ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle='rgba(62,86,126,.18)';ctx.lineWidth=1.5;ctx.stroke();ctx.fillStyle='#304b78';ctx.font=`700 ${Math.max(13,e.size)}px ui-monospace,monospace`;ctx.fillText(label,0,1)}else{ctx.font=e.textStyle==='handwritten'?`600 ${e.size}px "Segoe Print","Bradley Hand","Comic Sans MS",cursive`:`800 ${e.size}px system-ui,-apple-system,"Segoe UI",sans-serif`;ctx.lineWidth=Math.max(3,e.size*(e.textStyle==='handwritten'?0.10:0.16));ctx.strokeStyle=theme==='midnight'?'#171724':'#fffdf8';ctx.strokeText(e.value,0,0);ctx.fillStyle=t.ink;ctx.fillText(e.value,0,0)}if(i===selected){const r=elementRadius(e);ctx.strokeStyle='#7ff6c2';ctx.lineWidth=3;ctx.setLineDash([9,7]);ctx.strokeRect(-r,-r*.58,r*2,r*1.16);ctx.setLineDash([])}ctx.restore()}
+  function drawElement(e,i,t,now){ctx.save();ctx.translate(e.x,e.y);ctx.rotate(e.rotation);ctx.textAlign='center';ctx.textBaseline='middle';if(e.type==='sticker'){const item=itemById(e.stickerId);if(item)drawMaterial(e,item,now)}else if(e.type==='scene-filmstrip')drawFilmStrip(e);else if(e.type==='scene-polaroid')drawPolaroid(e);else if(e.type==='scene-crop')drawSceneCrop(e);else if(e.type==='scene-scrap-note')drawScrapNote(e);else if(e.type==='scene-ticket')drawSceneTicket(e);else if(e.textStyle==='date-label'){const label=String(e.value||'').slice(0,24),w=Math.max(120,label.length*12+30),h=34;ctx.shadowColor='rgba(37,54,84,.16)';ctx.shadowBlur=7;ctx.fillStyle='#edf3fc';roundedPath(-w/2,-h/2,w,h,4);ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle='rgba(62,86,126,.18)';ctx.lineWidth=1.5;ctx.stroke();ctx.fillStyle='#304b78';ctx.font=`700 ${Math.max(13,e.size)}px ui-monospace,monospace`;ctx.fillText(label,0,1)}else{ctx.font=e.textStyle==='handwritten'?`600 ${e.size}px "Segoe Print","Bradley Hand","Comic Sans MS",cursive`:`800 ${e.size}px system-ui,-apple-system,"Segoe UI",sans-serif`;ctx.lineWidth=Math.max(3,e.size*(e.textStyle==='handwritten'?0.10:0.16));ctx.strokeStyle=theme==='midnight'?'#171724':'#fffdf8';ctx.strokeText(e.value,0,0);ctx.fillStyle=t.ink;ctx.fillText(e.value,0,0)}if(i===selected){const r=elementRadius(e);ctx.strokeStyle='#7ff6c2';ctx.lineWidth=3;ctx.setLineDash([9,7]);ctx.strokeRect(-r,-r*.58,r*2,r*1.16);ctx.setLineDash([])}ctx.restore()}
   function statusText(){if(selected>=0)return`선택됨 · ${elements.length}/${limits.totalObjects}개 · 드래그해서 옮겨요`;if(photo&&sourceMeta?.source==='watch'){const who=sourceMeta.artist?`${sourceMeta.artist} · `:'';const when=Number.isFinite(Number(sourceMeta.time))?`${timeLabel(sourceMeta.time)} 장면`:'영상 장면';return`${who}${when}을 가져왔어요 ✨`}if(photo)return`꾸미는 중 · ${elements.length}/${limits.totalObjects}개`;return'사진을 먼저 골라주세요'}
   function draw(now=performance.now()){const t=themes[theme];ctx.clearRect(0,0,W,H);drawBackdrop(t);drawFrame(t);elements.forEach((e,i)=>drawElement(e,i,t,now));$('#selectionState').textContent=statusText()}
   function animationLoop(now){if(!reducedMotion&&document.visibilityState==='visible'&&elements.some(e=>e.type==='sticker'&&itemById(e.stickerId)?.motion))draw(now);requestAnimationFrame(animationLoop)}
@@ -272,12 +293,17 @@
         {type:'scene-polaroid',image:after.image,caption:'favorite cut ♡',x:W-115,y:182,size:112,rotation:.055,preset:'blue-stage'},
         {type:'scene-crop',image:sourceMeta.image,x:278,y:904,size:128,aspect:1.22,focusX:.50,focusY:.24,rotation:-.035,preset:'blue-stage'},
         {type:'scene-crop',image:after.image,x:515,y:900,size:120,aspect:1.38,focusX:.54,focusY:.66,rotation:.045,preset:'blue-stage'},
+        {type:'scene-scrap-note',value:'same moment',detail:'different feeling ♡',x:116,y:626,size:76,rotation:-.055,preset:'blue-stage'},
+        {type:'scene-ticket',value:'WATCH CUT',detail:`${String(sourceMeta.artist||'8TURN').slice(0,12)} · ${timeLabel(base)}`,x:132,y:790,size:72,rotation:.045,preset:'blue-stage'},
         presetSticker('tape-blue','tape-pink',{x:178,y:90,size:72,rotation:-.12}),
         presetSticker('tape-blue','tape-pink',{x:548,y:800,size:74,rotation:.09}),
+        presetSticker('tape-blue','tape-pink',{x:96,y:706,size:62,rotation:.10}),
+        presetSticker('tape-blue','tape-pink',{x:620,y:282,size:58,rotation:-.10}),
         {type:'text',value:capturedDateLabel(),textStyle:'date-label',x:155,y:1016,size:15,rotation:-.025,preset:'blue-stage'},
         presetSticker('silver-star','star',{x:620,y:430,size:48,rotation:.18}),
         presetSticker('chrome-heart','heart-outline',{x:610,y:650,size:46,rotation:-.14}),
         presetSticker('silver-star','star',{x:190,y:978,size:36,rotation:-.10}),
+        presetSticker('silver-star','star',{x:625,y:115,size:32,rotation:.11}),
         {type:'text',value:'my pick ♡',textStyle:'handwritten',x:360,y:82,size:34,rotation:-.045,preset:'blue-stage'},
         {type:'text',value:'saved tonight',textStyle:'handwritten',x:555,y:590,size:28,rotation:.06,preset:'blue-stage'},
         {type:'text',value:'8TURN ♡',textStyle:'handwritten',x:555,y:1006,size:24,rotation:-.055,preset:'blue-stage'}
