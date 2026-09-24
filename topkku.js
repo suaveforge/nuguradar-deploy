@@ -266,7 +266,7 @@
       elements=[...retained,...additions];
       theme='stageblue';
       selected=elements.length-1;
-      $('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme==='stageblue'));
+      $$('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme==='stageblue'));
       guide('Blue Stage를 실제 Topkku 오브젝트로 조립했어 ♡ 각 조각을 눌러 위치·크기·각도를 다시 손볼 수 있어요.');
       draw();
     }catch(e){
