@@ -10,6 +10,7 @@
     lavender:{bg:'#eee9ff',ink:'#57468b',frame:'#b9a8f5',accent:'#ff86bb',paper:'#fffdf8'},
     pink:{bg:'#ffe8f1',ink:'#8a4564',frame:'#ff9dc4',accent:'#ffc55f',paper:'#fffaf7'},
     mint:{bg:'#e7fff5',ink:'#3d7563',frame:'#8fe6c2',accent:'#8da4ff',paper:'#fbfffd'},
+    stageblue:{bg:'#e8eef7',ink:'#27476f',frame:'#93a9c7',accent:'#4f78b5',paper:'#fbfcff'},
     midnight:{bg:'#171724',ink:'#f1ecff',frame:'#6d5ba8',accent:'#ff6cac',paper:'#252436'}
   };
   const catalog=window.NUGU_TOPKKU_STICKERS||{items:[],byId:new Map(),limits:{totalObjects:90,motionObjects:6,privateSavesPerDay:30,publicPostsPerDay:10}};
