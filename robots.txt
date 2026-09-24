@@ -2,7 +2,6 @@ User-agent: *
 Allow: /
 Disallow: /watch/
 Disallow: /members/
-Disallow: /tracks/
 Disallow: /videos/
 Disallow: /radar-notes/
 Disallow: /artists/qid-
