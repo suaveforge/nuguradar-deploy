@@ -109,7 +109,7 @@
       const width=Number(r.headers.get('X-NUGU-Frame-Width')||0),height=Number(r.headers.get('X-NUGU-Frame-Height')||0);
       const capturedVideoTime=Number(r.headers.get('X-NUGU-Frame-Time')||m.time);
       if(!image||width<64||height<64)throw new Error('invalid_frame');
-      const payload={version:18,source:'watch',image,artist:m.artist,artistSlug:m.artistSlug||'',title:m.title,contentUrl:m.url,time:m.time,capturedVideoTime,capturedAt:new Date().toISOString(),cleanCapture:true,videoOnly:true,strictCapture:true,manualCapture:false,captureMode:'mobile-server-youtube-frame-v1',width,height};
+      const payload={version:18,source:'watch',image,artist:m.artist,artistSlug:m.artistSlug||'',title:m.title,contentUrl:m.url,videoId:m.videoId,time:m.time,capturedVideoTime,capturedAt:new Date().toISOString(),cleanCapture:true,videoOnly:true,strictCapture:true,manualCapture:false,captureMode:'mobile-server-youtube-frame-v1',width,height};
       setState('장면 준비 완료 ✓ · 탑꾸 편집기로 이동합니다.','success');
       handoffTopkku(payload,'watch-mobile-auto');
     }catch(err){

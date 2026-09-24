@@ -428,7 +428,7 @@
       if(!image||width<MIN_CAPTURE_PX||height<MIN_CAPTURE_PX)throw new Error('invalid_server_frame');
 
       const payload=storeIncomingPayload({
-        version:18,source:'watch',image,artist,artistSlug,title,contentUrl:url,time:requested,
+        version:18,source:'watch',image,artist,artistSlug,title,contentUrl:url,videoId:id,time:requested,
         capturedVideoTime,capturedAt:new Date().toISOString(),cleanCapture:true,videoOnly:true,strictCapture:true,
         manualCapture:false,captureMode:'server-decoded-video-frame-v1',width,height,
         quality:{uiFree:true,source:'decoded-video-element'},geometry:{mode:'server-video-element'}

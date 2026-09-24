@@ -7,6 +7,7 @@
     {id:'ribbon',label:'리본',pack:'기본',access:'free',minBand:1,kind:'emoji',value:'🎀'},
     {id:'flower',label:'꽃',pack:'기본',access:'free',minBand:1,kind:'emoji',value:'🌷'},
     {id:'tape-pink',label:'핑크 테이프',pack:'다꾸',access:'free',minBand:1,kind:'tape',variant:'pink'},
+    {id:'tape-blue',label:'블루 테이프',pack:'다꾸',access:'free',minBand:1,kind:'tape',variant:'blue'},
     {id:'note-paper',label:'메모 조각',pack:'다꾸',access:'free',minBand:1,kind:'paper',variant:'note',asset:'assets/topkku/memo.svg'},
 
     {id:'bubble',label:'버블',pack:'기본',access:'free',minBand:2,kind:'emoji',value:'🫧'},
@@ -15,6 +16,7 @@
     {id:'bear',label:'곰',pack:'기본',access:'free',minBand:2,kind:'emoji',value:'🐻'},
     {id:'tape-lilac',label:'라일락 테이프',pack:'다꾸',access:'free',minBand:2,kind:'tape',variant:'lilac'},
     {id:'ticket-mini',label:'티켓 조각',pack:'다꾸',access:'free',minBand:2,kind:'paper',variant:'ticket',asset:'assets/topkku/ticket.svg'},
+    {id:'date-strip',label:'날짜 스트립',pack:'다꾸',access:'free',minBand:2,kind:'paper',variant:'date'},
     {id:'pearl-dot',label:'미니 진주',pack:'포카',access:'free',minBand:2,kind:'pearl',variant:'single',asset:'assets/topkku/pearl-chain.svg'},
     {id:'mini-gem',label:'미니 큐빅',pack:'포카',access:'free',minBand:2,kind:'gem',variant:'mini',asset:'assets/topkku/gem.svg'},
     {id:'chrome-heart',label:'크롬 하트',pack:'찐 탑꾸',access:'activity',minBand:2,kind:'chrome',variant:'heart',asset:'assets/topkku/sparkling-heart.svg',assetTone:'chrome'},

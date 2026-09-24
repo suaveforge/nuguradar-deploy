@@ -133,7 +133,7 @@
       const width=Number(r.headers.get('X-NUGU-Frame-Width')||0),height=Number(r.headers.get('X-NUGU-Frame-Height')||0);
       const capturedVideoTime=Number(r.headers.get('X-NUGU-Frame-Time')||time);
       if(!image||width<64||height<64)throw new Error('invalid_frame');
-      handoffReelTopkku(el,{version:18,source:'watch',image,artist:c.artist_name||'',artistSlug:c.artist_slug||'',title:c.title||'',contentUrl:c.content_url||'',time,capturedVideoTime,capturedAt:new Date().toISOString(),cleanCapture:true,videoOnly:true,strictCapture:true,manualCapture:false,captureMode:'mobile-server-youtube-frame-v1',width,height});
+      handoffReelTopkku(el,{version:18,source:'watch',image,artist:c.artist_name||'',artistSlug:c.artist_slug||'',title:c.title||'',contentUrl:c.content_url||'',videoId:c.playback_id,time,capturedVideoTime,capturedAt:new Date().toISOString(),cleanCapture:true,videoOnly:true,strictCapture:true,manualCapture:false,captureMode:'mobile-server-youtube-frame-v1',width,height});
     }catch(err){
       console.error('reels Topkku frame failed',err);
       flash(el,err?.name==='AbortError'?'장면 준비가 지연됐어요 · 다시 눌러주세요':'장면을 가져오지 못했어요 · 다시 눌러주세요');
