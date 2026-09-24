@@ -1,1 +1,1 @@
-window.NUGU_CONFIG={"apiBase":"https://api-nuguradar.suaveforge.com:18042","build":"Updated 2026.09.25 · build f7bbc91cfb05-cb8afe0d1351-e9a42dfdef0b"};
+window.NUGU_CONFIG={"apiBase":"https://api-nuguradar.suaveforge.com:18042","build":"Updated 2026.09.25 · build 215f7c45dace-cb8afe0d1351-e9a42dfdef0b"};

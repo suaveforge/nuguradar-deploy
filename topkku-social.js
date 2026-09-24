@@ -306,13 +306,13 @@
   }
 
   function initControls(){
-    $('#topkkuGalleryTabs [data-gallery-sort]').forEach(b=>b.onclick=()=>{$('#topkkuGalleryTabs [data-gallery-sort]').forEach(x=>x.classList.toggle('active',x===b));loadGallery(b.dataset.gallerySort)});
-    $('#makerTrendTabs [data-maker-window]').forEach(b=>b.onclick=()=>{$('#makerTrendTabs [data-maker-window]').forEach(x=>x.classList.toggle('active',x===b));loadMakerTrend(b.dataset.makerWindow)});
+    $$('#topkkuGalleryTabs [data-gallery-sort]').forEach(b=>b.onclick=()=>{$$('#topkkuGalleryTabs [data-gallery-sort]').forEach(x=>x.classList.toggle('active',x===b));loadGallery(b.dataset.gallerySort)});
+    $$('#makerTrendTabs [data-maker-window]').forEach(b=>b.onclick=()=>{$$('#makerTrendTabs [data-maker-window]').forEach(x=>x.classList.toggle('active',x===b));loadMakerTrend(b.dataset.makerWindow)});
     $$('#vaultScopeTabs [data-vault-scope]').forEach(b=>b.onclick=()=>{$$('#vaultScopeTabs [data-vault-scope]').forEach(x=>x.classList.toggle('active',x===b));state.vaultGroup='all';loadVaultScope(b.dataset.vaultScope)});
     $$('#vaultViewTabs [data-vault-view]').forEach(b=>b.onclick=()=>{$$('#vaultViewTabs [data-vault-view]').forEach(x=>x.classList.toggle('active',x===b));state.vaultView=b.dataset.vaultView;decorateVault()});
   }
 
-  window.addEventListener('nugu-topkku-vault-rendered',ev=>{if(state.vaultScope==='mine'){state.vaultScope='mine';decorateVault();$('#topkkuVaultGrid [data-reactions]').forEach(b=>b.onclick=()=>openReactions(Number(b.dataset.reactions)))}});
+  window.addEventListener('nugu-topkku-vault-rendered',ev=>{if(state.vaultScope==='mine'){state.vaultScope='mine';decorateVault();$$('#topkkuVaultGrid [data-reactions]').forEach(b=>b.onclick=()=>openReactions(Number(b.dataset.reactions)))}});
   window.addEventListener('nugu-auth-changed',async()=>{await loadSavedIds();renderGallery();loadBalance();loadVaultScope(state.vaultScope)});
 
   initControls();
