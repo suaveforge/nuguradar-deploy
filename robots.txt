@@ -5,6 +5,5 @@ Disallow: /members/
 Disallow: /videos/
 Disallow: /radar-notes/
 Disallow: /artists/qid-
-Disallow: /tracks/
 Sitemap: https://idol.suaveforge.com/sitemap.xml
 Sitemap: https://idol.suaveforge.com/feed.xml
