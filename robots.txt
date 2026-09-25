@@ -73,10 +73,12 @@ Disallow: /tracks/qid-q124518472/sunflower/
 Disallow: /tracks/qid-q124518472/telescope/
 Disallow: /tracks/qid-q124518472/unhero/
 Disallow: /tracks/qid-q124518472/gravity/
+Disallow: /tracks/qid-q124518472/smile/
 Disallow: /tracks/qid-q65053641/got-it/
 Disallow: /tracks/qid-q51885404/narr-84/
 Disallow: /tracks/qid-q109256946/j/
 Disallow: /tracks/qid-q127162707/dumb-hot/
+Disallow: /tracks/qid-q127162707/supercrush/
 Disallow: /tracks/qid-q27989963/s-now-here-ep-3/
 Disallow: /tracks/qid-q109077000/legend/
 Disallow: /tracks/qid-q131722593/kickdoongs/
@@ -152,5 +154,6 @@ Disallow: /tracks/qid-q94615987/summer/
 Disallow: /tracks/qid-q117354566/girls-on-fire/
 Disallow: /tracks/qid-q65665588/like-always/
 Disallow: /tracks/qid-q483626/continue/
+Disallow: /tracks/qid-q118178306/animal/
 Sitemap: https://idol.suaveforge.com/sitemap.xml
 Sitemap: https://idol.suaveforge.com/feed.xml

@@ -3,7 +3,7 @@
   const HOSTED='https://authhub.suaveforge.com/login/';
   const PROJECT='p42';
   const ENV='production';
-  const CALLBACK='https://nuguradar.suaveforge.com/auth-callback.html';
+  const CALLBACK='https://idol.suaveforge.com/auth-callback.html';
   const PROFILE_KEY='nuguAuthProfile:p42';
   if(!window.AuthHubClient||!window.NUGU_AUTH)return;
   const client=new window.AuthHubClient({apiBase:API,project:PROJECT,environment:ENV});
