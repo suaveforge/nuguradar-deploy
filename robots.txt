@@ -147,6 +147,7 @@ Disallow: /tracks/qid-q61057550/danger/
 Disallow: /tracks/qid-q28418030/count-down/
 Disallow: /tracks/qid-q141030335/sun-kiss/
 Disallow: /tracks/qid-q124091148/soda-soda/
+Disallow: /tracks/qid-q124362218/milky-way/
 Disallow: /tracks/qid-q124362218/track-7zwy64qy65wfiouzhouvhq/
 Disallow: /tracks/qid-q60577989/don/
 Disallow: /tracks/qid-q57584225/track-7jye6rg47iqk/
