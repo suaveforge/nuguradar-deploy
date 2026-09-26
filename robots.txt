@@ -39,6 +39,7 @@ Disallow: /tracks/qid-q483253/greedyy/
 Disallow: /tracks/qid-q17499999/track-67cu656m67aa64qu64kg/
 Disallow: /tracks/qid-q17499999/track-67ai66m47j2yioycrouekq/
 Disallow: /tracks/qid-q13580495/arirang/
+Disallow: /tracks/qid-q13580495/merry-go-round/
 Disallow: /tracks/qid-q13580495/normal-korean-ver/
 Disallow: /tracks/qid-q65053981/track-7ja07kmm66m0/
 Disallow: /tracks/qid-q65053981/may-be/
