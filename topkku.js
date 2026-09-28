@@ -29,17 +29,11 @@
     artistNote:{x:646,y:650,size:24,rotation:-.050}
   };
   const defaultPhotoView=()=>({zoom:1,x:0,y:0});
-  let theme='lavender',photo=null,photoView=defaultPhotoView(),elements=[],selected=-1,drag=null,history=[],sourceMeta=null,compositionEventKey='',selectedArtist=null,saveBusy=false,searchTimer=null,blueStageMainSrc='';
+  let theme='lavender',photo=null,photoView=defaultPhotoView(),elements=[],selected=-1,drag=null,history=[],sourceMeta=null,compositionEventKey='',selectedArtist=null,saveBusy=false,searchTimer=null;
   let activeStickerPack='all',styleState=null,vaultUsage=null,currentSavedId=null,currentSavedPublished=false,lastSavedEventKey='',referenceSource=null;
   const reducedMotion=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
   const assetImages=new Map(),assetPromises=new Map();
   const sceneImages=new Map(),scenePromises=new Map();
-  const blueStageOverlayImage=new Image();
-  let blueStageOverlayReady=false,blueStageExactFrames=null;
-  blueStageOverlayImage.decoding='async';
-  blueStageOverlayImage.onload=()=>{blueStageOverlayReady=true;draw()};
-  blueStageOverlayImage.onerror=()=>{blueStageOverlayReady=false};
-  if(window.NUGU_BLUE_STAGE_MASTER_OVERLAY)blueStageOverlayImage.src=window.NUGU_BLUE_STAGE_MASTER_OVERLAY;
   function ensureAsset(item){
     if(!item?.asset)return Promise.resolve(null);
     const cached=assetImages.get(item.asset);
@@ -71,56 +65,6 @@
     scenePromises.set(src,pending);return pending;
   }
   async function blobDataUrl(blob){return await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result||''));r.onerror=()=>reject(new Error('frame_read_failed'));r.readAsDataURL(blob)})}
-  async function blueStageVisualScore(src){
-    const img=await ensureSceneImage(src);
-    const c=document.createElement('canvas');c.width=48;c.height=27;
-    const g=c.getContext('2d',{willReadFrequently:true});if(!g)return 0;
-    g.drawImage(img,0,0,c.width,c.height);
-    const d=g.getImageData(0,0,c.width,c.height).data;
-    let skin=0,blue=0,detail=0,greenCast=0,n=0;
-    for(let y=0;y<c.height;y++)for(let x=0;x<c.width;x++){
-      const i=(y*c.width+x)*4,r=d[i],gg=d[i+1],b=d[i+2];n++;
-      if(r>gg*1.05&&gg>b*.92&&r>65&&gg>45)skin++;
-      if(b>r*1.08&&b>gg*1.06&&b>55)blue++;
-      if(gg>r*1.32&&gg>b*1.18&&gg>70)greenCast++;
-      if(x){const j=i-4;detail+=Math.abs(r-d[j])+Math.abs(gg-d[j+1])+Math.abs(b-d[j+2])}
-    }
-    return skin/n*4+blue/n*2+Math.min(1,detail/(n*75))-(greenCast/n)*6;
-  }
-  const BLUE_STAGE_EXACT_VIDEO='WxL5cNNelLk';
-  const BLUE_STAGE_EXACT_TIMES=Object.freeze({
-    main:62.8,
-    film1:60,
-    film2:61,
-    film3:63.6,
-    polaroid:61,
-    lowerFace:101,
-    lowerStage:135
-  });
-  const BLUE_STAGE_EXACT_FOCUS=Object.freeze({
-    main:[.68,.44],
-    film1:[.58,.48],
-    film2:[.73,.50],
-    film3:[.70,.48],
-    polaroid:[.73,.50],
-    lowerFace:[.78,.46],
-    lowerStage:[.50,.52]
-  });
-  async function fetchBlueStageExactRoleFrames(){
-    if(String(sourceMeta?.videoId||'')!==BLUE_STAGE_EXACT_VIDEO)return null;
-    const out={};
-    for(const [role,time] of Object.entries(BLUE_STAGE_EXACT_TIMES)){
-      const shot=await fetchWatchSceneFrame(time);
-      out[role]=shot.image;
-      await ensureSceneImage(shot.image);
-    }
-    return out;
-  }
-  async function pickBlueStageFrames(srcs){
-    const unique=[...new Set(srcs.filter(Boolean))],scored=[];
-    for(const src of unique){try{scored.push({src,score:await blueStageVisualScore(src)})}catch{}}
-    scored.sort((a,b)=>b.score-a.score);return scored.map(x=>x.src);
-  }
   const $=s=>document.querySelector(s);
   const $$=s=>[...document.querySelectorAll(s)];
   const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
@@ -171,7 +115,7 @@
   function itemCount(id){return elements.filter(e=>e.type==='sticker'&&e.stickerId===id).length}
   function motionCount(){return elements.filter(e=>e.type==='sticker'&&itemById(e.stickerId)?.motion).length}
   function canAddItem(item){if(elements.length>=limits.totalObjects)return{ok:false,msg:`한 작품에는 최대 ${limits.totalObjects}개까지 붙일 수 있어요.`};if(item.motion&&motionCount()>=limits.motionObjects)return{ok:false,msg:`움직이는 장식은 한 작품에 ${limits.motionObjects}개까지 써요.`};if(item.maxPerCanvas&&itemCount(item.id)>=item.maxPerCanvas)return{ok:false,msg:`${item.label}은 한 작품에 ${item.maxPerCanvas}개까지 쓸 수 있어요.`};return{ok:true}}
-  function addStickerItem(item){const check=canAddItem(item);if(!check.ok){guide(check.msg);return}saveHistory();const size=item.kind==='frame'?100:item.kind==='tape'?90:item.kind==='lace'?86:76;const y=item.kind==='frame'?photoBox.y+photoBox.h/2:H/2;elements.push({type:'sticker',stickerId:item.id,value:item.value||'',x:W/2,y,size,rotation:0});selected=elements.length-1;guide(`${item.label} 붙였어 ♡`);draw()}
+  function addStickerItem(item){const check=canAddItem(item);if(!check.ok){guide(check.msg);return}saveHistory();const size=Number(item.defaultSize||0)||(item.kind==='frame'?100:item.kind==='tape'?90:item.kind==='lace'?86:76);const y=item.kind==='frame'?photoBox.y+photoBox.h/2:H/2;const value=item.dynamic==='artist'?String(selectedArtist?.name||sourceMeta?.artist||'MY PICK').slice(0,18):item.dynamic==='date'?capturedDateLabel():item.value||'';elements.push({type:'sticker',stickerId:item.id,value,x:W/2,y,size,rotation:0});selected=elements.length-1;guide(`${item.label} 붙였어 ♡`);draw()}
   function addText(value,textStyle='default'){const text=String(value||'').trim();if(!text)return;if(elements.length>=limits.totalObjects){guide(`한 작품에는 최대 ${limits.totalObjects}개 오브젝트까지 붙일 수 있어요.`);return}saveHistory();elements.push({type:'text',value:text,textStyle,x:W/2,y:H-112,size:textStyle==='handwritten'?38:34,rotation:0});selected=elements.length-1;draw();$('#textInput').value=''}
   function elementRadius(e){if(e.type==='scene-filmstrip')return e.size*1.42;if(e.type==='scene-polaroid')return e.size*1.08;if(e.type==='scene-crop')return e.size*.92;if(e.type==='scene-scrap-note')return e.size*1.48;if(e.type==='scene-ticket')return e.size*1.55;if(e.type==='scene-paper-scrap')return e.size*1.15;if(e.type==='scene-tape')return e.size*.95;if(e.type==='scene-chrome')return e.size*.62;if(e.type==='scene-clip')return e.size*.70;if(e.type!=='sticker')return Math.max(e.size*1.1,String(e.value||'').length*e.size*.27);const item=itemById(e.stickerId);if(item?.kind==='frame'&&!item?.asset)return Math.max(photoBox.w,photoBox.h)*.48;return e.size*.75*Number(item?.assetScale||1)}
   function drawBackdrop(t){ctx.fillStyle=t.bg;ctx.fillRect(0,0,W,H);const g=ctx.createRadialGradient(W*.18,H*.12,20,W*.18,H*.12,420);g.addColorStop(0,t.accent+'55');g.addColorStop(1,t.bg+'00');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.save();ctx.globalAlpha=.22;ctx.strokeStyle=t.frame;ctx.lineWidth=2;for(let y=30;y<H;y+=46){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y-18);ctx.stroke()}ctx.restore()}
@@ -196,72 +140,6 @@
     ctx.globalAlpha=.11;ctx.fillStyle='#05080d';
     for(let i=0;i<26;i++){const px=x+stageNoise(seed*71+i*4.7)*w,py=y+stageNoise(seed*83+i*6.1)*h,r=.45+stageNoise(seed*97+i)*1.45;ctx.beginPath();ctx.arc(px,py,r,0,Math.PI*2);ctx.fill()}
     ctx.restore();ctx.globalAlpha=1;ctx.restore();
-  }
-  function blueStageIsExact(){
-    return blueStageOverlayReady&&sourceMeta?.artistSlug==='8turn'&&blueStageExactFrames?.main;
-  }
-  function blueStageClip(poly){
-    ctx.beginPath();ctx.moveTo(poly[0][0],poly[0][1]);for(let i=1;i<poly.length;i++)ctx.lineTo(poly[i][0],poly[i][1]);ctx.closePath();
-  }
-  function drawBlueStageExactFrame(src,poly,bounds,focusX=.5,focusY=.5,tone=.16,zoom=1){
-    const img=src&&sceneImages.get(src);if(!img?.complete||!img.naturalWidth)return;
-    ctx.save();blueStageClip(poly);ctx.clip();
-    ctx.filter='contrast(1.08) saturate(1.02) brightness(.98)';
-    drawStaticCoverFocus(img,bounds.x,bounds.y,bounds.w,bounds.h,focusX,focusY,zoom);
-    ctx.filter='none';
-    if(tone>0){
-      ctx.globalCompositeOperation='soft-light';
-      ctx.globalAlpha=tone;ctx.fillStyle='#1c61b8';ctx.fillRect(bounds.x,bounds.y,bounds.w,bounds.h);
-      ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
-    }
-    ctx.restore();
-  }
-  function drawBlueStageExact(){
-    ctx.fillStyle='#08111d';ctx.fillRect(0,0,W,H);
-    const f=blueStageExactFrames||{},F=BLUE_STAGE_EXACT_FOCUS;
-    drawBlueStageExactFrame(f.film1,[[46,45],[210,50],[202,218],[46,211]],{x:28,y:31,w:205,h:205},...F.film1,.12);
-    drawBlueStageExactFrame(f.film2,[[43,220],[202,228],[196,399],[35,389]],{x:24,y:205,w:205,h:210},...F.film2,.12);
-    drawBlueStageExactFrame(f.film3,[[32,407],[193,413],[188,566],[21,556]],{x:12,y:394,w:205,h:190},...F.film3,.12);
-    drawBlueStageExactFrame(f.polaroid,[[505,42],[694,57],[661,262],[469,236]],{x:458,y:31,w:250,h:246},...F.polaroid,.16);
-    drawBlueStageExactFrame(f.main,[[197,173],[560,146],[620,302],[586,544],[628,766],[544,819],[198,758],[173,543]],{x:160,y:137,w:482,h:690},...F.main,.34,1.34);
-    drawBlueStageExactFrame(f.lowerFace,[[228,840],[423,815],[523,1006],[238,1051]],{x:205,y:799,w:335,h:270},...F.lowerFace,.24);
-    drawBlueStageExactFrame(f.lowerStage,[[527,837],[720,867],[720,1046],[545,1027]],{x:510,y:820,w:230,h:245},...F.lowerStage,.20);
-    ctx.drawImage(blueStageOverlayImage,0,0,W,H);
-  }
-  function drawBlueStageBackdrop(){
-    ctx.fillStyle='#07101b';ctx.fillRect(0,0,W,H);
-    const glow=ctx.createRadialGradient(W*.54,H*.34,36,W*.54,H*.34,560);
-    glow.addColorStop(0,'rgba(22,83,178,.92)');glow.addColorStop(.42,'rgba(16,57,119,.52)');glow.addColorStop(1,'rgba(5,10,18,0)');
-    ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
-    const patches=[
-      [-20,-16,220,86,'#eef1f3',-.05,11,.96],[105,-6,285,72,'#27599a',.035,12,.98],[338,-12,250,90,'#0a111c',-.045,13,.99],[540,-8,205,94,'#edf0f2',.05,14,.94],
-      [-25,72,150,240,'#2a5d9f',-.08,15,.96],[-24,286,142,220,'#0b111a',.045,16,.98],[-28,488,150,225,'#eef0f2',-.035,17,.90],[-18,676,160,220,'#2d5d9d',.055,18,.96],
-      [604,86,145,230,'#285a99',-.05,19,.96],[610,280,140,210,'#0a111a',.045,20,.99],[610,476,150,220,'#edf0f2',-.045,21,.91],[602,664,160,225,'#285796',.055,22,.97],
-      [-30,812,245,110,'#0a111a',-.035,23,.99],[72,918,286,145,'#edf0f2',.025,24,.91],[292,940,310,136,'#09101a',-.035,25,.99],[514,888,242,180,'#2b5e9e',.045,26,.98],
-      [14,720,260,82,'#28589a',.03,27,.96],[460,744,280,82,'#09101a',-.04,28,.99],[4,1006,286,78,'#2b5e9e',-.025,29,.96],[420,1000,332,84,'#edf0f2',.03,30,.88],
-      [132,840,190,58,'#edf0f2',-.055,31,.76],[505,836,195,60,'#2b5b9b',.05,32,.94],[215,112,170,55,'#edf0f2',-.08,33,.86],[518,320,160,52,'#2c5d9f',.07,34,.88],[250,770,220,48,'#edf0f2',-.04,35,.80]
-    ];
-    patches.forEach(p=>drawTornPatch(...p));
-    ctx.save();ctx.globalAlpha=.34;ctx.strokeStyle='#f5f7fb';ctx.lineWidth=1.25;
-    for(let i=0;i<140;i++){const x=stageNoise(100+i)*W,y=stageNoise(300+i)*H,len=8+stageNoise(500+i)*56;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+len,y+(stageNoise(700+i)-.5)*15);ctx.stroke()}
-    ctx.globalAlpha=.13;ctx.fillStyle='#fff';for(let i=0;i<180;i++){const x=stageNoise(900+i)*W,y=stageNoise(1200+i)*H,r=.45+stageNoise(1500+i)*1.7;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill()}
-    ctx.globalAlpha=.52;ctx.strokeStyle='#f7fbff';ctx.lineWidth=2.2;
-    for(const [x1,y1,x2,y2] of [[72,95,123,62],[560,353,646,310],[575,625,658,582],[282,850,347,816],[500,870,575,836],[240,1010,338,980]]){ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.lineTo(x1+16,y2+18);ctx.lineTo(x2-8,y1+20);ctx.stroke()}
-    ctx.restore();
-  }
-  function drawBlueStageMain(){
-    const m=BLUE_STAGE.main,{x,y,w,h}=m;
-    drawTornPatch(x-18,y-18,w+40,h+40,'#f0f1ef',-.010,71,.96);
-    drawTornPatch(x-10,y-10,w+22,h+22,'#285b9a',.012,72,.96);
-    ctx.save();tornPaperPath(x,y,w,h,73,16,9);ctx.clip();
-    const mainImg=(blueStageMainSrc&&sceneImages.get(blueStageMainSrc))||photo;
-    if(mainImg?.complete&&mainImg.naturalWidth){
-      drawStaticCoverFocus(mainImg,x,y,w,h,m.focusX,m.focusY);
-      const wash=ctx.createLinearGradient(x,y,x+w,y+h);wash.addColorStop(0,'rgba(14,45,96,.02)');wash.addColorStop(.68,'rgba(5,20,45,.01)');wash.addColorStop(1,'rgba(4,12,28,.12)');ctx.fillStyle=wash;ctx.fillRect(x,y,w,h);
-    }else{ctx.fillStyle='#18263c';ctx.fillRect(x,y,w,h)}
-    ctx.restore();
-    drawTornPatch(x-15,y+h-20,w*.73,34,'#f0f1ef',-.018,74,.92);
-    drawTornPatch(x+w*.55,y-10,w*.40,28,'#24558f',.026,75,.96);
   }
   function drawFrame(t){ctx.save();ctx.shadowColor='rgba(0,0,0,.20)';ctx.shadowBlur=28;ctx.shadowOffsetY=18;roundedPath(photoBox.x-24,photoBox.y-24,photoBox.w+48,photoBox.h+48,46);ctx.fillStyle=t.paper;ctx.fill();ctx.restore();ctx.save();roundedPath(photoBox.x,photoBox.y,photoBox.w,photoBox.h,photoBox.r);ctx.clip();if(photo)drawPhoto(photo,photoBox.x,photoBox.y,photoBox.w,photoBox.h);else{ctx.fillStyle=theme==='midnight'?'#313044':'#f4f1f7';ctx.fillRect(photoBox.x,photoBox.y,photoBox.w,photoBox.h);ctx.fillStyle=theme==='midnight'?'#aba5c6':'#90899b';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='700 28px system-ui,sans-serif';ctx.fillText('최애 사진을 올려주세요 ♡',W/2,H/2-8);ctx.font='500 17px system-ui,sans-serif';ctx.fillText('사진은 이 브라우저 밖으로 나가지 않아요',W/2,H/2+34)}ctx.restore();ctx.save();roundedPath(photoBox.x-11,photoBox.y-11,photoBox.w+22,photoBox.h+22,38);ctx.strokeStyle=t.frame;ctx.lineWidth=12;ctx.stroke();ctx.restore()}
   function drawStaticCover(img,x,y,w,h){if(!img?.naturalWidth||!img?.naturalHeight)return;const scale=Math.max(w/img.naturalWidth,h/img.naturalHeight),dw=img.naturalWidth*scale,dh=img.naturalHeight*scale;ctx.drawImage(img,x+(w-dw)/2,y+(h-dh)/2,dw,dh)}
@@ -373,8 +251,9 @@
       ensureAsset(item).catch(()=>{});
     }
     if(item.kind==='emoji'){ctx.font=`${s}px "Apple Color Emoji","Segoe UI Emoji",sans-serif`;ctx.fillText(item.value,0,0);return}
-    if(item.kind==='tape'){const w=s*1.65,h=s*.48;ctx.globalAlpha=.86;ctx.fillStyle=item.variant==='pink'?'#ffb7d5':item.variant==='lilac'?'#d9c5ff':item.variant==='blue'?'#7299dc':gradient([[0,'#ffc1df'],[.2,'#bfe8ff'],[.45,'#d7c3ff'],[.7,'#fff0ae'],[1,'#ffc7ec']],-w/2,0,w/2,0);ctx.fillRect(-w/2,-h/2,w,h);ctx.globalAlpha=.35;ctx.strokeStyle='#fff';ctx.lineWidth=3;for(let x=-w/2;x<w/2;x+=18){ctx.beginPath();ctx.moveTo(x,-h/2);ctx.lineTo(x+18,h/2);ctx.stroke()}ctx.globalAlpha=1;return}
+    if(item.kind==='tape'){const w=s*1.65,h=s*.48;ctx.globalAlpha=.88;const fill=item.variant==='pink'?'#ffb7d5':item.variant==='lilac'?'#d9c5ff':item.variant==='blue'?'#4f78b5':item.variant==='black'?'#161a22':item.variant==='beige'?'#d9c5a5':null;ctx.fillStyle=fill||gradient([[0,'#ffc1df'],[.2,'#bfe8ff'],[.45,'#d7c3ff'],[.7,'#fff0ae'],[1,'#ffc7ec']],-w/2,0,w/2,0);ctx.fillRect(-w/2,-h/2,w,h);ctx.globalAlpha=item.variant==='black'?.18:.34;ctx.strokeStyle='#fff';ctx.lineWidth=3;for(let x=-w/2;x<w/2;x+=18){ctx.beginPath();ctx.moveTo(x,-h/2);ctx.lineTo(x+18,h/2);ctx.stroke()}ctx.globalAlpha=1;return}
     if(item.kind==='paper'){const date=item.variant==='date',w=s*(date?1.9:1.5),h=s*(date?0.48:1.05);ctx.shadowColor='rgba(50,35,65,.18)';ctx.shadowBlur=8;ctx.fillStyle=item.variant==='ticket'?'#fff0d7':date?'#e5ecfb':'#fffaf0';roundedPath(-w/2,-h/2,w,h,date?3:8);ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle='rgba(99,75,120,.22)';ctx.lineWidth=2;ctx.stroke();if(item.variant==='ticket'){ctx.setLineDash([6,5]);ctx.beginPath();ctx.moveTo(-w*.28,-h*.35);ctx.lineTo(-w*.28,h*.35);ctx.stroke();ctx.setLineDash([])}if(date){ctx.fillStyle='#304b78';ctx.font=`700 ${Math.max(10,s*.16)}px ui-monospace,monospace`;ctx.fillText(String(e.value||'DATE').slice(0,24),0,0)}return}
+    if(item.kind==='label'){const artist=item.variant==='artist',w=s*(artist?2.35:2.05),h=s*.72;ctx.save();tornPaperPath(-w/2,-h/2,w,h,artist?211:223,10,5);ctx.shadowColor='rgba(20,30,48,.18)';ctx.shadowBlur=7;ctx.fillStyle=artist?'#f7f3e9':'#edf3fc';ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle=artist?'rgba(45,49,56,.18)':'rgba(48,75,120,.20)';ctx.lineWidth=1.5;ctx.stroke();ctx.fillStyle=artist?'#151820':'#304b78';ctx.font=artist?`900 ${Math.max(15,s*.28)}px system-ui,-apple-system,"Segoe UI",sans-serif`:`700 ${Math.max(12,s*.20)}px ui-monospace,monospace`;ctx.fillText(String(e.value||'').slice(0,24),0,1);ctx.restore();return}
     if(item.kind==='pearl'){const count=item.variant==='chain'?6:1,r=s*.18,start=-(count-1)*r*1.25;for(let i=0;i<count;i++){const x=start+i*r*2.5,g=ctx.createRadialGradient(x-r*.35,-r*.4,r*.1,x,0,r);g.addColorStop(0,'#fff');g.addColorStop(.45,'#fff8fb');g.addColorStop(.75,'#e5dce9');g.addColorStop(1,'#aaa0b1');ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,0,r,0,Math.PI*2);ctx.fill()}return}
     if(item.kind==='gem'){const r=s*.46;ctx.beginPath();ctx.moveTo(0,-r);ctx.lineTo(r*.8,-r*.15);ctx.lineTo(r*.55,r*.7);ctx.lineTo(0,r);ctx.lineTo(-r*.55,r*.7);ctx.lineTo(-r*.8,-r*.15);ctx.closePath();ctx.fillStyle=gradient([[0,'#fff'],[.18,'#aee7ff'],[.42,'#e7c0ff'],[.66,'#ffb8d8'],[.85,'#fff5af'],[1,'#c4d6ff']],-r,-r,r,r);ctx.fill();ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=3;ctx.stroke();if(item.motion&&!reducedMotion){const sweep=((t*.8)%1)*r*3-r*1.5;ctx.save();ctx.clip();const g=ctx.createLinearGradient(sweep-r*.25,0,sweep+r*.25,0);g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop(.5,'rgba(255,255,255,.95)');g.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=g;ctx.fillRect(-r,-r,r*2,r*2);ctx.restore()}return}
     if(item.kind==='chrome'){const r=s*.48;ctx.fillStyle=gradient([[0,'#777'],[.16,'#fff'],[.32,'#a8b1c1'],[.5,'#fff'],[.7,'#737b8b'],[.86,'#fff'],[1,'#9098a6']],-r,-r,r,r);if(item.variant==='heart')heartPath(s);else starPath(s);ctx.fill();ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=2;ctx.stroke();return}
@@ -386,7 +265,7 @@
   }
   function drawElement(e,i,t,now){ctx.save();ctx.translate(e.x,e.y);ctx.rotate(e.rotation);ctx.textAlign='center';ctx.textBaseline='middle';if(e.type==='sticker'){const item=itemById(e.stickerId);if(item)drawMaterial(e,item,now)}else if(e.type==='scene-filmstrip')drawFilmStrip(e);else if(e.type==='scene-polaroid')drawPolaroid(e);else if(e.type==='scene-crop')drawSceneCrop(e);else if(e.type==='scene-scrap-note')drawScrapNote(e);else if(e.type==='scene-ticket')drawSceneTicket(e);else if(e.type==='scene-paper-scrap')drawScenePaperScrap(e);else if(e.type==='scene-tape')drawSceneTape(e);else if(e.type==='scene-chrome')drawSceneChrome(e);else if(e.type==='scene-clip')drawSceneClip(e);else if(e.textStyle==='date-label'){const label=String(e.value||'').slice(0,24),w=Math.max(150,label.length*12+34),h=40;ctx.shadowColor='rgba(37,54,84,.16)';ctx.shadowBlur=7;ctx.fillStyle='#edf3fc';roundedPath(-w/2,-h/2,w,h,4);ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle='rgba(62,86,126,.18)';ctx.lineWidth=1.5;ctx.stroke();ctx.fillStyle='#304b78';ctx.font=`700 ${Math.max(13,e.size)}px ui-monospace,monospace`;ctx.fillText(label,0,1)}else{ctx.font=e.textStyle==='handwritten'?`600 ${e.size}px "Segoe Print","Bradley Hand","Comic Sans MS",cursive`:`800 ${e.size}px system-ui,-apple-system,"Segoe UI",sans-serif`;if(theme==='stageblue'&&e.textStyle==='handwritten'){ctx.fillStyle='#173d80';const lines=String(e.value||'').split('\\n');const step=Math.max(18,e.size*1.05);lines.forEach((line,idx)=>ctx.fillText(line,0,(idx-(lines.length-1)/2)*step))}else{ctx.lineWidth=Math.max(3,e.size*(e.textStyle==='handwritten'?0.10:0.16));ctx.strokeStyle=theme==='midnight'?'#171724':'#fffdf8';ctx.strokeText(e.value,0,0);ctx.fillStyle=t.ink;ctx.fillText(e.value,0,0)}}if(i===selected){const r=elementRadius(e);ctx.strokeStyle='#7ff6c2';ctx.lineWidth=3;ctx.setLineDash([9,7]);ctx.strokeRect(-r,-r*.58,r*2,r*1.16);ctx.setLineDash([])}ctx.restore()}
   function statusText(){if(selected>=0)return`선택됨 · ${elements.length}/${limits.totalObjects}개 · 드래그해서 옮겨요`;if(photo&&sourceMeta?.source==='watch'){const who=sourceMeta.artist?`${sourceMeta.artist} · `:'';const when=Number.isFinite(Number(sourceMeta.time))?`${timeLabel(sourceMeta.time)} 장면`:'영상 장면';return`${who}${when}을 가져왔어요 ✨`}if(photo)return`꾸미는 중 · ${elements.length}/${limits.totalObjects}개`;return'사진을 먼저 골라주세요'}
-  function draw(now=performance.now()){const t=themes[theme];ctx.clearRect(0,0,W,H);const exact=theme==='stageblue'&&blueStageIsExact();if(exact)drawBlueStageExact();else if(theme==='stageblue'){drawBlueStageBackdrop();drawBlueStageMain()}else{drawBackdrop(t);drawFrame(t)}if(!exact)elements.forEach((e,i)=>drawElement(e,i,t,now));$('#selectionState').textContent=statusText()}
+  function draw(now=performance.now()){const t=themes[theme];ctx.clearRect(0,0,W,H);drawBackdrop(t);drawFrame(t);elements.forEach((e,i)=>drawElement(e,i,t,now));$('#selectionState').textContent=statusText()}
   function animationLoop(now){if(!reducedMotion&&document.visibilityState==='visible'&&elements.some(e=>e.type==='sticker'&&itemById(e.stickerId)?.motion))draw(now);requestAnimationFrame(animationLoop)}
   function canvasPoint(ev){const r=canvas.getBoundingClientRect();return{x:(ev.clientX-r.left)*W/r.width,y:(ev.clientY-r.top)*H/r.height}}
   function hitTest(p){for(let i=elements.length-1;i>=0;i--){const e=elements[i],r=elementRadius(e);if(Math.hypot(p.x-e.x,p.y-e.y)<=r*1.05)return i}return-1}
@@ -404,52 +283,20 @@
   function accessFor(item){const server=serverCatalogItem(item.id);if(server)return{unlocked:!!server.unlocked,visible:server.visible!==false,gifted:!!server.gifted,label:server.gifted?'선물받음':item.access==='points'?`${item.unlockCost}P`:'사용 가능'};const starter=item.access==='free'&&Number(item.minBand||1)<=1;return{unlocked:starter,visible:starter,gifted:false,label:starter?'사용 가능':'아직 비공개'}}
   function emitStyleState(){window.NUGU_TOPKKU_STYLE_STATE=styleState;window.dispatchEvent(new CustomEvent('nugu-topkku-style-state',{detail:styleState||null}))}
   function leafMark(profile){const g=profile?.growth||{},phase=Math.max(1,Math.min(5,Number(g.leafPhase||1)));return `<span class="growth-leaf-mark band-${Number(g.bandIndex||1)}" aria-label="${esc(g.title||'성장 중')}">${[1,2,3,4,5].map(i=>`<i class="${i<=phase?'grown':''}">❧</i>`).join('')}</span>`}
-  function previewGlyph(item){if(item.kind==='emoji')return item.value;return{tape:'▰',paper:'▤',pearl:'○',gem:'◆',chrome:item.variant==='heart'?'♡':'★',jelly:'♥',lace:'⌜',acrylic:'◉',frame:'▣',sparkle:'✦'}[item.kind]||'✦'}
+  function previewGlyph(item){if(item.kind==='emoji')return item.value;return{tape:'▰',paper:'▤',scrap:'▱',framepiece:'▣',label:'TAG',metal:'⌇',doodle:'☺',pearl:'○',gem:'◆',chrome:item.variant==='heart'?'♡':'★',jelly:'♥',lace:'⌜',acrylic:'◉',frame:'▣',sparkle:'✦'}[item.kind]||'✦'}
   function renderStickerProfile(){const root=$('#stickerProfile');if(!root)return;const identity=window.NUGU_AUTH?.getIdentitySync?.();if(!identity?.authenticated){root.innerHTML='<b>기본 꾸미기는 바로 가능 ♡</b><span>로그인하면 놀았던 방식대로 잎과 덕질 결이 자라요.</span>';return}const p=styleState?.profile;if(!p){root.innerHTML='<b>꾸미기 서랍 불러오는 중…</b><span>지금까지의 덕질 기록을 살펴보고 있어요.</span>';return}const trait=p.traits?.primary?.label||'둘러보는 중',secondary=(p.traits?.secondary||[]).map(x=>x.label).join(' · ');root.innerHTML=`<div class="growth-profile-line">${leafMark(p)}<div><b>${esc(p.growth?.title||'반가운 새잎')} · ${esc(trait)}</b><span>${secondary?esc(secondary)+' · ':''}사용 가능한 활동포인트 ${Number(p.points?.balance||0)}P</span></div></div>`}
   function renderStickerGrid(){const root=$('#stickerGrid');if(!root)return;const rows=catalog.items.filter(item=>{const a=accessFor(item);return a.visible&&(activeStickerPack==='all'||item.pack===activeStickerPack)});root.innerHTML=rows.length?rows.map(item=>{const a=accessFor(item),motion=item.motion&&!reducedMotion,visual=item.asset?`<img src="${esc(item.asset)}" alt="" loading="lazy" draggable="false">`:esc(previewGlyph(item));return `<button type="button" class="material-sticker ${a.unlocked?'':'locked'} ${a.gifted?'gifted-item':''} ${motion?'motion-item':''}" data-sticker-id="${esc(item.id)}" title="${esc(item.label)}"><span class="sticker-swatch kind-${esc(item.kind)} variant-${esc(item.variant||'base')} ${item.asset?'has-asset':''}">${visual}</span><b>${esc(item.label)}</b><small>${a.unlocked?(a.gifted?'🎁 선물받음':motion?'LIVE ✦':'사용 가능'):`🔒 ${esc(a.label)}`}</small></button>`}).join(''):'<div class="sticker-empty-band">지금 이 서랍에서 꺼낼 수 있는 꾸미기는 여기까지예요. ♡</div>';root.querySelectorAll('[data-sticker-id]').forEach(b=>b.onclick=()=>handleStickerClick(b.dataset.stickerId))}
   async function signedIdentity(message='이 기능은 로그인 후 사용할 수 있어요.'){let identity=null;try{identity=await window.NUGU_AUTH?.getIdentity?.()}catch{}if(identity?.authenticated&&identity.accessToken)return identity;const state=$('#webSaveState');if(state)state.textContent=message;window.NUGU_AUTH_UI?.signIn?.(location.href);return null}
   async function unlockSticker(item){const identity=await signedIdentity('희귀 스티커는 로그인 후 영구 해금할 수 있어요.');if(!identity)return;const balance=Number(styleState?.profile?.points?.balance||0);if(balance<Number(item.unlockCost||0)){guide(`${item.label}은 ${item.unlockCost}P가 필요해요. 지금은 ${balance}P 있어요.`);return}guide(`${item.label} 영구 해금 중…`);try{const r=await fetch(`${apiBase()}/api/v1/community/style/unlock/${encodeURIComponent(item.id)}`,{method:'POST',headers:{Accept:'application/json','Content-Type':'application/json',...(window.NUGU_AUTH?.authHeaders?.(identity)||{})},body:JSON.stringify({visitorId:identity.visitorId})});const data=await r.json().catch(()=>({}));if(!r.ok)throw Object.assign(new Error(data.error||'unlock_failed'),{code:data.error});styleState={profile:data.profile,items:data.items};renderStickerProfile();renderStickerGrid();emitStyleState();guide(`${item.label} 영구 해금 완료 ♡ 이제 횟수 차감 없이 계속 쓸 수 있어요.`)}catch(e){guide(e.code==='insufficient_style_points'?'포인트가 조금 부족해요. 덕질하다 보면 자연스럽게 쌓여요.':'지금은 해금하지 못했어요.')}}
   async function handleStickerClick(id){const item=itemById(id);if(!item)return;const access=accessFor(item);if(!access.unlocked){if(item.access==='points'){await unlockSticker(item);return}const identity=window.NUGU_AUTH?.getIdentitySync?.();if(!identity?.authenticated){await signedIdentity('꾸미기 서랍은 로그인 후 덕질 기록과 연결돼요.');return}guide('조금 더 놀다 보면 다음 꾸미기 서랍이 편지와 함께 열려요. ♡');return}if(item.asset){try{await ensureAsset(item)}catch{guide(`${item.label} 벡터 장식을 불러오지 못했어요. 다시 눌러줘.`);return}}addStickerItem(item)}
   async function loadStyleState(){const sync=window.NUGU_AUTH?.getIdentitySync?.();if(!sync?.authenticated){styleState=null;renderStickerProfile();renderStickerGrid();emitStyleState();return}try{const identity=await window.NUGU_AUTH.getIdentity();if(!identity?.authenticated)return;const r=await fetch(`${apiBase()}/api/v1/community/style/me?visitorId=${encodeURIComponent(identity.visitorId)}`,{headers:{Accept:'application/json',...(window.NUGU_AUTH?.authHeaders?.(identity)||{})},cache:'no-store'});const data=await r.json();if(!r.ok)throw new Error(data.error||'style_failed');styleState=data}catch(e){console.warn('style state',e);styleState=null}renderStickerProfile();renderStickerGrid();emitStyleState()}
-  function sceneCutsReady(){return sourceMeta?.source==='watch'&&sourceMeta?.videoOnly===true&&sourceMeta?.manualCapture!==true&&!!String(sourceMeta?.videoId||'').trim()&&!!sourceMeta?.image&&!!apiBase()}
-  function renderSceneCutAvailability(){const ok=sceneCutsReady();for(const id of ['addFilmStrip','addPolaroidCut','buildBlueStage']){const b=$('#'+id);if(b){b.disabled=!ok;b.title=ok?(id==='buildBlueStage'?'현재 Watch 장면을 실제 Topkku 오브젝트로 Blue Stage 구성합니다.':'같은 Watch 영상의 인접 프레임을 가져옵니다.'):'Watch에서 가져온 장면에서 사용할 수 있어요.'}}}
-  async function fetchWatchSceneFrame(at){
-    const videoId=String(sourceMeta?.videoId||'').trim(),base=apiBase(),time=Math.max(0,Number(at)||0);
-    if(!videoId||!base)throw new Error('watch_scene_unavailable');
-    const ac=new AbortController(),timer=setTimeout(()=>ac.abort(),28000);
-    try{
-      const r=await fetch(base+'/api/v1/media/youtube-frame',{method:'POST',headers:{'Content-Type':'application/json',Accept:'image/jpeg'},body:JSON.stringify({videoId,time}),signal:ac.signal});
-      if(!r.ok)throw new Error('related_frame_failed');
-      const blob=await r.blob(),image=await blobDataUrl(blob);
-      const width=Number(r.headers.get('X-NUGU-Frame-Width')||0),height=Number(r.headers.get('X-NUGU-Frame-Height')||0),capturedTime=Number(r.headers.get('X-NUGU-Frame-Time')||time);
-      if(!image||width<64||height<64)throw new Error('related_frame_invalid');
-      await ensureSceneImage(image);return{image,width,height,time:capturedTime};
-    }finally{clearTimeout(timer)}
-  }
-  async function addFilmStripFromWatch(){
-    if(!sceneCutsReady()){guide('필름 3컷은 Watch에서 가져온 실제 영상 장면으로 시작할 때 만들 수 있어요.');return}
-    if(elements.length>=limits.totalObjects){guide(`한 작품에는 최대 ${limits.totalObjects}개까지 붙일 수 있어요.`);return}
-    const base=Math.max(0,Number(sourceMeta.time)||0);guide('같은 영상의 바로 앞·뒤 장면을 가져오는 중…');
-    try{
-      await ensureSceneImage(sourceMeta.image);
-      const before=await fetchWatchSceneFrame(Math.max(0,base-.45));const after=await fetchWatchSceneFrame(base+.45);
-      saveHistory();elements.push({type:'scene-filmstrip',images:[before.image,sourceMeta.image,after.image],label:String(sourceMeta.artist||'FILM 400'),x:105,y:360,size:132,rotation:-.035});selected=elements.length-1;guide('같은 순간의 앞·현재·뒤 프레임을 필름 3컷으로 붙였어 ♡');draw();
-    }catch(e){console.warn('film strip scene cuts',e);guide('같은 영상의 인접 프레임을 가져오지 못했어요. 메인 장면은 그대로 유지돼요.')}
-  }
-  async function addPolaroidFromWatch(){
-    if(!sceneCutsReady()){guide('폴라로이드 컷은 Watch에서 가져온 실제 영상 장면으로 시작할 때 만들 수 있어요.');return}
-    if(elements.length>=limits.totalObjects){guide(`한 작품에는 최대 ${limits.totalObjects}개까지 붙일 수 있어요.`);return}
-    const base=Math.max(0,Number(sourceMeta.time)||0);guide('같은 영상에서 폴라로이드로 남길 인접 장면을 가져오는 중…');
-    try{
-      const shot=await fetchWatchSceneFrame(base+.65);saveHistory();elements.push({type:'scene-polaroid',image:shot.image,caption:'favorite cut ♡',x:W-122,y:190,size:122,rotation:.055});selected=elements.length-1;guide('같은 영상의 인접 장면을 폴라로이드로 붙였어 ♡');draw();
-    }catch(e){console.warn('polaroid scene cut',e);guide('폴라로이드용 인접 프레임을 가져오지 못했어요. 메인 장면은 그대로 유지돼요.')}
-  }
+  function renderSceneCutAvailability(){const b=$('#buildBlueStage');if(b){b.disabled=!photo;b.title=photo?'베이스이미지 1장 위에 등록된 꾸미기스티커만 배치합니다.':'베이스이미지를 먼저 골라주세요.'}}
   function presetSticker(id,fallbackId,props={}){
     const candidates=[id,fallbackId].filter(Boolean);
     for(const candidate of candidates){
       const item=itemById(candidate);if(!item)continue;
       const access=accessFor(item);if(!access.unlocked)continue;
-      return {type:'sticker',stickerId:item.id,value:props.value??item.value??'',x:props.x??W/2,y:props.y??H/2,size:props.size??(item.kind==='tape'?90:76),rotation:props.rotation??0,preset:'blue-stage'};
+      const value=props.value??(item.dynamic==='artist'?String(selectedArtist?.name||sourceMeta?.artist||'MY PICK').slice(0,18):item.dynamic==='date'?capturedDateLabel():item.value??'');return {type:'sticker',stickerId:item.id,value,x:props.x??W/2,y:props.y??H/2,size:props.size??(Number(item.defaultSize||0)||(item.kind==='tape'?90:76)),rotation:props.rotation??0,preset:'blue-stage'};
     }
     return null;
   }
@@ -461,75 +308,40 @@
     return `${yyyy} . ${mm} . ${dd}`;
   }
   async function buildBlueStageReconstruction(){
-    if(!sceneCutsReady()){guide('Blue Stage 조립은 Watch에서 가져온 실제 영상 장면으로 시작할 때 사용할 수 있어요.');return}
+    if(!photo){guide('베이스이미지를 먼저 골라줘 ♡');return}
     const button=$('#buildBlueStage');if(button?.disabled)return;
-    const base=Math.max(0,Number(sourceMeta.time)||0),artistLabel=String(sourceMeta.artist||'8TURN').trim().slice(0,14)||'8TURN';
-    if(button){button.disabled=true;button.textContent='장면 정밀 매칭 중…'}
-    guide('원 시안 좌표에 맞춰 메인컷·필름·폴라로이드·메모·티켓을 정밀 조립하는 중…');
-    try{
-      await ensureSceneImage(sourceMeta.image);
-      const exactRoleFrames=await fetchBlueStageExactRoleFrames().catch(e=>{console.warn('blue stage exact role frames',e);return null});
-      let mainSrc,alt1,alt2,alt3,ranked=[];
-      if(exactRoleFrames){
-        blueStageExactFrames=exactRoleFrames;
-        mainSrc=exactRoleFrames.main;alt1=exactRoleFrames.polaroid;alt2=exactRoleFrames.lowerFace;alt3=exactRoleFrames.lowerStage;
-        blueStageMainSrc=mainSrc;
-      }else{
-        const fetched=[];for(const off of [-1.20,-.58,.58,1.20])fetched.push(await fetchWatchSceneFrame(Math.max(0,base+off)));
-        ranked=await pickBlueStageFrames([sourceMeta.image,...fetched.map(x=>x.image)]);
-        mainSrc=ranked[0]||sourceMeta.image;alt1=ranked[1]||fetched[2]?.image||sourceMeta.image;alt2=ranked[2]||fetched[0]?.image||sourceMeta.image;alt3=ranked[3]||fetched[3]?.image||alt1;
-        blueStageMainSrc=mainSrc;await ensureSceneImage(mainSrc);
-        const exactCandidates=[mainSrc,alt1,alt2,alt3,...ranked].filter(Boolean);
-        for(const src of [...new Set(exactCandidates)])await ensureSceneImage(src);
-        blueStageExactFrames={main:mainSrc,film1:alt1,film2:alt2,film3:alt3,polaroid:alt1,lowerFace:alt2,lowerStage:alt3};
-      }
-      const B=BLUE_STAGE,date=String(capturedDateLabel()||'').replaceAll(' · ','  ');
-      const additions=[
-        {type:'scene-paper-scrap',x:350,y:80,size:92,aspect:2.45,color:'#f2f0ea',rotation:-.055,seed:101,preset:'blue-stage'},
-        {type:'scene-filmstrip',images:exactRoleFrames?[exactRoleFrames.film1,exactRoleFrames.film2,exactRoleFrames.film3]:[alt1,alt2,alt3],label:'KODAK 400',artistLabel:artistLabel.toUpperCase(),x:B.film.x,y:B.film.y,size:B.film.size,rotation:B.film.rotation,preset:'blue-stage'},
-        {type:'scene-polaroid',image:exactRoleFrames?.polaroid||alt1,caption:'favorite cut ♡',x:B.polaroid.x,y:B.polaroid.y,size:B.polaroid.size,rotation:B.polaroid.rotation,preset:'blue-stage'},
-        {type:'scene-paper-scrap',x:632,y:430,size:86,aspect:1.12,color:'#f4f2ea',rotation:-.060,seed:102,lines:true,preset:'blue-stage'},
-        {type:'scene-paper-scrap',x:646,y:650,size:118,aspect:1.18,color:'#f2f0e9',rotation:-.050,seed:103,lines:false,preset:'blue-stage'},
-        {type:'scene-ticket',value:artistLabel.toUpperCase(),detail:`DATE  ${date}\nAREA  STAGE\nSEAT  08`,x:B.ticket.x,y:B.ticket.y,size:B.ticket.size,rotation:B.ticket.rotation,preset:'blue-stage'},
-        {type:'scene-scrap-note',lines:['Same moment','Different feelings',"You're always",'my special one. ♡'],x:B.note.x,y:B.note.y,size:B.note.size,rotation:B.note.rotation,preset:'blue-stage'},
-        {type:'scene-crop',image:exactRoleFrames?.lowerFace||alt2,x:B.lowerFace.x,y:B.lowerFace.y,size:B.lowerFace.size,aspect:B.lowerFace.aspect,focusX:B.lowerFace.focusX,focusY:B.lowerFace.focusY,rotation:B.lowerFace.rotation,preset:'blue-stage'},
-        {type:'scene-crop',image:exactRoleFrames?.lowerStage||alt3,x:B.lowerStage.x,y:B.lowerStage.y,size:B.lowerStage.size,aspect:B.lowerStage.aspect,focusX:B.lowerStage.focusX,focusY:B.lowerStage.focusY,rotation:B.lowerStage.rotation,preset:'blue-stage'},
-        {type:'scene-tape',x:150,y:38,size:86,rotation:-.14,variant:'blue',seed:111,preset:'blue-stage'},
-        {type:'scene-tape',x:540,y:36,size:76,rotation:.08,variant:'blue',seed:112,preset:'blue-stage'},
-        {type:'scene-tape',x:84,y:573,size:72,rotation:.12,variant:'blue',seed:113,preset:'blue-stage'},
-        {type:'scene-tape',x:654,y:548,size:70,rotation:-.12,variant:'blue',seed:114,preset:'blue-stage'},
-        {type:'scene-tape',x:262,y:804,size:84,rotation:-.02,variant:'blue',seed:115,preset:'blue-stage'},
-        {type:'scene-tape',x:560,y:822,size:80,rotation:.08,variant:'blue',seed:116,preset:'blue-stage'},
-        {type:'scene-tape',x:88,y:1010,size:78,rotation:-.09,variant:'blue',seed:117,preset:'blue-stage'},
-        {type:'scene-tape',x:340,y:1032,size:84,rotation:.04,variant:'black',seed:118,preset:'blue-stage'},
-        {type:'scene-tape',x:474,y:1024,size:70,rotation:-.08,variant:'blue',seed:119,preset:'blue-stage'},
-        {type:'scene-tape',x:650,y:1000,size:68,rotation:.08,variant:'white',seed:120,preset:'blue-stage'},
-        {type:'scene-chrome',variant:'star',x:466,y:100,size:50,rotation:.14,preset:'blue-stage'},
-        {type:'scene-clip',x:690,y:76,size:66,rotation:.12,preset:'blue-stage'},
-        {type:'scene-chrome',variant:'heart',x:660,y:276,size:66,rotation:-.12,preset:'blue-stage'},
-        {type:'scene-chrome',variant:'star',x:650,y:388,size:46,rotation:.18,preset:'blue-stage'},
-        {type:'scene-chrome',variant:'star',x:490,y:870,size:50,rotation:-.10,preset:'blue-stage'},
-        {type:'scene-chrome',variant:'heart',x:40,y:800,size:40,rotation:.08,preset:'blue-stage'},
-        {type:'scene-chrome',variant:'star',x:220,y:720,size:36,rotation:.18,preset:'blue-stage'},
-        {type:'scene-chrome',variant:'star',x:438,y:1018,size:38,rotation:-.18,preset:'blue-stage'},
-        {type:'text',value:capturedDateLabel(),textStyle:'date-label',x:B.date.x,y:B.date.y,size:B.date.size,rotation:B.date.rotation,preset:'blue-stage'},
-        {type:'text',value:'my pick ♡',textStyle:'handwritten',x:B.pick.x,y:B.pick.y,size:B.pick.size,rotation:B.pick.rotation,preset:'blue-stage'},
-        {type:'text',value:'saved\ntonight!',textStyle:'handwritten',x:B.saved.x,y:B.saved.y,size:B.saved.size,rotation:B.saved.rotation,preset:'blue-stage'},
-        {type:'text',value:artistLabel.toUpperCase()+' ♡',textStyle:'handwritten',x:B.artistNote.x,y:B.artistNote.y,size:B.artistNote.size,rotation:B.artistNote.rotation,preset:'blue-stage'}
-      ];
-      const retained=elements.filter(e=>e.preset!=='blue-stage');
-      if(retained.length+additions.length>limits.totalObjects)throw new Error('preset_object_limit');
-      saveHistory();elements=[...retained,...additions];theme='stageblue';photoView={zoom:1,x:0,y:0};selected=-1;
-      $$('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme==='stageblue'));
-      guide(blueStageIsExact()?'Blue Stage 원본 시안 오버레이 매칭 완료 · 실제 영상 프레임을 원본 사진창에 합성했어.':'Blue Stage 원 시안 좌표 매칭 완료 · 메인 장면은 인접 프레임 중 얼굴/블루톤/선명도 기준으로 자동 선택했어.');
-      draw();
-    }catch(e){
-      console.warn('blue stage reconstruction',e);blueStageMainSrc='';blueStageExactFrames=null;
-      guide(e.message==='preset_object_limit'?'현재 장식이 많아서 Blue Stage 조각을 한 번에 더 붙일 수 없어요.':'같은 영상의 인접 장면을 가져오지 못해서 Blue Stage 조립을 시작하지 않았어요.');
-    }finally{if(button){button.disabled=!sceneCutsReady();button.textContent='Blue Stage 조립'}}
+    const artistLabel=String(selectedArtist?.name||sourceMeta?.artist||'MY PICK').trim().slice(0,18)||'MY PICK';
+    const additions=[
+      presetSticker('paper-scrap-blue','tape-blue',{x:118,y:84,size:124,rotation:-.12}),
+      presetSticker('paper-scrap-white','note-paper',{x:562,y:96,size:108,rotation:.08}),
+      presetSticker('tape-blue',null,{x:170,y:165,size:98,rotation:-.10}),
+      presetSticker('tape-black','tape-blue',{x:541,y:182,size:92,rotation:.09}),
+      presetSticker('film-frame-empty','paper-scrap-black',{x:116,y:320,size:118,rotation:-.055}),
+      presetSticker('polaroid-empty','paper-scrap-white',{x:590,y:285,size:118,rotation:.06}),
+      presetSticker('paper-scrap-grid','paper-scrap-white',{x:573,y:500,size:98,rotation:-.05}),
+      presetSticker('paper-scrap-black','paper-scrap-blue',{x:112,y:620,size:110,rotation:.055}),
+      presetSticker('tape-beige','tape-blue',{x:164,y:744,size:96,rotation:.10}),
+      presetSticker('paper-scrap-white','note-paper',{x:521,y:760,size:112,rotation:-.07}),
+      presetSticker('artist-tag','note-paper',{x:204,y:905,size:106,rotation:-.065,value:artistLabel.toUpperCase()}),
+      presetSticker('captured-date-tag','date-strip',{x:492,y:938,size:88,rotation:.028,value:capturedDateLabel()}),
+      presetSticker('paperclip-silver','sparkle',{x:73,y:182,size:76,rotation:.18}),
+      presetSticker('doodle-smile','heart-outline',{x:622,y:828,size:72,rotation:-.08}),
+      presetSticker('silver-star','star',{x:623,y:150,size:60,rotation:.14}),
+      presetSticker('chrome-heart','heart-outline',{x:91,y:478,size:64,rotation:-.14}),
+      presetSticker('heart-outline',null,{x:616,y:620,size:58,rotation:.08}),
+      presetSticker('star',null,{x:104,y:846,size:52,rotation:-.16}),
+      presetSticker('tape-blue',null,{x:342,y:1014,size:108,rotation:-.02}),
+      presetSticker('paper-scrap-blue','tape-blue',{x:590,y:1030,size:100,rotation:.06})
+    ].filter(Boolean);
+    const retained=elements.filter(e=>e.preset!=='blue-stage');
+    if(retained.length+additions.length>limits.totalObjects){guide('현재 붙어 있는 스티커가 많아서 시안을 한 번에 더 붙일 수 없어요.');return}
+    saveHistory();elements=[...retained,...additions];theme='stageblue';photoView={...photoView};selected=-1;
+    $$('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme==='stageblue'));
+    guide('베이스이미지 1장 + 실제 꾸미기스티커만으로 스크랩북 시안을 배치했어 ♡');
+    draw();
   }
-  function setArtist(artist){const next=artist?.slug?{slug:String(artist.slug).toLowerCase(),name:String(artist.name||artist.korean_name||artist.slug)}:null;if(selectedArtist?.slug!==next?.slug)markDirty();selectedArtist=next;const box=$('#topkkuArtistConnected');if(box)box.innerHTML=selectedArtist?`<b>${esc(selectedArtist.name)}</b><span>웹 보관함과 아지트 공개 대상을 이 팀으로 연결했어요.</span>`:'아직 팀이 연결되지 않았어요.';const results=$('#topkkuArtistResults');if(results)results.innerHTML='';const input=$('#topkkuArtistSearch');if(input&&selectedArtist)input.value=selectedArtist.name}
-  function loadPhotoData(src,meta=null){if(!src)return;blueStageMainSrc='';blueStageExactFrames=null;const img=new Image();img.onload=()=>{photo=img;photoView=defaultPhotoView();sourceMeta=meta;configurePhotoBox(img,meta);compositionEventKey=newCompositionKey();currentSavedId=null;currentSavedPublished=false;lastSavedEventKey='';if(meta?.artistSlug)setArtist({slug:meta.artistSlug,name:meta.artist||meta.artistSlug});selected=-1;renderSceneCutAvailability();draw();renderSaveState()};img.onerror=()=>{sourceMeta=null;resetPhotoBox();compositionEventKey='';renderSceneCutAvailability();draw()};img.src=src}
+  function setArtist(artist){const next=artist?.slug?{slug:String(artist.slug).toLowerCase(),name:String(artist.name||artist.korean_name||artist.slug)}:null;if(selectedArtist?.slug!==next?.slug)markDirty();selectedArtist=next;for(const e of elements){if(e.type==='sticker'&&itemById(e.stickerId)?.dynamic==='artist')e.value=String(selectedArtist?.name||sourceMeta?.artist||'MY PICK').slice(0,18)}const box=$('#topkkuArtistConnected');if(box)box.innerHTML=selectedArtist?`<b>${esc(selectedArtist.name)}</b><span>웹 보관함과 아지트 공개 대상을 이 팀으로 연결했어요.</span>`:'아직 팀이 연결되지 않았어요.';const results=$('#topkkuArtistResults');if(results)results.innerHTML='';const input=$('#topkkuArtistSearch');if(input&&selectedArtist)input.value=selectedArtist.name}
+  function loadPhotoData(src,meta=null){if(!src)return;const img=new Image();img.onload=()=>{photo=img;photoView=defaultPhotoView();sourceMeta=meta;configurePhotoBox(img,meta);compositionEventKey=newCompositionKey();currentSavedId=null;currentSavedPublished=false;lastSavedEventKey='';if(meta?.artistSlug)setArtist({slug:meta.artistSlug,name:meta.artist||meta.artistSlug});selected=-1;renderSceneCutAvailability();draw();renderSaveState()};img.onerror=()=>{sourceMeta=null;resetPhotoBox();compositionEventKey='';renderSceneCutAvailability();draw()};img.src=src}
   function loadIncoming(){let raw='';try{raw=sessionStorage.getItem('nuguTopkkuIncoming')||'';sessionStorage.removeItem('nuguTopkkuIncoming')}catch{}if(!raw)return false;try{const data=JSON.parse(raw);if(!data?.image)return false;loadPhotoData(data.image,data);return true}catch{return false}}
   canvas.addEventListener('pointerdown',ev=>{const p=canvasPoint(ev),i=hitTest(p);selected=i;if(i>=0){markDirty();drag={dx:p.x-elements[i].x,dy:p.y-elements[i].y,before:{...elements[i]}};canvas.setPointerCapture?.(ev.pointerId)}draw()});
   canvas.addEventListener('pointermove',ev=>{if(!drag||selected<0)return;const p=canvasPoint(ev),e=elements[selected];e.x=clamp(p.x-drag.dx,24,W-24);e.y=clamp(p.y-drag.dy,24,H-24);draw()});
@@ -541,11 +353,11 @@
   $$('#stickerPackTabs [data-sticker-pack]').forEach(b=>b.addEventListener('click',()=>{activeStickerPack=b.dataset.stickerPack;$$('#stickerPackTabs [data-sticker-pack]').forEach(x=>x.classList.toggle('active',x===b));renderStickerGrid()}));
   $('#addText').addEventListener('click',()=>addText($('#textInput').value));$('#textInput').addEventListener('keydown',e=>{if(e.key==='Enter')addText(e.currentTarget.value)});
   $$('.quick-copy [data-copy]').forEach(b=>b.addEventListener('click',()=>addText(b.dataset.copy,b.dataset.textStyle||'default')));
-  $('#addFilmStrip')?.addEventListener('click',()=>addFilmStripFromWatch());$('#addPolaroidCut')?.addEventListener('click',()=>addPolaroidFromWatch());$('#buildBlueStage')?.addEventListener('click',()=>buildBlueStageReconstruction());
+  $('#buildBlueStage')?.addEventListener('click',()=>buildBlueStageReconstruction());
   function editSelected(fn){if(selected<0)return;saveHistory();fn(elements[selected]);draw()}
   $('#smaller').onclick=()=>editSelected(e=>e.size=clamp(e.size*.88,18,180));$('#bigger').onclick=()=>editSelected(e=>e.size=clamp(e.size*1.12,18,180));$('#rotateLeft').onclick=()=>editSelected(e=>e.rotation-=Math.PI/18);$('#rotateRight').onclick=()=>editSelected(e=>e.rotation+=Math.PI/18);$('#deleteElement').onclick=()=>{if(selected<0)return;saveHistory();elements.splice(selected,1);selected=-1;draw()};
   $('#undoBtn').onclick=()=>restore(history.pop());
-  $('#resetBtn').onclick=()=>{if(!photo&&!elements.length&&theme==='lavender')return;saveHistory();photo=null;blueStageMainSrc='';blueStageExactFrames=null;photoView=defaultPhotoView();sourceMeta=null;resetPhotoBox();compositionEventKey='';elements=[];selected=-1;theme='lavender';currentSavedId=null;currentSavedPublished=false;lastSavedEventKey='';setArtist(null);renderSceneCutAvailability();$$('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme==='lavender'));$('#photoInput').value='';draw();renderSaveState()};
+  $('#resetBtn').onclick=()=>{if(!photo&&!elements.length&&theme==='lavender')return;saveHistory();photo=null;photoView=defaultPhotoView();sourceMeta=null;resetPhotoBox();compositionEventKey='';elements=[];selected=-1;theme='lavender';currentSavedId=null;currentSavedPublished=false;lastSavedEventKey='';setArtist(null);renderSceneCutAvailability();$$('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme==='lavender'));$('#photoInput').value='';draw();renderSaveState()};
   function visitorId(){const a=window.NUGU_AUTH?.getIdentitySync?.();if(a?.visitorId)return a.visitorId;let id=localStorage.getItem('nuguVisitorId');if(!id){id=(crypto.randomUUID?.()||`${Date.now()}-${Math.random()}`).replace(/[^A-Za-z0-9_-]/g,'');localStorage.setItem('nuguVisitorId',id)}return id}
   async function searchArtists(q){const root=$('#topkkuArtistResults'),base=apiBase();if(!root||!base||q.trim().length<1){if(root)root.innerHTML='';return}try{const r=await fetch(`${base}/api/v1/search?q=${encodeURIComponent(q.trim())}`,{headers:{Accept:'application/json'},cache:'no-store'});const data=await r.json();const rows=(data.items||[]).slice(0,6);root.innerHTML=rows.length?rows.map(a=>`<button type="button" data-topkku-artist="${esc(a.slug)}" data-topkku-name="${esc(a.name)}">${a.image_url?`<img src="${esc(a.image_url)}" alt="">`:''}<span><b>${esc(a.name)}</b><small>${esc(a.korean_name||a.agency||'')}</small></span></button>`).join(''):'<div class="topkku-team-empty">검색되는 팀이 없어요.</div>';root.querySelectorAll('[data-topkku-artist]').forEach(b=>b.onclick=()=>setArtist({slug:b.dataset.topkkuArtist,name:b.dataset.topkkuName}))}catch{root.innerHTML='<div class="topkku-team-empty">팀 검색을 잠시 불러오지 못했어요.</div>'}}
   $('#topkkuArtistSearch')?.addEventListener('input',e=>{clearTimeout(searchTimer);const q=e.currentTarget.value;searchTimer=setTimeout(()=>searchArtists(q),220)});
