@@ -127,15 +127,21 @@
     glow.addColorStop(0,'rgba(42,92,176,.72)');glow.addColorStop(.46,'rgba(18,48,94,.45)');glow.addColorStop(1,'rgba(7,12,23,0)');
     ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
     const patches=[
-      [0,-8,240,88,'#e9edf4',-.035,11,.95],[118,4,280,74,'#285b9e',.035,12,.98],[360,-2,260,82,'#0b1019',-.04,13,.98],[545,0,190,110,'#eef0f2',.045,14,.96],
-      [-28,116,155,260,'#315f9f',-.08,15,.9],[-20,360,140,245,'#eef0f2',.04,16,.92],[612,330,140,245,'#28548d',-.04,17,.92],[600,565,150,255,'#eef0f2',.05,18,.92],
-      [-25,790,240,118,'#2d5e9f',-.04,19,.94],[100,932,250,135,'#eef0f2',.025,20,.95],[320,962,260,122,'#0c111b',-.035,21,.96],[535,900,220,175,'#2b5996',.04,22,.95],
-      [18,710,230,78,'#0b1019',.03,23,.84],[500,725,230,80,'#0c111b',-.04,24,.88],[22,1025,255,70,'#e9edf4',-.025,25,.9],[458,1020,285,72,'#e9edf4',.03,26,.9]
+      [-8,-10,245,82,'#0a101b',-.035,11,.99],[112,4,300,70,'#23518e',.035,12,.99],[354,-4,265,88,'#0b1019',-.04,13,.99],[575,2,155,92,'#e7e9ea',.045,14,.90],
+      [-35,92,150,250,'#244f8a',-.08,15,.96],[-28,300,132,210,'#0a1019',.04,16,.96],[-28,500,145,235,'#e9eaeb',-.03,17,.82],[-24,690,155,210,'#214a82',.05,18,.95],
+      [610,100,135,230,'#214c87',-.04,19,.96],[612,300,135,215,'#0a1019',.05,20,.98],[612,500,140,200,'#e8eaed',-.04,21,.82],[604,690,150,215,'#234f8c',.05,22,.96],
+      [-24,830,245,110,'#0a1019',-.04,23,.98],[82,930,270,138,'#e7e9ec',.025,24,.88],[300,945,300,130,'#09101b',-.035,25,.99],[520,900,235,172,'#255590',.04,26,.97],
+      [20,735,260,76,'#214d88',.03,27,.96],[465,760,275,76,'#09101a',-.04,28,.98],[10,1018,275,70,'#214e8c',-.025,29,.96],[430,1010,320,76,'#e6e8eb',.03,30,.84],
+      [115,850,195,55,'#e8e9ea',-.06,31,.72],[510,850,190,58,'#24538f',.05,32,.92]
     ];
     patches.forEach(p=>drawTornPatch(...p));
-    ctx.save();ctx.globalAlpha=.23;ctx.strokeStyle='#d7e4f6';ctx.lineWidth=1;
-    for(let i=0;i<70;i++){const x=stageNoise(100+i)*W,y=stageNoise(300+i)*H,len=10+stageNoise(500+i)*42;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+len,y+(stageNoise(700+i)-.5)*10);ctx.stroke()}
-    ctx.globalAlpha=.18;ctx.fillStyle='#fff';for(let i=0;i<95;i++){const x=stageNoise(900+i)*W,y=stageNoise(1200+i)*H,r=.5+stageNoise(1500+i)*1.8;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill()}ctx.restore();
+    ctx.save();ctx.globalAlpha=.28;ctx.strokeStyle='#d7e4f6';ctx.lineWidth=1;
+    for(let i=0;i<95;i++){const x=stageNoise(100+i)*W,y=stageNoise(300+i)*H,len=10+stageNoise(500+i)*48;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+len,y+(stageNoise(700+i)-.5)*12);ctx.stroke()}
+    ctx.globalAlpha=.18;ctx.fillStyle='#fff';for(let i=0;i<130;i++){const x=stageNoise(900+i)*W,y=stageNoise(1200+i)*H,r=.5+stageNoise(1500+i)*1.8;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill()}
+    ctx.globalAlpha=.42;ctx.strokeStyle='#edf5ff';ctx.lineWidth=2.2;
+    const scribbles=[[80,92,116,72],[558,350,630,318],[570,620,650,585],[270,850,330,820],[500,880,560,840]];
+    for(const [x1,y1,x2,y2] of scribbles){ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.lineTo(x1+18,y2+18);ctx.lineTo(x2-10,y1+22);ctx.stroke()}
+    ctx.restore();
   }
   function drawBlueStageMain(){
     const x=168,y=148,w=490,h=656;
@@ -144,7 +150,8 @@
     ctx.save();tornPaperPath(x,y,w,h,73,14,9);ctx.clip();
     if(photo){
       drawStaticCoverFocus(photo,x,y,w,h,.53,.48);
-      const wash=ctx.createLinearGradient(x,y,x+w,y+h);wash.addColorStop(0,'rgba(18,77,160,.05)');wash.addColorStop(.58,'rgba(8,36,85,.04)');wash.addColorStop(1,'rgba(5,15,34,.22)');ctx.fillStyle=wash;ctx.fillRect(x,y,w,h);
+      ctx.save();ctx.globalCompositeOperation='soft-light';ctx.fillStyle='rgba(35,96,196,.48)';ctx.fillRect(x,y,w,h);ctx.restore();
+      const wash=ctx.createLinearGradient(x,y,x+w,y+h);wash.addColorStop(0,'rgba(35,100,205,.12)');wash.addColorStop(.55,'rgba(10,42,96,.05)');wash.addColorStop(1,'rgba(3,12,28,.26)');ctx.fillStyle=wash;ctx.fillRect(x,y,w,h);
     }else{ctx.fillStyle='#18263c';ctx.fillRect(x,y,w,h);ctx.fillStyle='#d5dfef';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='700 26px system-ui,sans-serif';ctx.fillText('최애 장면을 가져와주세요',x+w/2,y+h/2)}
     ctx.restore();
     drawTornPatch(x-12,y+h-22,w*.72,38,'#eef0f2',-.018,74,.95);
@@ -205,7 +212,7 @@
   function drawSceneTicket(e){
     const s=e.size,w=s*2.16,h=s*1.18;
     ctx.save();ctx.shadowColor='rgba(37,54,84,.16)';ctx.shadowBlur=9;ctx.shadowOffsetY=5;
-    ctx.fillStyle='#f6ead4';roundedPath(-w/2,-h/2,w,h,7);ctx.fill();ctx.shadowBlur=0;
+    ctx.fillStyle='#d9dfe7';roundedPath(-w/2,-h/2,w,h,7);ctx.fill();ctx.shadowBlur=0;
     ctx.strokeStyle='rgba(74,87,112,.20)';ctx.lineWidth=1.5;ctx.stroke();
     ctx.setLineDash([5,5]);ctx.beginPath();ctx.moveTo(-w*.27,-h*.34);ctx.lineTo(-w*.27,h*.34);ctx.stroke();ctx.setLineDash([]);
     ctx.fillStyle='#233c68';ctx.textAlign='left';ctx.font=`900 ${Math.max(14,s*.22)}px ui-monospace,monospace`;ctx.fillText(String(e.value||'WATCH CUT').slice(0,18),-w*.17,-h*.24);
@@ -355,8 +362,8 @@
         {type:'scene-paper-scrap',x:615,y:490,size:88,aspect:1.28,color:'#f4f2ea',rotation:-.065,seed:102,lines:true,preset:'blue-stage'},
         {type:'scene-ticket',value:artistLabel.toUpperCase(),detail:`LIVE MOMENT\nSCENE ${timeLabel(base)}\nOUR MOMENTS`,x:108,y:696,size:92,rotation:-.055,preset:'blue-stage'},
         {type:'scene-scrap-note',lines:['Same moment','Different feelings',"You're always",'my special one. ♡'],x:116,y:908,size:90,rotation:-.045,preset:'blue-stage'},
-        {type:'scene-crop',image:sourceMeta.image,x:405,y:967,size:132,aspect:1.04,focusX:.51,focusY:.27,rotation:-.04,preset:'blue-stage'},
-        {type:'scene-crop',image:after.image,x:605,y:952,size:124,aspect:1.42,focusX:.53,focusY:.64,rotation:.045,preset:'blue-stage'},
+        {type:'scene-crop',image:sourceMeta.image,x:398,y:968,size:154,aspect:1.10,focusX:.51,focusY:.27,rotation:-.04,preset:'blue-stage'},
+        {type:'scene-crop',image:after.image,x:605,y:954,size:146,aspect:1.36,focusX:.53,focusY:.64,rotation:.045,preset:'blue-stage'},
         {type:'scene-tape',x:164,y:44,size:80,rotation:-.14,variant:'blue',seed:111,preset:'blue-stage'},
         {type:'scene-tape',x:570,y:38,size:72,rotation:.08,variant:'blue',seed:112,preset:'blue-stage'},
         {type:'scene-tape',x:76,y:575,size:68,rotation:.13,variant:'blue',seed:113,preset:'blue-stage'},
@@ -369,7 +376,9 @@
         {type:'scene-chrome',variant:'heart',x:660,y:280,size:54,rotation:-.12,preset:'blue-stage'},
         {type:'scene-chrome',variant:'star',x:626,y:425,size:43,rotation:.18,preset:'blue-stage'},
         {type:'scene-chrome',variant:'star',x:455,y:926,size:38,rotation:-.10,preset:'blue-stage'},
-        {type:'scene-chrome',variant:'heart',x:54,y:812,size:34,rotation:.08,preset:'blue-stage'},
+        {type:'scene-chrome',variant:'heart',x:54,y:812,size:40,rotation:.08,preset:'blue-stage'},
+        {type:'scene-chrome',variant:'star',x:215,y:586,size:34,rotation:.18,preset:'blue-stage'},
+        {type:'scene-chrome',variant:'star',x:690,y:700,size:32,rotation:-.18,preset:'blue-stage'},
         {type:'text',value:capturedDateLabel(),textStyle:'date-label',x:350,y:830,size:15,rotation:-.025,preset:'blue-stage'},
         {type:'text',value:'my pick ♡',textStyle:'handwritten',x:360,y:86,size:38,rotation:-.045,preset:'blue-stage'},
         {type:'text',value:'saved tonight!',textStyle:'handwritten',x:612,y:490,size:27,rotation:.055,preset:'blue-stage'},
