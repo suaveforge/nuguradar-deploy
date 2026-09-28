@@ -89,22 +89,22 @@
   }
   const BLUE_STAGE_EXACT_VIDEO='WxL5cNNelLk';
   const BLUE_STAGE_EXACT_TIMES=Object.freeze({
-    main:140,
-    film1:61,
-    film2:63.5,
-    film3:70,
+    main:95,
+    film1:60,
+    film2:61,
+    film3:63.5,
     polaroid:61,
-    lowerFace:63.5,
-    lowerStage:136
+    lowerFace:60,
+    lowerStage:135
   });
   const BLUE_STAGE_EXACT_FOCUS=Object.freeze({
-    main:[.52,.50],
-    film1:[.73,.50],
-    film2:[.76,.47],
-    film3:[.33,.48],
+    main:[.50,.47],
+    film1:[.58,.48],
+    film2:[.73,.50],
+    film3:[.73,.48],
     polaroid:[.73,.50],
-    lowerFace:[.76,.47],
-    lowerStage:[.50,.55]
+    lowerFace:[.58,.46],
+    lowerStage:[.50,.52]
   });
   async function fetchBlueStageExactRoleFrames(){
     if(String(sourceMeta?.videoId||'')!==BLUE_STAGE_EXACT_VIDEO)return null;
@@ -223,8 +223,8 @@
     drawBlueStageExactFrame(f.film2,[[43,220],[202,228],[196,399],[35,389]],{x:24,y:205,w:205,h:210},...F.film2,.12);
     drawBlueStageExactFrame(f.film3,[[32,407],[193,413],[188,566],[21,556]],{x:12,y:394,w:205,h:190},...F.film3,.12);
     drawBlueStageExactFrame(f.polaroid,[[505,42],[694,57],[661,262],[469,236]],{x:458,y:31,w:250,h:246},...F.polaroid,.16);
-    drawBlueStageExactFrame(f.main,[[197,173],[560,146],[620,302],[586,544],[628,766],[544,819],[198,758],[173,543]],{x:160,y:137,w:482,h:690},...F.main,.18);
-    drawBlueStageExactFrame(f.lowerFace,[[228,840],[423,815],[523,1006],[238,1051]],{x:205,y:799,w:335,h:270},...F.lowerFace,.16);
+    drawBlueStageExactFrame(f.main,[[197,173],[560,146],[620,302],[586,544],[628,766],[544,819],[198,758],[173,543]],{x:160,y:137,w:482,h:690},...F.main,.30);
+    drawBlueStageExactFrame(f.lowerFace,[[228,840],[423,815],[523,1006],[238,1051]],{x:205,y:799,w:335,h:270},...F.lowerFace,.24);
     drawBlueStageExactFrame(f.lowerStage,[[527,837],[720,867],[720,1046],[545,1027]],{x:510,y:820,w:230,h:245},...F.lowerStage,.20);
     ctx.drawImage(blueStageOverlayImage,0,0,W,H);
   }
