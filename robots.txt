@@ -138,6 +138,7 @@ Disallow: /tracks/qid-q110920753/no-fear-feat-punchnello/
 Disallow: /tracks/qid-q86730786/iri-who/
 Disallow: /tracks/qid-q15979639/blingy/
 Disallow: /tracks/qid-q15979639/generation-hrs/
+Disallow: /tracks/qid-q15979639/high-beam/
 Disallow: /tracks/qid-q15979639/iconic-heart/
 Disallow: /tracks/qid-q15979639/make-it-hot/
 Disallow: /tracks/qid-q15979639/sunburst/

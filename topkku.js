@@ -89,7 +89,7 @@
   }
   const BLUE_STAGE_EXACT_VIDEO='WxL5cNNelLk';
   const BLUE_STAGE_EXACT_TIMES=Object.freeze({
-    main:63.5,
+    main:140,
     film1:60,
     film2:61,
     film3:70,
@@ -98,7 +98,7 @@
     lowerStage:135
   });
   const BLUE_STAGE_EXACT_FOCUS=Object.freeze({
-    main:[.73,.48],
+    main:[.50,.48],
     film1:[.58,.48],
     film2:[.73,.50],
     film3:[.33,.48],
