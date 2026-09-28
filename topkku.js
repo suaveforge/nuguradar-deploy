@@ -104,8 +104,52 @@
   function canAddItem(item){if(elements.length>=limits.totalObjects)return{ok:false,msg:`한 작품에는 최대 ${limits.totalObjects}개까지 붙일 수 있어요.`};if(item.motion&&motionCount()>=limits.motionObjects)return{ok:false,msg:`움직이는 장식은 한 작품에 ${limits.motionObjects}개까지 써요.`};if(item.maxPerCanvas&&itemCount(item.id)>=item.maxPerCanvas)return{ok:false,msg:`${item.label}은 한 작품에 ${item.maxPerCanvas}개까지 쓸 수 있어요.`};return{ok:true}}
   function addStickerItem(item){const check=canAddItem(item);if(!check.ok){guide(check.msg);return}saveHistory();const size=item.kind==='frame'?100:item.kind==='tape'?90:item.kind==='lace'?86:76;const y=item.kind==='frame'?photoBox.y+photoBox.h/2:H/2;elements.push({type:'sticker',stickerId:item.id,value:item.value||'',x:W/2,y,size,rotation:0});selected=elements.length-1;guide(`${item.label} 붙였어 ♡`);draw()}
   function addText(value,textStyle='default'){const text=String(value||'').trim();if(!text)return;if(elements.length>=limits.totalObjects){guide(`한 작품에는 최대 ${limits.totalObjects}개 오브젝트까지 붙일 수 있어요.`);return}saveHistory();elements.push({type:'text',value:text,textStyle,x:W/2,y:H-112,size:textStyle==='handwritten'?38:34,rotation:0});selected=elements.length-1;draw();$('#textInput').value=''}
-  function elementRadius(e){if(e.type==='scene-filmstrip')return e.size*1.42;if(e.type==='scene-polaroid')return e.size*1.08;if(e.type==='scene-crop')return e.size*.92;if(e.type==='scene-scrap-note')return e.size*1.42;if(e.type==='scene-ticket')return e.size*1.5;if(e.type!=='sticker')return Math.max(e.size*1.1,String(e.value||'').length*e.size*.27);const item=itemById(e.stickerId);if(item?.kind==='frame'&&!item?.asset)return Math.max(photoBox.w,photoBox.h)*.48;return e.size*.75*Number(item?.assetScale||1)}
+  function elementRadius(e){if(e.type==='scene-filmstrip')return e.size*1.42;if(e.type==='scene-polaroid')return e.size*1.08;if(e.type==='scene-crop')return e.size*.92;if(e.type==='scene-scrap-note')return e.size*1.48;if(e.type==='scene-ticket')return e.size*1.55;if(e.type==='scene-paper-scrap')return e.size*1.15;if(e.type==='scene-tape')return e.size*.95;if(e.type==='scene-chrome')return e.size*.62;if(e.type!=='sticker')return Math.max(e.size*1.1,String(e.value||'').length*e.size*.27);const item=itemById(e.stickerId);if(item?.kind==='frame'&&!item?.asset)return Math.max(photoBox.w,photoBox.h)*.48;return e.size*.75*Number(item?.assetScale||1)}
   function drawBackdrop(t){ctx.fillStyle=t.bg;ctx.fillRect(0,0,W,H);const g=ctx.createRadialGradient(W*.18,H*.12,20,W*.18,H*.12,420);g.addColorStop(0,t.accent+'55');g.addColorStop(1,t.bg+'00');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.save();ctx.globalAlpha=.22;ctx.strokeStyle=t.frame;ctx.lineWidth=2;for(let y=30;y<H;y+=46){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y-18);ctx.stroke()}ctx.restore()}
+  function stageNoise(seed){const x=Math.sin(Number(seed||1)*12.9898)*43758.5453;return x-Math.floor(x)}
+  function tornPaperPath(x,y,w,h,seed=1,segments=8,amp=7){
+    const top=[],right=[],bottom=[],left=[],seg=Math.max(3,segments);
+    for(let i=0;i<=seg;i++){const p=i/seg;top.push([x+w*p,y+(stageNoise(seed+i*1.17)-.5)*amp])}
+    for(let i=1;i<=seg;i++){const p=i/seg;right.push([x+w+(stageNoise(seed+20+i*1.33)-.5)*amp,y+h*p])}
+    for(let i=1;i<=seg;i++){const p=i/seg;bottom.push([x+w*(1-p),y+h+(stageNoise(seed+40+i*1.71)-.5)*amp])}
+    for(let i=1;i<seg;i++){const p=i/seg;left.push([x+(stageNoise(seed+60+i*1.91)-.5)*amp,y+h*(1-p)])}
+    const pts=[...top,...right,...bottom,...left];
+    ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)ctx.lineTo(pts[i][0],pts[i][1]);ctx.closePath();
+  }
+  function drawTornPatch(x,y,w,h,color,rotation=0,seed=1,alpha=1){
+    ctx.save();ctx.translate(x+w/2,y+h/2);ctx.rotate(rotation);ctx.translate(-x-w/2,-y-h/2);
+    tornPaperPath(x,y,w,h,seed,Math.max(5,Math.round(Math.max(w,h)/58)),Math.min(11,Math.max(4,Math.min(w,h)*.08)));
+    ctx.globalAlpha=alpha;ctx.fillStyle=color;ctx.fill();ctx.globalAlpha=1;ctx.restore();
+  }
+  function drawBlueStageBackdrop(){
+    ctx.fillStyle='#111827';ctx.fillRect(0,0,W,H);
+    const glow=ctx.createRadialGradient(W*.58,H*.36,35,W*.58,H*.36,530);
+    glow.addColorStop(0,'rgba(42,92,176,.72)');glow.addColorStop(.46,'rgba(18,48,94,.45)');glow.addColorStop(1,'rgba(7,12,23,0)');
+    ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
+    const patches=[
+      [0,-8,240,88,'#e9edf4',-.035,11,.95],[118,4,280,74,'#285b9e',.035,12,.98],[360,-2,260,82,'#0b1019',-.04,13,.98],[545,0,190,110,'#eef0f2',.045,14,.96],
+      [-28,116,155,260,'#315f9f',-.08,15,.9],[-20,360,140,245,'#eef0f2',.04,16,.92],[612,330,140,245,'#28548d',-.04,17,.92],[600,565,150,255,'#eef0f2',.05,18,.92],
+      [-25,790,240,118,'#2d5e9f',-.04,19,.94],[100,932,250,135,'#eef0f2',.025,20,.95],[320,962,260,122,'#0c111b',-.035,21,.96],[535,900,220,175,'#2b5996',.04,22,.95],
+      [18,710,230,78,'#0b1019',.03,23,.84],[500,725,230,80,'#0c111b',-.04,24,.88],[22,1025,255,70,'#e9edf4',-.025,25,.9],[458,1020,285,72,'#e9edf4',.03,26,.9]
+    ];
+    patches.forEach(p=>drawTornPatch(...p));
+    ctx.save();ctx.globalAlpha=.23;ctx.strokeStyle='#d7e4f6';ctx.lineWidth=1;
+    for(let i=0;i<70;i++){const x=stageNoise(100+i)*W,y=stageNoise(300+i)*H,len=10+stageNoise(500+i)*42;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+len,y+(stageNoise(700+i)-.5)*10);ctx.stroke()}
+    ctx.globalAlpha=.18;ctx.fillStyle='#fff';for(let i=0;i<95;i++){const x=stageNoise(900+i)*W,y=stageNoise(1200+i)*H,r=.5+stageNoise(1500+i)*1.8;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill()}ctx.restore();
+  }
+  function drawBlueStageMain(){
+    const x=168,y=148,w=490,h=656;
+    drawTornPatch(x-18,y-20,w+38,h+42,'#f3f2ed',-.008,71,.98);
+    drawTornPatch(x-10,y-12,w+22,h+26,'#275798',.012,72,.95);
+    ctx.save();tornPaperPath(x,y,w,h,73,14,9);ctx.clip();
+    if(photo){
+      drawStaticCoverFocus(photo,x,y,w,h,.53,.48);
+      const wash=ctx.createLinearGradient(x,y,x+w,y+h);wash.addColorStop(0,'rgba(18,77,160,.05)');wash.addColorStop(.58,'rgba(8,36,85,.04)');wash.addColorStop(1,'rgba(5,15,34,.22)');ctx.fillStyle=wash;ctx.fillRect(x,y,w,h);
+    }else{ctx.fillStyle='#18263c';ctx.fillRect(x,y,w,h);ctx.fillStyle='#d5dfef';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='700 26px system-ui,sans-serif';ctx.fillText('최애 장면을 가져와주세요',x+w/2,y+h/2)}
+    ctx.restore();
+    drawTornPatch(x-12,y+h-22,w*.72,38,'#eef0f2',-.018,74,.95);
+    drawTornPatch(x+w*.54,y-12,w*.42,30,'#1f4f8e',.025,75,.94);
+  }
   function drawFrame(t){ctx.save();ctx.shadowColor='rgba(0,0,0,.20)';ctx.shadowBlur=28;ctx.shadowOffsetY=18;roundedPath(photoBox.x-24,photoBox.y-24,photoBox.w+48,photoBox.h+48,46);ctx.fillStyle=t.paper;ctx.fill();ctx.restore();ctx.save();roundedPath(photoBox.x,photoBox.y,photoBox.w,photoBox.h,photoBox.r);ctx.clip();if(photo)drawPhoto(photo,photoBox.x,photoBox.y,photoBox.w,photoBox.h);else{ctx.fillStyle=theme==='midnight'?'#313044':'#f4f1f7';ctx.fillRect(photoBox.x,photoBox.y,photoBox.w,photoBox.h);ctx.fillStyle=theme==='midnight'?'#aba5c6':'#90899b';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='700 28px system-ui,sans-serif';ctx.fillText('최애 사진을 올려주세요 ♡',W/2,H/2-8);ctx.font='500 17px system-ui,sans-serif';ctx.fillText('사진은 이 브라우저 밖으로 나가지 않아요',W/2,H/2+34)}ctx.restore();ctx.save();roundedPath(photoBox.x-11,photoBox.y-11,photoBox.w+22,photoBox.h+22,38);ctx.strokeStyle=t.frame;ctx.lineWidth=12;ctx.stroke();ctx.restore()}
   function drawStaticCover(img,x,y,w,h){if(!img?.naturalWidth||!img?.naturalHeight)return;const scale=Math.max(w/img.naturalWidth,h/img.naturalHeight),dw=img.naturalWidth*scale,dh=img.naturalHeight*scale;ctx.drawImage(img,x+(w-dw)/2,y+(h-dh)/2,dw,dh)}
   function drawStaticCoverFocus(img,x,y,w,h,focusX=.5,focusY=.5){
@@ -149,25 +193,41 @@
     ctx.restore();
   }
   function drawScrapNote(e){
-    const s=e.size,w=s*2.1,h=s*1.22;
+    const s=e.size,w=s*2.1,h=s*1.42;
     ctx.save();ctx.shadowColor='rgba(37,54,84,.15)';ctx.shadowBlur=10;ctx.shadowOffsetY=5;
     ctx.fillStyle='#fffdf4';ctx.beginPath();ctx.moveTo(-w/2+8,-h/2);ctx.lineTo(w/2-5,-h/2+4);ctx.lineTo(w/2,h/2-8);ctx.lineTo(-w/2+4,h/2);ctx.lineTo(-w/2,-h/2+10);ctx.closePath();ctx.fill();
     ctx.shadowBlur=0;ctx.strokeStyle='rgba(64,86,124,.16)';ctx.lineWidth=1.5;ctx.stroke();
     ctx.strokeStyle='rgba(91,126,177,.16)';ctx.lineWidth=1;for(let y=-h*.20;y<h*.34;y+=18){ctx.beginPath();ctx.moveTo(-w*.39,y);ctx.lineTo(w*.39,y);ctx.stroke()}
-    ctx.fillStyle='#304b78';ctx.textAlign='left';ctx.font=`600 ${Math.max(15,s*.24)}px "Segoe Print","Bradley Hand","Comic Sans MS",cursive`;ctx.fillText(String(e.value||'same moment').slice(0,22),-w*.38,-h*.18);
-    ctx.font=`600 ${Math.max(12,s*.18)}px "Segoe Print","Bradley Hand","Comic Sans MS",cursive`;ctx.fillText(String(e.detail||'different feeling ♡').slice(0,28),-w*.34,h*.18);
+    ctx.fillStyle='#304b78';ctx.textAlign='left';const lines=(Array.isArray(e.lines)?e.lines:[e.value||'same moment',e.detail||'different feeling ♡']).map(x=>String(x)).slice(0,4);
+    ctx.font=`600 ${Math.max(13,s*.205)}px "Segoe Print","Bradley Hand","Comic Sans MS",cursive`;const start=-h*.30,step=Math.max(18,s*.235);lines.forEach((line,i)=>ctx.fillText(line.slice(0,30),-w*.38,start+i*step));
     ctx.restore();
   }
   function drawSceneTicket(e){
-    const s=e.size,w=s*2.16,h=s*.96;
+    const s=e.size,w=s*2.16,h=s*1.18;
     ctx.save();ctx.shadowColor='rgba(37,54,84,.16)';ctx.shadowBlur=9;ctx.shadowOffsetY=5;
     ctx.fillStyle='#f6ead4';roundedPath(-w/2,-h/2,w,h,7);ctx.fill();ctx.shadowBlur=0;
     ctx.strokeStyle='rgba(74,87,112,.20)';ctx.lineWidth=1.5;ctx.stroke();
     ctx.setLineDash([5,5]);ctx.beginPath();ctx.moveTo(-w*.27,-h*.34);ctx.lineTo(-w*.27,h*.34);ctx.stroke();ctx.setLineDash([]);
-    ctx.fillStyle='#2e456f';ctx.textAlign='left';ctx.font=`800 ${Math.max(13,s*.20)}px ui-monospace,monospace`;ctx.fillText(String(e.value||'WATCH CUT').slice(0,18),-w*.17,-h*.13);
-    ctx.font=`700 ${Math.max(10,s*.14)}px ui-monospace,monospace`;ctx.fillText(String(e.detail||'8TURN · SCENE').slice(0,26),-w*.17,h*.18);
+    ctx.fillStyle='#233c68';ctx.textAlign='left';ctx.font=`900 ${Math.max(14,s*.22)}px ui-monospace,monospace`;ctx.fillText(String(e.value||'WATCH CUT').slice(0,18),-w*.17,-h*.24);
+    const detailLines=String(e.detail||'8TURN · SCENE').split('\n').slice(0,3);ctx.font=`700 ${Math.max(9,s*.12)}px ui-monospace,monospace`;detailLines.forEach((line,i)=>ctx.fillText(line.slice(0,26),-w*.17,h*(-.02+i*.19)));
     ctx.strokeStyle='rgba(46,69,111,.55)';ctx.lineWidth=2;for(let i=0;i<9;i++){const x=-w*.43+i*3.3;ctx.beginPath();ctx.moveTo(x,-h*.20);ctx.lineTo(x,h*.20);ctx.stroke()}
     ctx.restore();
+  }
+  function drawScenePaperScrap(e){
+    const s=e.size,w=s*Number(e.aspect||1.7),h=s,color=e.color||'#f2f0e9';
+    drawTornPatch(-w/2,-h/2,w,h,color,0,Number(e.seed||31),Number(e.alpha??.96));
+    if(e.lines){ctx.save();ctx.strokeStyle=e.lineColor||'rgba(51,82,125,.16)';ctx.lineWidth=1;for(let y=-h*.28;y<h*.34;y+=18){ctx.beginPath();ctx.moveTo(-w*.40,y);ctx.lineTo(w*.40,y);ctx.stroke()}ctx.restore()}
+  }
+  function drawSceneTape(e){
+    const s=e.size,w=s*1.7,h=s*.44,variant=e.variant||'blue';
+    ctx.save();ctx.globalAlpha=.88;ctx.fillStyle=variant==='black'?'#111722':variant==='white'?'#e9edf3':'#3265ab';tornPaperPath(-w/2,-h/2,w,h,Number(e.seed||41),8,5);ctx.fill();
+    if(variant==='blue'){ctx.globalAlpha=.22;ctx.strokeStyle='#fff';ctx.lineWidth=3;for(let x=-w/2;x<w/2;x+=17){ctx.beginPath();ctx.moveTo(x,-h/2);ctx.lineTo(x+17,h/2);ctx.stroke()}}ctx.globalAlpha=1;ctx.restore();
+  }
+  function drawSceneChrome(e){
+    const s=e.size,variant=e.variant||'star',r=s*.5;
+    ctx.save();ctx.shadowColor='rgba(0,0,0,.34)';ctx.shadowBlur=9;ctx.shadowOffsetY=4;
+    ctx.fillStyle=gradient([[0,'#626b79'],[.13,'#fff'],[.28,'#949eae'],[.48,'#f8fbff'],[.68,'#656e7c'],[.84,'#fff'],[1,'#7d8694']],-r,-r,r,r);
+    if(variant==='heart')heartPath(s);else starPath(s);ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle='rgba(255,255,255,.86)';ctx.lineWidth=2;ctx.stroke();ctx.restore();
   }
   function drawMaterial(e,item,now){
     const s=e.size,t=(Number(now)||0)/1000;
@@ -203,9 +263,9 @@
     if(item.kind==='frame'){const scale=s/100,w=(photoBox.w+50)*scale,h=(photoBox.h+50)*scale,phase=reducedMotion?.5:((t*.12)%1);ctx.lineWidth=18*scale;const g=ctx.createLinearGradient(-w/2,0,w/2,0);g.addColorStop(0,'#ffb8db');g.addColorStop(clamp(phase-.18,0,1),'#c9c5ff');g.addColorStop(phase,'#fff');g.addColorStop(clamp(phase+.18,0,1),'#bfeaff');g.addColorStop(1,'#ffe4a8');ctx.strokeStyle=g;roundedPath(-w/2,-h/2,w,h,44*scale);ctx.stroke();return}
     if(item.kind==='sparkle'){const phase=reducedMotion?1:(.72+.28*Math.sin(t*4));ctx.globalAlpha=phase;ctx.fillStyle=gradient([[0,'#fff'],[.35,'#d4c2ff'],[.66,'#ff9dce'],[1,'#a7efff']],-s/2,0,s/2,0);ctx.beginPath();ctx.moveTo(0,-s*.55);ctx.quadraticCurveTo(s*.08,-s*.08,s*.55,0);ctx.quadraticCurveTo(s*.08,s*.08,0,s*.55);ctx.quadraticCurveTo(-s*.08,s*.08,-s*.55,0);ctx.quadraticCurveTo(-s*.08,-s*.08,0,-s*.55);ctx.fill();ctx.globalAlpha=1}
   }
-  function drawElement(e,i,t,now){ctx.save();ctx.translate(e.x,e.y);ctx.rotate(e.rotation);ctx.textAlign='center';ctx.textBaseline='middle';if(e.type==='sticker'){const item=itemById(e.stickerId);if(item)drawMaterial(e,item,now)}else if(e.type==='scene-filmstrip')drawFilmStrip(e);else if(e.type==='scene-polaroid')drawPolaroid(e);else if(e.type==='scene-crop')drawSceneCrop(e);else if(e.type==='scene-scrap-note')drawScrapNote(e);else if(e.type==='scene-ticket')drawSceneTicket(e);else if(e.textStyle==='date-label'){const label=String(e.value||'').slice(0,24),w=Math.max(120,label.length*12+30),h=34;ctx.shadowColor='rgba(37,54,84,.16)';ctx.shadowBlur=7;ctx.fillStyle='#edf3fc';roundedPath(-w/2,-h/2,w,h,4);ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle='rgba(62,86,126,.18)';ctx.lineWidth=1.5;ctx.stroke();ctx.fillStyle='#304b78';ctx.font=`700 ${Math.max(13,e.size)}px ui-monospace,monospace`;ctx.fillText(label,0,1)}else{ctx.font=e.textStyle==='handwritten'?`600 ${e.size}px "Segoe Print","Bradley Hand","Comic Sans MS",cursive`:`800 ${e.size}px system-ui,-apple-system,"Segoe UI",sans-serif`;ctx.lineWidth=Math.max(3,e.size*(e.textStyle==='handwritten'?0.10:0.16));ctx.strokeStyle=theme==='midnight'?'#171724':'#fffdf8';ctx.strokeText(e.value,0,0);ctx.fillStyle=t.ink;ctx.fillText(e.value,0,0)}if(i===selected){const r=elementRadius(e);ctx.strokeStyle='#7ff6c2';ctx.lineWidth=3;ctx.setLineDash([9,7]);ctx.strokeRect(-r,-r*.58,r*2,r*1.16);ctx.setLineDash([])}ctx.restore()}
+  function drawElement(e,i,t,now){ctx.save();ctx.translate(e.x,e.y);ctx.rotate(e.rotation);ctx.textAlign='center';ctx.textBaseline='middle';if(e.type==='sticker'){const item=itemById(e.stickerId);if(item)drawMaterial(e,item,now)}else if(e.type==='scene-filmstrip')drawFilmStrip(e);else if(e.type==='scene-polaroid')drawPolaroid(e);else if(e.type==='scene-crop')drawSceneCrop(e);else if(e.type==='scene-scrap-note')drawScrapNote(e);else if(e.type==='scene-ticket')drawSceneTicket(e);else if(e.type==='scene-paper-scrap')drawScenePaperScrap(e);else if(e.type==='scene-tape')drawSceneTape(e);else if(e.type==='scene-chrome')drawSceneChrome(e);else if(e.textStyle==='date-label'){const label=String(e.value||'').slice(0,24),w=Math.max(120,label.length*12+30),h=34;ctx.shadowColor='rgba(37,54,84,.16)';ctx.shadowBlur=7;ctx.fillStyle='#edf3fc';roundedPath(-w/2,-h/2,w,h,4);ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle='rgba(62,86,126,.18)';ctx.lineWidth=1.5;ctx.stroke();ctx.fillStyle='#304b78';ctx.font=`700 ${Math.max(13,e.size)}px ui-monospace,monospace`;ctx.fillText(label,0,1)}else{ctx.font=e.textStyle==='handwritten'?`600 ${e.size}px "Segoe Print","Bradley Hand","Comic Sans MS",cursive`:`800 ${e.size}px system-ui,-apple-system,"Segoe UI",sans-serif`;ctx.lineWidth=Math.max(3,e.size*(e.textStyle==='handwritten'?0.10:0.16));ctx.strokeStyle=theme==='midnight'?'#171724':'#fffdf8';ctx.strokeText(e.value,0,0);ctx.fillStyle=t.ink;ctx.fillText(e.value,0,0)}if(i===selected){const r=elementRadius(e);ctx.strokeStyle='#7ff6c2';ctx.lineWidth=3;ctx.setLineDash([9,7]);ctx.strokeRect(-r,-r*.58,r*2,r*1.16);ctx.setLineDash([])}ctx.restore()}
   function statusText(){if(selected>=0)return`선택됨 · ${elements.length}/${limits.totalObjects}개 · 드래그해서 옮겨요`;if(photo&&sourceMeta?.source==='watch'){const who=sourceMeta.artist?`${sourceMeta.artist} · `:'';const when=Number.isFinite(Number(sourceMeta.time))?`${timeLabel(sourceMeta.time)} 장면`:'영상 장면';return`${who}${when}을 가져왔어요 ✨`}if(photo)return`꾸미는 중 · ${elements.length}/${limits.totalObjects}개`;return'사진을 먼저 골라주세요'}
-  function draw(now=performance.now()){const t=themes[theme];ctx.clearRect(0,0,W,H);drawBackdrop(t);drawFrame(t);elements.forEach((e,i)=>drawElement(e,i,t,now));$('#selectionState').textContent=statusText()}
+  function draw(now=performance.now()){const t=themes[theme];ctx.clearRect(0,0,W,H);if(theme==='stageblue'){drawBlueStageBackdrop();drawBlueStageMain()}else{drawBackdrop(t);drawFrame(t)}elements.forEach((e,i)=>drawElement(e,i,t,now));$('#selectionState').textContent=statusText()}
   function animationLoop(now){if(!reducedMotion&&document.visibilityState==='visible'&&elements.some(e=>e.type==='sticker'&&itemById(e.stickerId)?.motion))draw(now);requestAnimationFrame(animationLoop)}
   function canvasPoint(ev){const r=canvas.getBoundingClientRect();return{x:(ev.clientX-r.left)*W/r.width,y:(ev.clientY-r.top)*H/r.height}}
   function hitTest(p){for(let i=elements.length-1;i>=0;i--){const e=elements[i],r=elementRadius(e);if(Math.hypot(p.x-e.x,p.y-e.y)<=r*1.05)return i}return-1}
@@ -282,40 +342,48 @@
   async function buildBlueStageReconstruction(){
     if(!sceneCutsReady()){guide('Blue Stage 조립은 Watch에서 가져온 실제 영상 장면으로 시작할 때 사용할 수 있어요.');return}
     const button=$('#buildBlueStage');if(button?.disabled)return;
-    const base=Math.max(0,Number(sourceMeta.time)||0);
+    const base=Math.max(0,Number(sourceMeta.time)||0),artistLabel=String(sourceMeta.artist||'8TURN').trim().slice(0,14)||'8TURN';
     if(button){button.disabled=true;button.textContent='장면 모으는 중…'}
-    guide('같은 Watch 순간을 필름·폴라로이드·디테일 컷으로 모으는 중…');
+    guide('원 시안 기준으로 메인 인물·필름·폴라로이드·찢긴 종이 레이어를 다시 조립하는 중…');
     try{
       await ensureSceneImage(sourceMeta.image);
       const before=await fetchWatchSceneFrame(Math.max(0,base-.45));const after=await fetchWatchSceneFrame(base+.45);
       const additions=[
-        {type:'scene-filmstrip',images:[before.image,sourceMeta.image,after.image],label:String(sourceMeta.artist||'FILM 400'),x:92,y:330,size:118,rotation:-.035,preset:'blue-stage'},
-        {type:'scene-polaroid',image:after.image,caption:'favorite cut ♡',x:W-115,y:182,size:112,rotation:.055,preset:'blue-stage'},
-        {type:'scene-crop',image:sourceMeta.image,x:278,y:904,size:128,aspect:1.22,focusX:.50,focusY:.24,rotation:-.035,preset:'blue-stage'},
-        {type:'scene-crop',image:after.image,x:515,y:900,size:120,aspect:1.38,focusX:.54,focusY:.66,rotation:.045,preset:'blue-stage'},
-        {type:'scene-scrap-note',value:'same moment',detail:'different feeling ♡',x:116,y:626,size:76,rotation:-.055,preset:'blue-stage'},
-        {type:'scene-ticket',value:'WATCH CUT',detail:`${String(sourceMeta.artist||'8TURN').slice(0,12)} · ${timeLabel(base)}`,x:132,y:790,size:72,rotation:.045,preset:'blue-stage'},
-        presetSticker('tape-blue','tape-pink',{x:178,y:90,size:72,rotation:-.12}),
-        presetSticker('tape-blue','tape-pink',{x:548,y:800,size:74,rotation:.09}),
-        presetSticker('tape-blue','tape-pink',{x:96,y:706,size:62,rotation:.10}),
-        presetSticker('tape-blue','tape-pink',{x:620,y:282,size:58,rotation:-.10}),
-        {type:'text',value:capturedDateLabel(),textStyle:'date-label',x:155,y:1016,size:15,rotation:-.025,preset:'blue-stage'},
-        presetSticker('silver-star','star',{x:620,y:430,size:48,rotation:.18}),
-        presetSticker('chrome-heart','heart-outline',{x:610,y:650,size:46,rotation:-.14}),
-        presetSticker('silver-star','star',{x:190,y:978,size:36,rotation:-.10}),
-        presetSticker('silver-star','star',{x:625,y:115,size:32,rotation:.11}),
-        {type:'text',value:'my pick ♡',textStyle:'handwritten',x:360,y:82,size:34,rotation:-.045,preset:'blue-stage'},
-        {type:'text',value:'saved tonight',textStyle:'handwritten',x:555,y:590,size:28,rotation:.06,preset:'blue-stage'},
-        {type:'text',value:'8TURN ♡',textStyle:'handwritten',x:555,y:1006,size:24,rotation:-.055,preset:'blue-stage'}
+        {type:'scene-paper-scrap',x:345,y:84,size:86,aspect:2.7,color:'#f1f0eb',rotation:-.045,seed:101,preset:'blue-stage'},
+        {type:'scene-filmstrip',images:[before.image,sourceMeta.image,after.image],label:artistLabel.toUpperCase()+' · 400',x:92,y:292,size:144,rotation:-.03,preset:'blue-stage'},
+        {type:'scene-polaroid',image:after.image,caption:'favorite cut ♡',x:584,y:164,size:126,rotation:.055,preset:'blue-stage'},
+        {type:'scene-paper-scrap',x:615,y:490,size:88,aspect:1.28,color:'#f4f2ea',rotation:-.065,seed:102,lines:true,preset:'blue-stage'},
+        {type:'scene-ticket',value:artistLabel.toUpperCase(),detail:`LIVE MOMENT\nSCENE ${timeLabel(base)}\nOUR MOMENTS`,x:108,y:696,size:92,rotation:-.055,preset:'blue-stage'},
+        {type:'scene-scrap-note',lines:['Same moment','Different feelings',"You're always",'my special one. ♡'],x:116,y:908,size:90,rotation:-.045,preset:'blue-stage'},
+        {type:'scene-crop',image:sourceMeta.image,x:405,y:967,size:132,aspect:1.04,focusX:.51,focusY:.27,rotation:-.04,preset:'blue-stage'},
+        {type:'scene-crop',image:after.image,x:605,y:952,size:124,aspect:1.42,focusX:.53,focusY:.64,rotation:.045,preset:'blue-stage'},
+        {type:'scene-tape',x:164,y:44,size:80,rotation:-.14,variant:'blue',seed:111,preset:'blue-stage'},
+        {type:'scene-tape',x:570,y:38,size:72,rotation:.08,variant:'blue',seed:112,preset:'blue-stage'},
+        {type:'scene-tape',x:76,y:575,size:68,rotation:.13,variant:'blue',seed:113,preset:'blue-stage'},
+        {type:'scene-tape',x:636,y:570,size:66,rotation:-.12,variant:'blue',seed:114,preset:'blue-stage'},
+        {type:'scene-tape',x:255,y:822,size:78,rotation:-.02,variant:'blue',seed:115,preset:'blue-stage'},
+        {type:'scene-tape',x:548,y:825,size:76,rotation:.08,variant:'blue',seed:116,preset:'blue-stage'},
+        {type:'scene-tape',x:78,y:1018,size:72,rotation:-.09,variant:'blue',seed:117,preset:'blue-stage'},
+        {type:'scene-tape',x:330,y:1030,size:78,rotation:.04,variant:'black',seed:118,preset:'blue-stage'},
+        {type:'scene-chrome',variant:'star',x:470,y:98,size:42,rotation:.14,preset:'blue-stage'},
+        {type:'scene-chrome',variant:'heart',x:660,y:280,size:54,rotation:-.12,preset:'blue-stage'},
+        {type:'scene-chrome',variant:'star',x:626,y:425,size:43,rotation:.18,preset:'blue-stage'},
+        {type:'scene-chrome',variant:'star',x:455,y:926,size:38,rotation:-.10,preset:'blue-stage'},
+        {type:'scene-chrome',variant:'heart',x:54,y:812,size:34,rotation:.08,preset:'blue-stage'},
+        {type:'text',value:capturedDateLabel(),textStyle:'date-label',x:350,y:830,size:15,rotation:-.025,preset:'blue-stage'},
+        {type:'text',value:'my pick ♡',textStyle:'handwritten',x:360,y:86,size:38,rotation:-.045,preset:'blue-stage'},
+        {type:'text',value:'saved tonight!',textStyle:'handwritten',x:612,y:490,size:27,rotation:.055,preset:'blue-stage'},
+        {type:'text',value:artistLabel.toUpperCase()+' ♡',textStyle:'handwritten',x:610,y:714,size:25,rotation:-.055,preset:'blue-stage'}
       ].filter(Boolean);
       const retained=elements.filter(e=>e.preset!=='blue-stage');
       if(retained.length+additions.length>limits.totalObjects)throw new Error('preset_object_limit');
       saveHistory();
       elements=[...retained,...additions];
       theme='stageblue';
+      photoView={zoom:1,x:0,y:0};
       selected=elements.length-1;
       $$('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme==='stageblue'));
-      guide('Blue Stage를 실제 Topkku 오브젝트로 조립했어 ♡ 각 조각을 눌러 위치·크기·각도를 다시 손볼 수 있어요.');
+      guide('Blue Stage를 원 시안의 중앙 대형 인물·고밀도 찢김·금속 장식 구조로 다시 조립했어 ♡');
       draw();
     }catch(e){
       console.warn('blue stage reconstruction',e);
