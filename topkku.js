@@ -87,6 +87,35 @@
     }
     return skin/n*4+blue/n*2+Math.min(1,detail/(n*75))-(greenCast/n)*6;
   }
+  const BLUE_STAGE_EXACT_VIDEO='WxL5cNNelLk';
+  const BLUE_STAGE_EXACT_TIMES=Object.freeze({
+    main:70,
+    film1:62,
+    film2:64,
+    film3:78,
+    polaroid:140,
+    lowerFace:78,
+    lowerStage:136
+  });
+  const BLUE_STAGE_EXACT_FOCUS=Object.freeze({
+    main:[.27,.47],
+    film1:[.50,.48],
+    film2:[.54,.50],
+    film3:[.72,.48],
+    polaroid:[.72,.48],
+    lowerFace:[.72,.43],
+    lowerStage:[.50,.55]
+  });
+  async function fetchBlueStageExactRoleFrames(){
+    if(String(sourceMeta?.videoId||'')!==BLUE_STAGE_EXACT_VIDEO)return null;
+    const out={};
+    for(const [role,time] of Object.entries(BLUE_STAGE_EXACT_TIMES)){
+      const shot=await fetchWatchSceneFrame(time);
+      out[role]=shot.image;
+      await ensureSceneImage(shot.image);
+    }
+    return out;
+  }
   async function pickBlueStageFrames(srcs){
     const unique=[...new Set(srcs.filter(Boolean))],scored=[];
     for(const src of unique){try{scored.push({src,score:await blueStageVisualScore(src)})}catch{}}
@@ -174,23 +203,29 @@
   function blueStageClip(poly){
     ctx.beginPath();ctx.moveTo(poly[0][0],poly[0][1]);for(let i=1;i<poly.length;i++)ctx.lineTo(poly[i][0],poly[i][1]);ctx.closePath();
   }
-  function drawBlueStageExactFrame(src,poly,bounds,focusX=.5,focusY=.5){
+  function drawBlueStageExactFrame(src,poly,bounds,focusX=.5,focusY=.5,tone=.16){
     const img=src&&sceneImages.get(src);if(!img?.complete||!img.naturalWidth)return;
     ctx.save();blueStageClip(poly);ctx.clip();
-    ctx.filter='contrast(1.06) saturate(.96) brightness(.98)';
+    ctx.filter='contrast(1.08) saturate(1.02) brightness(.98)';
     drawStaticCoverFocus(img,bounds.x,bounds.y,bounds.w,bounds.h,focusX,focusY);
-    ctx.filter='none';ctx.restore();
+    ctx.filter='none';
+    if(tone>0){
+      ctx.globalCompositeOperation='soft-light';
+      ctx.globalAlpha=tone;ctx.fillStyle='#1c61b8';ctx.fillRect(bounds.x,bounds.y,bounds.w,bounds.h);
+      ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
+    }
+    ctx.restore();
   }
   function drawBlueStageExact(){
     ctx.fillStyle='#08111d';ctx.fillRect(0,0,W,H);
-    const f=blueStageExactFrames||{};
-    drawBlueStageExactFrame(f.film1,[[46,45],[210,50],[202,218],[46,211]],{x:28,y:31,w:205,h:205},.50,.46);
-    drawBlueStageExactFrame(f.film2,[[43,220],[202,228],[196,399],[35,389]],{x:24,y:205,w:205,h:210},.50,.47);
-    drawBlueStageExactFrame(f.film3,[[32,407],[193,413],[188,566],[21,556]],{x:12,y:394,w:205,h:190},.50,.50);
-    drawBlueStageExactFrame(f.polaroid,[[505,42],[694,57],[661,262],[469,236]],{x:458,y:31,w:250,h:246},.50,.48);
-    drawBlueStageExactFrame(f.main,[[197,173],[560,146],[620,302],[586,544],[628,766],[544,819],[198,758],[173,543]],{x:160,y:137,w:482,h:690},.50,.50);
-    drawBlueStageExactFrame(f.lowerFace,[[228,840],[423,815],[523,1006],[238,1051]],{x:205,y:799,w:335,h:270},.50,.42);
-    drawBlueStageExactFrame(f.lowerStage,[[527,837],[720,867],[720,1046],[545,1027]],{x:510,y:820,w:230,h:245},.50,.55);
+    const f=blueStageExactFrames||{},F=BLUE_STAGE_EXACT_FOCUS;
+    drawBlueStageExactFrame(f.film1,[[46,45],[210,50],[202,218],[46,211]],{x:28,y:31,w:205,h:205},...F.film1,.12);
+    drawBlueStageExactFrame(f.film2,[[43,220],[202,228],[196,399],[35,389]],{x:24,y:205,w:205,h:210},...F.film2,.12);
+    drawBlueStageExactFrame(f.film3,[[32,407],[193,413],[188,566],[21,556]],{x:12,y:394,w:205,h:190},...F.film3,.12);
+    drawBlueStageExactFrame(f.polaroid,[[505,42],[694,57],[661,262],[469,236]],{x:458,y:31,w:250,h:246},...F.polaroid,.16);
+    drawBlueStageExactFrame(f.main,[[197,173],[560,146],[620,302],[586,544],[628,766],[544,819],[198,758],[173,543]],{x:160,y:137,w:482,h:690},...F.main,.18);
+    drawBlueStageExactFrame(f.lowerFace,[[228,840],[423,815],[523,1006],[238,1051]],{x:205,y:799,w:335,h:270},...F.lowerFace,.16);
+    drawBlueStageExactFrame(f.lowerStage,[[527,837],[720,867],[720,1046],[545,1027]],{x:510,y:820,w:230,h:245},...F.lowerStage,.20);
     ctx.drawImage(blueStageOverlayImage,0,0,W,H);
   }
   function drawBlueStageBackdrop(){
@@ -433,32 +468,32 @@
     guide('원 시안 좌표에 맞춰 메인컷·필름·폴라로이드·메모·티켓을 정밀 조립하는 중…');
     try{
       await ensureSceneImage(sourceMeta.image);
-      const fetched=[];for(const off of [-1.20,-.58,.58,1.20])fetched.push(await fetchWatchSceneFrame(Math.max(0,base+off)));
-      const ranked=await pickBlueStageFrames([sourceMeta.image,...fetched.map(x=>x.image)]);
-      const mainSrc=ranked[0]||sourceMeta.image,alt1=ranked[1]||fetched[2]?.image||sourceMeta.image,alt2=ranked[2]||fetched[0]?.image||sourceMeta.image,alt3=ranked[3]||fetched[3]?.image||alt1;
-      blueStageMainSrc=mainSrc;await ensureSceneImage(mainSrc);
-      const exactCandidates=[mainSrc,alt1,alt2,alt3,...ranked].filter(Boolean);
-      for(const src of [...new Set(exactCandidates)])await ensureSceneImage(src);
-      blueStageExactFrames={
-        main:mainSrc,
-        film1:alt1,
-        film2:alt2,
-        film3:alt3,
-        polaroid:alt1,
-        lowerFace:alt2,
-        lowerStage:alt3
-      };
+      const exactRoleFrames=await fetchBlueStageExactRoleFrames().catch(e=>{console.warn('blue stage exact role frames',e);return null});
+      let mainSrc,alt1,alt2,alt3,ranked=[];
+      if(exactRoleFrames){
+        blueStageExactFrames=exactRoleFrames;
+        mainSrc=exactRoleFrames.main;alt1=exactRoleFrames.polaroid;alt2=exactRoleFrames.lowerFace;alt3=exactRoleFrames.lowerStage;
+        blueStageMainSrc=mainSrc;
+      }else{
+        const fetched=[];for(const off of [-1.20,-.58,.58,1.20])fetched.push(await fetchWatchSceneFrame(Math.max(0,base+off)));
+        ranked=await pickBlueStageFrames([sourceMeta.image,...fetched.map(x=>x.image)]);
+        mainSrc=ranked[0]||sourceMeta.image;alt1=ranked[1]||fetched[2]?.image||sourceMeta.image;alt2=ranked[2]||fetched[0]?.image||sourceMeta.image;alt3=ranked[3]||fetched[3]?.image||alt1;
+        blueStageMainSrc=mainSrc;await ensureSceneImage(mainSrc);
+        const exactCandidates=[mainSrc,alt1,alt2,alt3,...ranked].filter(Boolean);
+        for(const src of [...new Set(exactCandidates)])await ensureSceneImage(src);
+        blueStageExactFrames={main:mainSrc,film1:alt1,film2:alt2,film3:alt3,polaroid:alt1,lowerFace:alt2,lowerStage:alt3};
+      }
       const B=BLUE_STAGE,date=String(capturedDateLabel()||'').replaceAll(' · ','  ');
       const additions=[
         {type:'scene-paper-scrap',x:350,y:80,size:92,aspect:2.45,color:'#f2f0ea',rotation:-.055,seed:101,preset:'blue-stage'},
-        {type:'scene-filmstrip',images:[alt1,alt2,alt3],label:'KODAK 400',artistLabel:artistLabel.toUpperCase(),x:B.film.x,y:B.film.y,size:B.film.size,rotation:B.film.rotation,preset:'blue-stage'},
-        {type:'scene-polaroid',image:alt1,caption:'favorite cut ♡',x:B.polaroid.x,y:B.polaroid.y,size:B.polaroid.size,rotation:B.polaroid.rotation,preset:'blue-stage'},
+        {type:'scene-filmstrip',images:exactRoleFrames?[exactRoleFrames.film1,exactRoleFrames.film2,exactRoleFrames.film3]:[alt1,alt2,alt3],label:'KODAK 400',artistLabel:artistLabel.toUpperCase(),x:B.film.x,y:B.film.y,size:B.film.size,rotation:B.film.rotation,preset:'blue-stage'},
+        {type:'scene-polaroid',image:exactRoleFrames?.polaroid||alt1,caption:'favorite cut ♡',x:B.polaroid.x,y:B.polaroid.y,size:B.polaroid.size,rotation:B.polaroid.rotation,preset:'blue-stage'},
         {type:'scene-paper-scrap',x:632,y:430,size:86,aspect:1.12,color:'#f4f2ea',rotation:-.060,seed:102,lines:true,preset:'blue-stage'},
         {type:'scene-paper-scrap',x:646,y:650,size:118,aspect:1.18,color:'#f2f0e9',rotation:-.050,seed:103,lines:false,preset:'blue-stage'},
         {type:'scene-ticket',value:artistLabel.toUpperCase(),detail:`DATE  ${date}\nAREA  STAGE\nSEAT  08`,x:B.ticket.x,y:B.ticket.y,size:B.ticket.size,rotation:B.ticket.rotation,preset:'blue-stage'},
         {type:'scene-scrap-note',lines:['Same moment','Different feelings',"You're always",'my special one. ♡'],x:B.note.x,y:B.note.y,size:B.note.size,rotation:B.note.rotation,preset:'blue-stage'},
-        {type:'scene-crop',image:alt2,x:B.lowerFace.x,y:B.lowerFace.y,size:B.lowerFace.size,aspect:B.lowerFace.aspect,focusX:B.lowerFace.focusX,focusY:B.lowerFace.focusY,rotation:B.lowerFace.rotation,preset:'blue-stage'},
-        {type:'scene-crop',image:alt3,x:B.lowerStage.x,y:B.lowerStage.y,size:B.lowerStage.size,aspect:B.lowerStage.aspect,focusX:B.lowerStage.focusX,focusY:B.lowerStage.focusY,rotation:B.lowerStage.rotation,preset:'blue-stage'},
+        {type:'scene-crop',image:exactRoleFrames?.lowerFace||alt2,x:B.lowerFace.x,y:B.lowerFace.y,size:B.lowerFace.size,aspect:B.lowerFace.aspect,focusX:B.lowerFace.focusX,focusY:B.lowerFace.focusY,rotation:B.lowerFace.rotation,preset:'blue-stage'},
+        {type:'scene-crop',image:exactRoleFrames?.lowerStage||alt3,x:B.lowerStage.x,y:B.lowerStage.y,size:B.lowerStage.size,aspect:B.lowerStage.aspect,focusX:B.lowerStage.focusX,focusY:B.lowerStage.focusY,rotation:B.lowerStage.rotation,preset:'blue-stage'},
         {type:'scene-tape',x:150,y:38,size:86,rotation:-.14,variant:'blue',seed:111,preset:'blue-stage'},
         {type:'scene-tape',x:540,y:36,size:76,rotation:.08,variant:'blue',seed:112,preset:'blue-stage'},
         {type:'scene-tape',x:84,y:573,size:72,rotation:.12,variant:'blue',seed:113,preset:'blue-stage'},
