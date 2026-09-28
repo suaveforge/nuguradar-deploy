@@ -46,6 +46,7 @@ Disallow: /tracks/qid-q65053981/may-be/
 Disallow: /tracks/qid-q105622929/fame/
 Disallow: /tracks/qid-q19626731/170205-cl/
 Disallow: /tracks/qid-q19626731/run/
+Disallow: /tracks/qid-q131689681/drop-that/
 Disallow: /tracks/qid-q131689681/open-your-eyes/
 Disallow: /tracks/qid-q27019538/i-am-not-alone/
 Disallow: /tracks/qid-q27019538/touch/
@@ -143,6 +144,7 @@ Disallow: /tracks/qid-q15979639/iconic-heart/
 Disallow: /tracks/qid-q15979639/make-it-hot/
 Disallow: /tracks/qid-q15979639/sunburst/
 Disallow: /tracks/qid-q15979639/surfin/
+Disallow: /tracks/qid-q15979639/winds-of-time/
 Disallow: /tracks/qid-q60550265/fxxking-star/
 Disallow: /tracks/qid-q61057550/danger/
 Disallow: /tracks/qid-q28418030/count-down/
