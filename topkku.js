@@ -89,21 +89,21 @@
   }
   const BLUE_STAGE_EXACT_VIDEO='WxL5cNNelLk';
   const BLUE_STAGE_EXACT_TIMES=Object.freeze({
-    main:54.5,
-    film1:56.5,
-    film2:61,
-    film3:63,
-    polaroid:140,
-    lowerFace:61,
+    main:140,
+    film1:61,
+    film2:63.5,
+    film3:70,
+    polaroid:61,
+    lowerFace:63.5,
     lowerStage:136
   });
   const BLUE_STAGE_EXACT_FOCUS=Object.freeze({
-    main:[.48,.48],
-    film1:[.44,.49],
-    film2:[.73,.50],
-    film3:[.50,.49],
-    polaroid:[.72,.48],
-    lowerFace:[.73,.50],
+    main:[.52,.50],
+    film1:[.73,.50],
+    film2:[.76,.47],
+    film3:[.33,.48],
+    polaroid:[.73,.50],
+    lowerFace:[.76,.47],
     lowerStage:[.50,.55]
   });
   async function fetchBlueStageExactRoleFrames(){
