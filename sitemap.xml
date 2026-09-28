@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <sitemap><loc>https://idol.suaveforge.com/sitemap-pages.xml</loc><lastmod>2026-09-28T06:23:41.138Z</lastmod></sitemap>
-  <sitemap><loc>https://idol.suaveforge.com/recovery-artist-sitemap.xml</loc><lastmod>2026-09-28T06:23:58.476Z</lastmod></sitemap>
+  <sitemap><loc>https://idol.suaveforge.com/sitemap-pages.xml</loc><lastmod>2026-09-28T06:38:19.101Z</lastmod></sitemap>
+  <sitemap><loc>https://idol.suaveforge.com/recovery-artist-sitemap.xml</loc><lastmod>2026-09-28T06:38:47.607Z</lastmod></sitemap>
   <sitemap><loc>https://idol.suaveforge.com/recovery-track-sitemap.xml</loc><lastmod>2026-09-23T09:00:05.000Z</lastmod></sitemap>
+  <sitemap><loc>https://idol.suaveforge.com/fanwork-sitemap.xml</loc><lastmod>2026-09-28T02:58:03.692Z</lastmod></sitemap>
 </sitemapindex>
