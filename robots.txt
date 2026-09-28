@@ -1,6 +1,11 @@
 User-agent: *
 Allow: /
 Disallow: /watch/
+Disallow: /watch.html
+Disallow: /topkku.html
+Disallow: /community.html
+Disallow: /hall-of-fame.html
+Disallow: /auth-callback.html
 Disallow: /members/
 Disallow: /videos/
 Disallow: /radar-notes/
