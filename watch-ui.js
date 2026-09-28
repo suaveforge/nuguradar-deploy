@@ -169,8 +169,10 @@
     updateSceneTime();
   }
 
-  function syncPlayer(){
+  function syncPlayer(event){
     if(!player.open)return;
+    const startAt=Number(event?.detail?.startAt);
+    if(Number.isFinite(startAt)&&startAt>=0)latestTime=startAt;
     const title=(playerBody.querySelector('.player-title h2')?.textContent||'').toLowerCase();
     const portrait=portraitNext||title.includes('#shorts')||title.includes(' shorts');
     player.classList.toggle('is-vertical',portrait);
