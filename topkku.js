@@ -92,18 +92,18 @@
     main:69,
     film1:60,
     film2:61,
-    film3:70,
+    film3:69,
     polaroid:61,
-    lowerFace:60,
+    lowerFace:101,
     lowerStage:135
   });
   const BLUE_STAGE_EXACT_FOCUS=Object.freeze({
-    main:[.50,.48],
+    main:[.70,.44],
     film1:[.58,.48],
     film2:[.73,.50],
-    film3:[.33,.48],
+    film3:[.50,.48],
     polaroid:[.73,.50],
-    lowerFace:[.58,.46],
+    lowerFace:[.78,.46],
     lowerStage:[.50,.52]
   });
   async function fetchBlueStageExactRoleFrames(){
@@ -203,11 +203,11 @@
   function blueStageClip(poly){
     ctx.beginPath();ctx.moveTo(poly[0][0],poly[0][1]);for(let i=1;i<poly.length;i++)ctx.lineTo(poly[i][0],poly[i][1]);ctx.closePath();
   }
-  function drawBlueStageExactFrame(src,poly,bounds,focusX=.5,focusY=.5,tone=.16){
+  function drawBlueStageExactFrame(src,poly,bounds,focusX=.5,focusY=.5,tone=.16,zoom=1){
     const img=src&&sceneImages.get(src);if(!img?.complete||!img.naturalWidth)return;
     ctx.save();blueStageClip(poly);ctx.clip();
     ctx.filter='contrast(1.08) saturate(1.02) brightness(.98)';
-    drawStaticCoverFocus(img,bounds.x,bounds.y,bounds.w,bounds.h,focusX,focusY);
+    drawStaticCoverFocus(img,bounds.x,bounds.y,bounds.w,bounds.h,focusX,focusY,zoom);
     ctx.filter='none';
     if(tone>0){
       ctx.globalCompositeOperation='soft-light';
@@ -223,7 +223,7 @@
     drawBlueStageExactFrame(f.film2,[[43,220],[202,228],[196,399],[35,389]],{x:24,y:205,w:205,h:210},...F.film2,.12);
     drawBlueStageExactFrame(f.film3,[[32,407],[193,413],[188,566],[21,556]],{x:12,y:394,w:205,h:190},...F.film3,.12);
     drawBlueStageExactFrame(f.polaroid,[[505,42],[694,57],[661,262],[469,236]],{x:458,y:31,w:250,h:246},...F.polaroid,.16);
-    drawBlueStageExactFrame(f.main,[[197,173],[560,146],[620,302],[586,544],[628,766],[544,819],[198,758],[173,543]],{x:160,y:137,w:482,h:690},...F.main,.30);
+    drawBlueStageExactFrame(f.main,[[197,173],[560,146],[620,302],[586,544],[628,766],[544,819],[198,758],[173,543]],{x:160,y:137,w:482,h:690},...F.main,.34,1.16);
     drawBlueStageExactFrame(f.lowerFace,[[228,840],[423,815],[523,1006],[238,1051]],{x:205,y:799,w:335,h:270},...F.lowerFace,.24);
     drawBlueStageExactFrame(f.lowerStage,[[527,837],[720,867],[720,1046],[545,1027]],{x:510,y:820,w:230,h:245},...F.lowerStage,.20);
     ctx.drawImage(blueStageOverlayImage,0,0,W,H);
@@ -265,9 +265,9 @@
   }
   function drawFrame(t){ctx.save();ctx.shadowColor='rgba(0,0,0,.20)';ctx.shadowBlur=28;ctx.shadowOffsetY=18;roundedPath(photoBox.x-24,photoBox.y-24,photoBox.w+48,photoBox.h+48,46);ctx.fillStyle=t.paper;ctx.fill();ctx.restore();ctx.save();roundedPath(photoBox.x,photoBox.y,photoBox.w,photoBox.h,photoBox.r);ctx.clip();if(photo)drawPhoto(photo,photoBox.x,photoBox.y,photoBox.w,photoBox.h);else{ctx.fillStyle=theme==='midnight'?'#313044':'#f4f1f7';ctx.fillRect(photoBox.x,photoBox.y,photoBox.w,photoBox.h);ctx.fillStyle=theme==='midnight'?'#aba5c6':'#90899b';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='700 28px system-ui,sans-serif';ctx.fillText('최애 사진을 올려주세요 ♡',W/2,H/2-8);ctx.font='500 17px system-ui,sans-serif';ctx.fillText('사진은 이 브라우저 밖으로 나가지 않아요',W/2,H/2+34)}ctx.restore();ctx.save();roundedPath(photoBox.x-11,photoBox.y-11,photoBox.w+22,photoBox.h+22,38);ctx.strokeStyle=t.frame;ctx.lineWidth=12;ctx.stroke();ctx.restore()}
   function drawStaticCover(img,x,y,w,h){if(!img?.naturalWidth||!img?.naturalHeight)return;const scale=Math.max(w/img.naturalWidth,h/img.naturalHeight),dw=img.naturalWidth*scale,dh=img.naturalHeight*scale;ctx.drawImage(img,x+(w-dw)/2,y+(h-dh)/2,dw,dh)}
-  function drawStaticCoverFocus(img,x,y,w,h,focusX=.5,focusY=.5){
+  function drawStaticCoverFocus(img,x,y,w,h,focusX=.5,focusY=.5,zoom=1){
     if(!img?.naturalWidth||!img?.naturalHeight)return;
-    const scale=Math.max(w/img.naturalWidth,h/img.naturalHeight),dw=img.naturalWidth*scale,dh=img.naturalHeight*scale;
+    const scale=Math.max(w/img.naturalWidth,h/img.naturalHeight)*Math.max(1,Number(zoom)||1),dw=img.naturalWidth*scale,dh=img.naturalHeight*scale;
     const overflowX=Math.max(0,dw-w),overflowY=Math.max(0,dh-h);
     const dx=x-overflowX*clamp(Number(focusX)||.5,0,1),dy=y-overflowY*clamp(Number(focusY)||.5,0,1);
     ctx.drawImage(img,dx,dy,dw,dh);
