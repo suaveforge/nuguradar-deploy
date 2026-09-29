@@ -153,6 +153,7 @@ Disallow: /tracks/qid-q15979639/generation-hrs/
 Disallow: /tracks/qid-q15979639/high-beam/
 Disallow: /tracks/qid-q15979639/iconic-heart/
 Disallow: /tracks/qid-q15979639/make-it-hot/
+Disallow: /tracks/qid-q15979639/song-for-you/
 Disallow: /tracks/qid-q15979639/sunburst/
 Disallow: /tracks/qid-q15979639/surfin/
 Disallow: /tracks/qid-q15979639/winds-of-time/
@@ -168,6 +169,7 @@ Disallow: /tracks/qid-q57584225/track-7jye6rg47iqk/
 Disallow: /tracks/qid-q97191757/9-to-6/
 Disallow: /tracks/qid-q476119/why-so-lonely/
 Disallow: /tracks/qid-q94615987/summer/
+Disallow: /tracks/qid-q94615987/voodoo-doll/
 Disallow: /tracks/qid-q117354566/girls-on-fire/
 Disallow: /tracks/qid-q65665588/like-always/
 Disallow: /tracks/qid-q483626/continue/
