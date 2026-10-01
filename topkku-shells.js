@@ -14,6 +14,7 @@
       {id:'pink',label:'핑크 프레임',style:'solid',color:'#f7b8ce'},
       {id:'blue',label:'블루 프레임',style:'solid',color:'#9cc5ef'},
       {id:'lace-white',label:'화이트 레이스',style:'lace',color:'#fffdf8'},
+      {id:'couture-pink',label:'꾸뛰르 펄 핑크',style:'couture',color:'#f3a4c4',pearl:'#fffafc',metal:'#d8dbe5'},
       {id:'lace-black',label:'블랙 레이스',style:'lace',color:'#17171c'}
     ],
     backings:[

@@ -58,3 +58,5 @@ body.topkku-editing-focus .topkku-workspace{padding-top:18px}
   .topkku-tools{max-height:39vh}
   .tool-block{padding:12px 0}
 }
+
+.shell-couture-pink{background:radial-gradient(circle at 30% 30%,#fff 0 12%,transparent 13%),linear-gradient(145deg,#fff7fb,#f3a4c4 58%,#d9c8ff)}

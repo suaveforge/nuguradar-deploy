@@ -160,6 +160,33 @@
       ctx.globalAlpha=.48;ctx.strokeStyle=edge;ctx.lineWidth=1.6;roundedPath(x-5,y-5,w+10,h+10,photoBox.r+12);ctx.stroke();
       ctx.globalAlpha=.28;ctx.strokeStyle=edge;ctx.lineWidth=1.2;roundedPath(x+6,y+6,w-12,h-12,photoBox.r+7);ctx.stroke();
     }
+    else if(item.style==='couture'){
+      const pink=item.color||'#f3a4c4',pearl=item.pearl||'#fffafc',metal=item.metal||'#d8dbe5';
+      const outerX=x-6,outerY=y-6,outerW=w+12,outerH=h+12;
+      ctx.shadowColor='rgba(99,48,76,.18)';ctx.shadowBlur=14;ctx.shadowOffsetY=5;
+      roundedPath(outerX,outerY,outerW,outerH,photoBox.r+14);ctx.strokeStyle='rgba(255,255,255,.94)';ctx.lineWidth=18;ctx.stroke();
+      ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+      roundedPath(outerX,outerY,outerW,outerH,photoBox.r+14);ctx.strokeStyle=pink;ctx.lineWidth=8;ctx.stroke();
+      roundedPath(x+3,y+3,w-6,h-6,photoBox.r+5);ctx.strokeStyle='rgba(255,255,255,.98)';ctx.lineWidth=4;ctx.stroke();
+      roundedPath(x+9,y+9,w-18,h-18,photoBox.r);ctx.strokeStyle='rgba(208,118,155,.42)';ctx.lineWidth=2;ctx.stroke();
+
+      const pearlAt=(px,py,r=4.8)=>{
+        const g=ctx.createRadialGradient(px-r*.35,py-r*.45,1,px,py,r);
+        g.addColorStop(0,'#fff');g.addColorStop(.48,pearl);g.addColorStop(.78,'#e8dde3');g.addColorStop(1,'#b7a6af');
+        ctx.beginPath();ctx.arc(px,py,r,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();ctx.strokeStyle='rgba(153,132,145,.34)';ctx.lineWidth=.8;ctx.stroke();
+      };
+      const pStep=26,px0=x+30,px1=x+w-30,py0=y-8,py1=y+h+8;
+      for(let px=px0;px<=px1;px+=pStep){pearlAt(px,py0,4.7);pearlAt(px,py1,4.7)}
+      for(let py=y+34;py<=y+h-34;py+=pStep){pearlAt(x-8,py,4.7);pearlAt(x+w+8,py,4.7)}
+
+      const crystal=(cx,cy)=>{
+        ctx.save();ctx.translate(cx,cy);ctx.rotate(Math.PI/4);
+        const g=ctx.createLinearGradient(-8,-8,8,8);g.addColorStop(0,'#fff');g.addColorStop(.34,'#f7d9e8');g.addColorStop(.70,'#d7c7ff');g.addColorStop(1,metal);
+        ctx.fillStyle=g;ctx.strokeStyle='rgba(140,129,159,.55)';ctx.lineWidth=1.2;ctx.fillRect(-7,-7,14,14);ctx.strokeRect(-7,-7,14,14);
+        ctx.restore();
+      };
+      crystal(x+18,y+18);crystal(x+w-18,y+18);crystal(x+18,y+h-18);crystal(x+w-18,y+h-18);
+    }
     ctx.restore();
   }
   function drawPackageOverlay(){
@@ -420,10 +447,10 @@
     const retained=elements.filter(e=>e.preset!=='pink-lace');
     if(retained.length+additions.length>limits.totalObjects){guide('현재 붙어 있는 꾸미기가 많아서 핑크 레이스 시안을 더 붙일 수 없어요.');return}
     saveHistory();
-    shellState={loaderId:'clear',frameId:'lace-white',backingId:'pink',packageId:'opp-flap',sealId:'none'};
+    shellState={loaderId:'clear',frameId:'couture-pink',backingId:'cream',packageId:'opp-flap',sealId:'none'};
     elements=[...retained,...additions];theme='pink';selected=-1;
     renderShellControls();$$('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme==='pink'));
-    guide('Pink Lace v5 · 새틴 리본 + 로즈 펄 코너 + 크리스탈 체인 실제 파츠 시안 ♡');
+    guide('Pink Lace v6 · 꾸뛰르 펄 프레임 + 새틴 리본 + 로즈 펄 코너 + 크리스탈 체인 ♡');
     draw();
   }
   function setArtist(artist){const next=artist?.slug?{slug:String(artist.slug).toLowerCase(),name:String(artist.name||artist.korean_name||artist.slug)}:null;if(selectedArtist?.slug!==next?.slug)markDirty();selectedArtist=next;for(const e of elements){if(e.type==='sticker'&&itemById(e.stickerId)?.dynamic==='artist')e.value=String(selectedArtist?.name||sourceMeta?.artist||'MY PICK').slice(0,18)}const box=$('#topkkuArtistConnected');if(box)box.innerHTML=selectedArtist?`<b>${esc(selectedArtist.name)}</b><span>웹 보관함과 아지트 공개 대상을 이 팀으로 연결했어요.</span>`:'아직 팀이 연결되지 않았어요.';const results=$('#topkkuArtistResults');if(results)results.innerHTML='';const input=$('#topkkuArtistSearch');if(input&&selectedArtist)input.value=selectedArtist.name}
