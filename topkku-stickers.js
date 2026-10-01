@@ -29,6 +29,8 @@
     {id:'paper-scrap-grid',label:'그리드 찢어진 종이',pack:'스크랩북',access:'activity',minBand:2,kind:'scrap',asset:'assets/topkku/grid-paper.svg',assetScale:1.36,defaultSize:94},
     {id:'paperclip-silver',label:'실버 페이퍼클립',pack:'스크랩북',access:'activity',minBand:2,kind:'metal',asset:'assets/topkku/paperclip-silver.svg',assetScale:.72,defaultSize:82},
     {id:'big-ribbon-pink',label:'빅 핑크 리본',pack:'시그니처',access:'free',minBand:1,kind:'signature',asset:'assets/topkku/big-ribbon-pink.svg',assetScale:1.0,defaultSize:180,maxPerCanvas:2},
+    {id:'satin-bow-pearl-pink',label:'새틴 리본 진주 참',pack:'시그니처',access:'free',minBand:1,kind:'signature',asset:'assets/topkku/satin-bow-pearl-pink.svg',assetScale:1.0,defaultSize:190,maxPerCanvas:2},
+    {id:'crystal-heart-chain-pink',label:'크리스탈 하트 체인',pack:'시그니처',access:'activity',minBand:2,kind:'signature',asset:'assets/topkku/crystal-heart-chain-pink.svg',assetScale:1.0,defaultSize:210,maxPerCanvas:3},
     {id:'lace-strip-white',label:'화이트 레이스 스트립',pack:'시그니처',access:'free',minBand:1,kind:'signature',asset:'assets/topkku/lace-strip-white.svg',assetScale:1.0,defaultSize:220,maxPerCanvas:4},
     {id:'pearl-garland',label:'진주 가랜드',pack:'시그니처',access:'free',minBand:2,kind:'signature',asset:'assets/topkku/pearl-garland.svg',assetScale:1.0,defaultSize:220,maxPerCanvas:4},
     {id:'metal-chain-long',label:'메탈 체인',pack:'시그니처',access:'activity',minBand:2,kind:'signature',asset:'assets/topkku/metal-chain.svg',assetScale:1.0,defaultSize:220,maxPerCanvas:4},

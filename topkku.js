@@ -176,7 +176,7 @@
     ctx.save();ctx.translate(cx,cy);ctx.shadowColor='rgba(0,0,0,.18)';ctx.shadowBlur=8;ctx.shadowOffsetY=4;
     if(item.style==='heart'){ctx.fillStyle=item.color;heartPath(74);ctx.fill();ctx.strokeStyle='rgba(255,255,255,.82)';ctx.lineWidth=4;ctx.stroke()}
     else if(item.style==='star'){ctx.fillStyle=item.color;starPath(74);ctx.fill();ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=3;ctx.stroke()}
-    else if(item.style==='circle'){ctx.fillStyle=item.color;ctx.beginPath();ctx.arc(0,0,35,0,Math.PI*2);ctx.fill();ctx.strokeStyle='rgba(255,255,255,.88)';ctx.lineWidth=4;ctx.stroke()}
+    else if(item.style==='circle'){ctx.globalAlpha=.38;ctx.fillStyle=item.color;ctx.beginPath();ctx.arc(0,0,24,0,Math.PI*2);ctx.fill();ctx.globalAlpha=.58;ctx.strokeStyle='rgba(255,255,255,.72)';ctx.lineWidth=2;ctx.stroke()}
     else if(item.style==='label'){ctx.fillStyle='#fffaf1';roundedPath(-62,-25,124,50,9);ctx.fill();ctx.strokeStyle='#d9c9bf';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#5f4a55';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='700 18px "Segoe Print","Bradley Hand",cursive';ctx.fillText(item.text||'For you ♡',0,1)}
     ctx.restore();
   }
@@ -410,23 +410,21 @@
     const artistLabel=String(selectedArtist?.name||sourceMeta?.artist||'MY PICK').trim().slice(0,18)||'MY PICK';
     const P=(id,fallback,props={})=>presetSticker(id,fallback,{...props,preset:'pink-lace'});
     const additions=[
-      P('big-ribbon-pink','ribbon',{x:108,y:132,size:150,rotation:-.12}),
-      P('gem-cluster','sparkle',{x:576,y:250,size:104,rotation:.07}),
-      P('heart-outline',null,{x:72,y:510,size:52,rotation:-.08}),
-      P('sparkle',null,{x:646,y:510,size:44,rotation:.12}),
-      P('butterfly-cluster','sparkle',{x:585,y:710,size:108,rotation:.06}),
-      P('rose-vine-pink','flower',{x:180,y:842,size:190,rotation:-.13}),
-      P('pearl-garland','heart-outline',{x:360,y:884,size:250,rotation:.015}),
-      P('artist-tag','note-paper',{x:245,y:982,size:104,rotation:-.045,value:artistLabel.toUpperCase()}),
-      P('captured-date-tag','date-strip',{x:505,y:990,size:82,rotation:.02,value:capturedDateLabel()})
+      P('satin-bow-pearl-pink','big-ribbon-pink',{x:94,y:128,size:164,rotation:-.095}),
+      P('crystal-heart-chain-pink','pearl-garland',{x:505,y:792,size:218,rotation:.028}),
+      P('rose-vine-pink','flower',{x:148,y:826,size:158,rotation:-.12}),
+      P('sparkle',null,{x:636,y:505,size:34,rotation:.12}),
+      P('sparkle',null,{x:78,y:565,size:30,rotation:-.08}),
+      P('artist-tag','note-paper',{x:245,y:980,size:102,rotation:-.04,value:artistLabel.toUpperCase()}),
+      P('captured-date-tag','date-strip',{x:505,y:989,size:80,rotation:.018,value:capturedDateLabel()})
     ].filter(Boolean);
     const retained=elements.filter(e=>e.preset!=='pink-lace');
     if(retained.length+additions.length>limits.totalObjects){guide('현재 붙어 있는 꾸미기가 많아서 핑크 레이스 시안을 더 붙일 수 없어요.');return}
     saveHistory();
-    shellState={loaderId:'pink',frameId:'lace-white',backingId:'pink',packageId:'opp-flap',sealId:'heart'};
+    shellState={loaderId:'clear',frameId:'lace-white',backingId:'pink',packageId:'opp-flap',sealId:'clear'};
     elements=[...retained,...additions];theme='pink';selected=-1;
     renderShellControls();$$('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme==='pink'));
-    guide('Pink Lace v2 · 사진을 가리지 않고 실제 파츠만으로 완성했어 ♡');
+    guide('Pink Lace v3 · 새틴 리본과 크리스탈 체인 중심의 실제 파츠 시안 ♡');
     draw();
   }
   function setArtist(artist){const next=artist?.slug?{slug:String(artist.slug).toLowerCase(),name:String(artist.name||artist.korean_name||artist.slug)}:null;if(selectedArtist?.slug!==next?.slug)markDirty();selectedArtist=next;for(const e of elements){if(e.type==='sticker'&&itemById(e.stickerId)?.dynamic==='artist')e.value=String(selectedArtist?.name||sourceMeta?.artist||'MY PICK').slice(0,18)}const box=$('#topkkuArtistConnected');if(box)box.innerHTML=selectedArtist?`<b>${esc(selectedArtist.name)}</b><span>웹 보관함과 아지트 공개 대상을 이 팀으로 연결했어요.</span>`:'아직 팀이 연결되지 않았어요.';const results=$('#topkkuArtistResults');if(results)results.innerHTML='';const input=$('#topkkuArtistSearch');if(input&&selectedArtist)input.value=selectedArtist.name}
