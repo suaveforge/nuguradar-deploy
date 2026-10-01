@@ -60,3 +60,8 @@ body.topkku-editing-focus .topkku-workspace{padding-top:18px}
 }
 
 .shell-couture-pink{background:radial-gradient(circle at 30% 30%,#fff 0 12%,transparent 13%),linear-gradient(145deg,#fff7fb,#f3a4c4 58%,#d9c8ff)}
+
+.shell-atelier-pink{background:radial-gradient(circle at 22% 25%,#fff 0 10%,transparent 11%),linear-gradient(145deg,#fff9fc,#df8fb3 58%,#d6c7ff)}
+.shell-atelier-black{background:radial-gradient(circle at 72% 24%,#eef1f8 0 8%,transparent 9%),linear-gradient(145deg,#0f1016,#252733 58%,#9da6b9)}
+
+.shell-atelier-blue{background:radial-gradient(circle at 25% 24%,#fff 0 9%,transparent 10%),linear-gradient(145deg,#f4fbff,#78b7e7 58%,#bddcff)}

@@ -15,6 +15,9 @@
       {id:'blue',label:'블루 프레임',style:'solid',color:'#9cc5ef'},
       {id:'lace-white',label:'화이트 레이스',style:'lace',color:'#fffdf8'},
       {id:'couture-pink',label:'꾸뛰르 펄 핑크',style:'couture',color:'#f3a4c4',pearl:'#fffafc',metal:'#d8dbe5'},
+      {id:'atelier-pink',label:'아틀리에 펄 핑크',style:'atelier',color:'#df8fb3',pearl:'#fffafc',metal:'#c8cbd6',base:'#fff9fc'},
+      {id:'atelier-black',label:'미드나잇 실버',style:'atelier',color:'#20212a',pearl:'#f4f5f8',metal:'#aeb6c6',base:'#111219',dark:true},
+      {id:'atelier-blue',label:'아틀리에 크리스탈 블루',style:'atelier',color:'#78b7e7',pearl:'#f3fbff',metal:'#9eb8d2',base:'#f4fbff'},
       {id:'lace-black',label:'블랙 레이스',style:'lace',color:'#17171c'}
     ],
     backings:[
