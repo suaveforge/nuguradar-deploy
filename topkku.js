@@ -410,21 +410,21 @@
     const artistLabel=String(selectedArtist?.name||sourceMeta?.artist||'MY PICK').trim().slice(0,18)||'MY PICK';
     const P=(id,fallback,props={})=>presetSticker(id,fallback,{...props,preset:'pink-lace'});
     const additions=[
-      P('satin-bow-pearl-pink','big-ribbon-pink',{x:94,y:128,size:164,rotation:-.095}),
-      P('crystal-heart-chain-pink','pearl-garland',{x:505,y:792,size:218,rotation:.028}),
-      P('rose-vine-pink','flower',{x:148,y:826,size:158,rotation:-.12}),
-      P('sparkle',null,{x:636,y:505,size:34,rotation:.12}),
-      P('sparkle',null,{x:78,y:565,size:30,rotation:-.08}),
-      P('artist-tag','note-paper',{x:245,y:980,size:102,rotation:-.04,value:artistLabel.toUpperCase()}),
-      P('captured-date-tag','date-strip',{x:505,y:989,size:80,rotation:.018,value:capturedDateLabel()})
+      P('satin-bow-pearl-pink','big-ribbon-pink',{x:58,y:158,size:146,rotation:-.075}),
+      P('crystal-heart-chain-pink','pearl-garland',{x:520,y:850,size:198,rotation:.025}),
+      P('rose-vine-pink','flower',{x:128,y:864,size:150,rotation:-.10}),
+      P('sparkle',null,{x:642,y:555,size:30,rotation:.10}),
+      P('sparkle',null,{x:76,y:600,size:28,rotation:-.06}),
+      P('artist-tag','note-paper',{x:242,y:982,size:100,rotation:-.035,value:artistLabel.toUpperCase()}),
+      P('captured-date-tag','date-strip',{x:510,y:991,size:78,rotation:.015,value:capturedDateLabel()})
     ].filter(Boolean);
     const retained=elements.filter(e=>e.preset!=='pink-lace');
     if(retained.length+additions.length>limits.totalObjects){guide('현재 붙어 있는 꾸미기가 많아서 핑크 레이스 시안을 더 붙일 수 없어요.');return}
     saveHistory();
-    shellState={loaderId:'clear',frameId:'lace-white',backingId:'pink',packageId:'opp-flap',sealId:'clear'};
+    shellState={loaderId:'clear',frameId:'lace-white',backingId:'pink',packageId:'opp-flap',sealId:'none'};
     elements=[...retained,...additions];theme='pink';selected=-1;
     renderShellControls();$$('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme==='pink'));
-    guide('Pink Lace v3 · 새틴 리본과 크리스탈 체인 중심의 실제 파츠 시안 ♡');
+    guide('Pink Lace v4 · 상단 콘텐츠를 비우고 바깥 장식 중심으로 완성했어 ♡');
     draw();
   }
   function setArtist(artist){const next=artist?.slug?{slug:String(artist.slug).toLowerCase(),name:String(artist.name||artist.korean_name||artist.slug)}:null;if(selectedArtist?.slug!==next?.slug)markDirty();selectedArtist=next;for(const e of elements){if(e.type==='sticker'&&itemById(e.stickerId)?.dynamic==='artist')e.value=String(selectedArtist?.name||sourceMeta?.artist||'MY PICK').slice(0,18)}const box=$('#topkkuArtistConnected');if(box)box.innerHTML=selectedArtist?`<b>${esc(selectedArtist.name)}</b><span>웹 보관함과 아지트 공개 대상을 이 팀으로 연결했어요.</span>`:'아직 팀이 연결되지 않았어요.';const results=$('#topkkuArtistResults');if(results)results.innerHTML='';const input=$('#topkkuArtistSearch');if(input&&selectedArtist)input.value=selectedArtist.name}
