@@ -14,6 +14,7 @@
     midnight:{bg:'#171724',ink:'#f1ecff',frame:'#6d5ba8',accent:'#ff6cac',paper:'#252436'}
   };
   const catalog=window.NUGU_TOPKKU_STICKERS||{items:[],byId:new Map(),limits:{totalObjects:90,motionObjects:6,privateSavesPerDay:30,publicPostsPerDay:10}};
+  const shellCatalog=window.NUGU_TOPKKU_SHELLS||{loaders:[],frames:[],backings:[],packages:[],seals:[],defaults:{loaderId:'clear',frameId:'none',backingId:'none',packageId:'none',sealId:'none'}};
   const limits=catalog.limits;
   const BLUE_STAGE={
     main:{x:178,y:154,w:430,h:660,focusX:.50,focusY:.50},
@@ -30,6 +31,7 @@
   };
   const defaultPhotoView=()=>({zoom:1,x:0,y:0});
   let theme='lavender',photo=null,photoView=defaultPhotoView(),elements=[],selected=-1,drag=null,history=[],sourceMeta=null,compositionEventKey='',selectedArtist=null,saveBusy=false,searchTimer=null;
+  let shellState={...shellCatalog.defaults};
   let activeStickerPack='all',styleState=null,vaultUsage=null,currentSavedId=null,currentSavedPublished=false,lastSavedEventKey='',referenceSource=null;
   const reducedMotion=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
   const assetImages=new Map(),assetPromises=new Map();
@@ -72,6 +74,7 @@
   const apiBase=()=>String((window.NUGU_CONFIG||{}).apiBase||'').replace(/\/$/,'');
   const timeLabel=s=>{const n=Math.max(0,Math.floor(Number(s)||0)),m=Math.floor(n/60),sec=n%60;return`${m}:${String(sec).padStart(2,'0')}`};
   const itemById=id=>catalog.byId?.get?.(id)||catalog.items.find(x=>x.id===id)||null;
+  const shellItem=(group,id)=>shellCatalog[group+'ById']?.get?.(id)||shellCatalog[group]?.find?.(x=>x.id===id)||null;
   function roundedPath(x,y,w,h,r){const rr=Math.min(r,w/2,h/2);ctx.beginPath();ctx.moveTo(x+rr,y);ctx.arcTo(x+w,y,x+w,y+h,rr);ctx.arcTo(x+w,y+h,x,y+h,rr);ctx.arcTo(x,y+h,x,y,rr);ctx.arcTo(x,y,x+w,y,rr);ctx.closePath()}
   function heartPath(size){const s=size/100;ctx.beginPath();ctx.moveTo(0,35*s);ctx.bezierCurveTo(-58*s,-4*s,-45*s,-55*s,-10*s,-43*s);ctx.bezierCurveTo(0,-58*s,38*s,-56*s,48*s,-27*s);ctx.bezierCurveTo(62*s,10*s,24*s,35*s,0,55*s);ctx.bezierCurveTo(-24*s,35*s,-62*s,10*s,-48*s,-27*s);ctx.bezierCurveTo(-38*s,-56*s,0,-58*s,10*s,-43*s);ctx.closePath()}
   function starPath(size,points=5){const outer=size*.52,inner=outer*.43;ctx.beginPath();for(let i=0;i<points*2;i++){const r=i%2?inner:outer,a=-Math.PI/2+i*Math.PI/points,x=Math.cos(a)*r,y=Math.sin(a)*r;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)}ctx.closePath()}
@@ -105,12 +108,12 @@
     ctx.drawImage(img,x+(w-dw)/2+photoView.x,y+(h-dh)/2+photoView.y,dw,dh);
   }
   function drawPhoto(img,x,y,w,h){if(sourceMeta?.source==='watch')fitWatchImage(img,x,y,w,h);else coverImage(img,x,y,w,h)}
-  function snapshot(){return{theme,elements:elements.map(e=>({...e,images:Array.isArray(e.images)?[...e.images]:e.images})),photoView:{...photoView}}}
+  function snapshot(){return{theme,elements:elements.map(e=>({...e,images:Array.isArray(e.images)?[...e.images]:e.images})),photoView:{...photoView},shellState:{...shellState}}}
   function renderUsage(){const root=$('#topkkuLimitLine');if(!root)return;const s=Number(vaultUsage?.savedToday||0),p=Number(vaultUsage?.publishedToday||0),sl=Number(vaultUsage?.saveLimit||limits.privateSavesPerDay),pl=Number(vaultUsage?.publishLimit||limits.publicPostsPerDay);root.textContent=`만들기·PNG 저장 무제한 · 웹 보관 ${s}/${sl} · 아지트 공개 ${p}/${pl} · 모션 장식 작품당 ${limits.motionObjects}개`}
   function renderSaveState(){const a=$('#webSaveBtn'),b=$('#publishBtn');if(a)a.disabled=saveBusy;if(b){b.disabled=saveBusy;b.textContent=currentSavedPublished?'아지트 벽에 붙음 ✓':'아지트 벽에 붙이기 ✦'}renderUsage()}
   function markDirty(){if(currentSavedId!=null){currentSavedId=null;currentSavedPublished=false;if(compositionEventKey===lastSavedEventKey)compositionEventKey=newCompositionKey();renderSaveState()}}
   function saveHistory(){markDirty();history.push(snapshot());if(history.length>30)history.shift()}
-  function restore(s){if(!s)return;markDirty();theme=s.theme;elements=s.elements.map(e=>({...e}));photoView=s.photoView?{...s.photoView}:defaultPhotoView();selected=-1;$$('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme===theme));draw()}
+  function restore(s){if(!s)return;markDirty();theme=s.theme;elements=s.elements.map(e=>({...e}));photoView=s.photoView?{...s.photoView}:defaultPhotoView();shellState=s.shellState?{...shellCatalog.defaults,...s.shellState}:{...shellCatalog.defaults};selected=-1;$$('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme===theme));renderShellControls();draw()}
   function guide(message){const root=$('#stickerGuide');if(root)root.textContent=message}
   function itemCount(id){return elements.filter(e=>e.type==='sticker'&&e.stickerId===id).length}
   function motionCount(){return elements.filter(e=>e.type==='sticker'&&itemById(e.stickerId)?.motion).length}
@@ -119,6 +122,59 @@
   function addText(value,textStyle='default'){const text=String(value||'').trim();if(!text)return;if(elements.length>=limits.totalObjects){guide(`한 작품에는 최대 ${limits.totalObjects}개 오브젝트까지 붙일 수 있어요.`);return}saveHistory();elements.push({type:'text',value:text,textStyle,x:W/2,y:H-112,size:textStyle==='handwritten'?38:34,rotation:0});selected=elements.length-1;draw();$('#textInput').value=''}
   function elementRadius(e){if(e.type==='scene-filmstrip')return e.size*1.42;if(e.type==='scene-polaroid')return e.size*1.08;if(e.type==='scene-crop')return e.size*.92;if(e.type==='scene-scrap-note')return e.size*1.48;if(e.type==='scene-ticket')return e.size*1.55;if(e.type==='scene-paper-scrap')return e.size*1.15;if(e.type==='scene-tape')return e.size*.95;if(e.type==='scene-chrome')return e.size*.62;if(e.type==='scene-clip')return e.size*.70;if(e.type!=='sticker')return Math.max(e.size*1.1,String(e.value||'').length*e.size*.27);const item=itemById(e.stickerId);if(item?.kind==='frame'&&!item?.asset)return Math.max(photoBox.w,photoBox.h)*.48;return e.size*.75*Number(item?.assetScale||1)}
   function drawBackdrop(t){ctx.fillStyle=t.bg;ctx.fillRect(0,0,W,H);const g=ctx.createRadialGradient(W*.18,H*.12,20,W*.18,H*.12,420);g.addColorStop(0,t.accent+'55');g.addColorStop(1,t.bg+'00');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.save();ctx.globalAlpha=.22;ctx.strokeStyle=t.frame;ctx.lineWidth=2;for(let y=30;y<H;y+=46){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y-18);ctx.stroke()}ctx.restore()}
+  function drawBackingLayer(){
+    const item=shellItem('backings',shellState.backingId);if(!item||item.id==='none'||!item.color)return;
+    const x=photoBox.x-42,y=photoBox.y-60,w=photoBox.w+84,h=photoBox.h+120;
+    ctx.save();ctx.translate(W/2,H/2);ctx.rotate(-.025);ctx.translate(-W/2,-H/2);
+    ctx.shadowColor='rgba(22,24,34,.18)';ctx.shadowBlur=24;ctx.shadowOffsetY=14;roundedPath(x,y,w,h,26);ctx.fillStyle=item.color;ctx.fill();
+    ctx.shadowBlur=0;ctx.globalAlpha=.11;ctx.strokeStyle=item.id==='black'?'#fff':'#765f77';ctx.lineWidth=1.2;
+    for(let yy=y+24;yy<y+h-18;yy+=34){ctx.beginPath();ctx.moveTo(x+18,yy);ctx.lineTo(x+w-18,yy-8);ctx.stroke()}
+    ctx.restore();
+  }
+  function drawLoaderBase(){
+    const item=shellItem('loaders',shellState.loaderId)||{tone:'clear'};
+    const tones={clear:['rgba(255,255,255,.12)','rgba(225,236,255,.65)'],frost:['rgba(247,249,255,.34)','rgba(221,227,239,.82)'],pink:['rgba(255,213,229,.22)','rgba(242,151,185,.72)'],blue:['rgba(203,226,255,.22)','rgba(123,176,231,.74)'],black:['rgba(35,38,47,.24)','rgba(72,76,89,.84)']};
+    const [fill,stroke]=tones[item.tone]||tones.clear,x=photoBox.x-34,y=photoBox.y-48,w=photoBox.w+68,h=photoBox.h+96;
+    ctx.save();ctx.shadowColor='rgba(18,25,42,.22)';ctx.shadowBlur=26;ctx.shadowOffsetY=16;roundedPath(x,y,w,h,32);ctx.fillStyle=fill;ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle=stroke;ctx.lineWidth=9;ctx.stroke();
+    ctx.globalAlpha=.55;ctx.strokeStyle='rgba(255,255,255,.92)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x+24,y+14);ctx.lineTo(x+w-24,y+14);ctx.stroke();
+    ctx.globalAlpha=.32;ctx.beginPath();ctx.moveTo(x+14,y+28);ctx.lineTo(x+14,y+h-28);ctx.stroke();ctx.restore();
+  }
+  function drawDecorativeFrame(){
+    const item=shellItem('frames',shellState.frameId);if(!item||item.style==='none')return;
+    const x=photoBox.x-16,y=photoBox.y-16,w=photoBox.w+32,h=photoBox.h+32;
+    ctx.save();
+    if(item.style==='solid'){roundedPath(x,y,w,h,photoBox.r+10);ctx.strokeStyle=item.color;ctx.lineWidth=20;ctx.stroke();ctx.globalAlpha=.32;ctx.strokeStyle='#fff';ctx.lineWidth=3;ctx.stroke()}
+    else if(item.style==='lace'){
+      const c=item.color||'#fffdf8';ctx.strokeStyle=c;ctx.fillStyle=c;ctx.lineWidth=7;roundedPath(x,y,w,h,photoBox.r+10);ctx.stroke();
+      const step=28,r=7;
+      for(let xx=x+18;xx<x+w-12;xx+=step){ctx.beginPath();ctx.arc(xx,y,r,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(xx,y+h,r,0,Math.PI*2);ctx.fill()}
+      for(let yy=y+18;yy<y+h-12;yy+=step){ctx.beginPath();ctx.arc(x,yy,r,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(x+w,yy,r,0,Math.PI*2);ctx.fill()}
+      ctx.globalAlpha=.30;ctx.strokeStyle=item.id==='lace-black'?'#fff':'#b9aab2';ctx.lineWidth=1.5;roundedPath(x-5,y-5,w+10,h+10,photoBox.r+12);ctx.stroke();
+    }
+    ctx.restore();
+  }
+  function drawPackageOverlay(){
+    const item=shellItem('packages',shellState.packageId);if(!item||item.style==='none')return;
+    const x=photoBox.x-55,y=photoBox.y-82,w=photoBox.w+110,h=photoBox.h+144;
+    ctx.save();roundedPath(x,y,w,h,30);ctx.fillStyle='rgba(255,255,255,.055)';ctx.fill();ctx.strokeStyle='rgba(255,255,255,.78)';ctx.lineWidth=4;ctx.stroke();
+    ctx.globalAlpha=.38;const g=ctx.createLinearGradient(x,y,x+w,y+h);g.addColorStop(0,'rgba(255,255,255,.05)');g.addColorStop(.34,'rgba(255,255,255,.62)');g.addColorStop(.42,'rgba(255,255,255,.08)');g.addColorStop(.72,'rgba(255,255,255,.34)');g.addColorStop(1,'rgba(255,255,255,.03)');ctx.fillStyle=g;roundedPath(x+7,y+7,w-14,h-14,25);ctx.fill();ctx.globalAlpha=.65;ctx.strokeStyle='rgba(209,218,232,.8)';ctx.lineWidth=2;ctx.stroke();
+    if(item.style==='opp-flap'){ctx.globalAlpha=.60;ctx.fillStyle='rgba(255,255,255,.24)';ctx.beginPath();ctx.moveTo(x+20,y+18);ctx.lineTo(x+w-20,y+18);ctx.lineTo(x+w-68,y+66);ctx.lineTo(x+68,y+66);ctx.closePath();ctx.fill();ctx.strokeStyle='rgba(255,255,255,.62)';ctx.stroke()}
+    ctx.restore();
+  }
+  function drawSealOverlay(){
+    const item=shellItem('seals',shellState.sealId);if(!item||item.style==='none')return;
+    const packageOn=shellState.packageId!=='none',cx=packageOn?photoBox.x+photoBox.w/2:photoBox.x+photoBox.w-20,cy=packageOn?Math.max(42,photoBox.y-48):Math.max(44,photoBox.y-26);
+    ctx.save();ctx.translate(cx,cy);ctx.shadowColor='rgba(0,0,0,.18)';ctx.shadowBlur=8;ctx.shadowOffsetY=4;
+    if(item.style==='heart'){ctx.fillStyle=item.color;heartPath(74);ctx.fill();ctx.strokeStyle='rgba(255,255,255,.82)';ctx.lineWidth=4;ctx.stroke()}
+    else if(item.style==='star'){ctx.fillStyle=item.color;starPath(74);ctx.fill();ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=3;ctx.stroke()}
+    else if(item.style==='circle'){ctx.fillStyle=item.color;ctx.beginPath();ctx.arc(0,0,35,0,Math.PI*2);ctx.fill();ctx.strokeStyle='rgba(255,255,255,.88)';ctx.lineWidth=4;ctx.stroke()}
+    else if(item.style==='label'){ctx.fillStyle='#fffaf1';roundedPath(-62,-25,124,50,9);ctx.fill();ctx.strokeStyle='#d9c9bf';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#5f4a55';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='700 18px "Segoe Print","Bradley Hand",cursive';ctx.fillText(item.text||'For you ♡',0,1)}
+    ctx.restore();
+  }
+  function renderShellControls(){
+    const groups=[['loaders','loaderId','topkkuLoaderOptions'],['frames','frameId','topkkuFrameOptions'],['backings','backingId','topkkuBackingOptions'],['packages','packageId','topkkuPackageOptions'],['seals','sealId','topkkuSealOptions']];
+    for(const [group,key,rootId] of groups){const root=$('#'+rootId);if(!root)continue;root.innerHTML=(shellCatalog[group]||[]).map(item=>'<button type="button" class="'+(shellState[key]===item.id?'active':'')+'" data-shell-key="'+key+'" data-shell-id="'+esc(item.id)+'"><span class="shell-dot shell-'+esc(item.id)+'"></span>'+esc(item.label)+'</button>').join('');root.querySelectorAll('[data-shell-id]').forEach(b=>b.onclick=()=>{if(shellState[b.dataset.shellKey]===b.dataset.shellId)return;saveHistory();shellState={...shellState,[b.dataset.shellKey]:b.dataset.shellId};renderShellControls();draw()})}
+  }
   function stageNoise(seed){const x=Math.sin(Number(seed||1)*12.9898)*43758.5453;return x-Math.floor(x)}
   function tornPaperPath(x,y,w,h,seed=1,segments=8,amp=7){
     const top=[],right=[],bottom=[],left=[],seg=Math.max(3,segments);
@@ -265,7 +321,7 @@
   }
   function drawElement(e,i,t,now){ctx.save();ctx.translate(e.x,e.y);ctx.rotate(e.rotation);ctx.textAlign='center';ctx.textBaseline='middle';if(e.type==='sticker'){const item=itemById(e.stickerId);if(item)drawMaterial(e,item,now)}else if(e.type==='scene-filmstrip')drawFilmStrip(e);else if(e.type==='scene-polaroid')drawPolaroid(e);else if(e.type==='scene-crop')drawSceneCrop(e);else if(e.type==='scene-scrap-note')drawScrapNote(e);else if(e.type==='scene-ticket')drawSceneTicket(e);else if(e.type==='scene-paper-scrap')drawScenePaperScrap(e);else if(e.type==='scene-tape')drawSceneTape(e);else if(e.type==='scene-chrome')drawSceneChrome(e);else if(e.type==='scene-clip')drawSceneClip(e);else if(e.textStyle==='date-label'){const label=String(e.value||'').slice(0,24),w=Math.max(150,label.length*12+34),h=40;ctx.shadowColor='rgba(37,54,84,.16)';ctx.shadowBlur=7;ctx.fillStyle='#edf3fc';roundedPath(-w/2,-h/2,w,h,4);ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle='rgba(62,86,126,.18)';ctx.lineWidth=1.5;ctx.stroke();ctx.fillStyle='#304b78';ctx.font=`700 ${Math.max(13,e.size)}px ui-monospace,monospace`;ctx.fillText(label,0,1)}else{ctx.font=e.textStyle==='handwritten'?`600 ${e.size}px "Segoe Print","Bradley Hand","Comic Sans MS",cursive`:`800 ${e.size}px system-ui,-apple-system,"Segoe UI",sans-serif`;if(theme==='stageblue'&&e.textStyle==='handwritten'){ctx.fillStyle='#173d80';const lines=String(e.value||'').split('\\n');const step=Math.max(18,e.size*1.05);lines.forEach((line,idx)=>ctx.fillText(line,0,(idx-(lines.length-1)/2)*step))}else{ctx.lineWidth=Math.max(3,e.size*(e.textStyle==='handwritten'?0.10:0.16));ctx.strokeStyle=theme==='midnight'?'#171724':'#fffdf8';ctx.strokeText(e.value,0,0);ctx.fillStyle=t.ink;ctx.fillText(e.value,0,0)}}if(i===selected){const r=elementRadius(e);ctx.strokeStyle='#7ff6c2';ctx.lineWidth=3;ctx.setLineDash([9,7]);ctx.strokeRect(-r,-r*.58,r*2,r*1.16);ctx.setLineDash([])}ctx.restore()}
   function statusText(){if(selected>=0)return`선택됨 · ${elements.length}/${limits.totalObjects}개 · 드래그해서 옮겨요`;if(photo&&sourceMeta?.source==='watch'){const who=sourceMeta.artist?`${sourceMeta.artist} · `:'';const when=Number.isFinite(Number(sourceMeta.time))?`${timeLabel(sourceMeta.time)} 장면`:'영상 장면';return`${who}${when}을 가져왔어요 ✨`}if(photo)return`꾸미는 중 · ${elements.length}/${limits.totalObjects}개`;return'사진을 먼저 골라주세요'}
-  function draw(now=performance.now()){const t=themes[theme];ctx.clearRect(0,0,W,H);drawBackdrop(t);drawFrame(t);elements.forEach((e,i)=>drawElement(e,i,t,now));$('#selectionState').textContent=statusText()}
+  function draw(now=performance.now()){const t=themes[theme];ctx.clearRect(0,0,W,H);drawBackdrop(t);drawBackingLayer();drawLoaderBase();drawFrame(t);drawDecorativeFrame();elements.forEach((e,i)=>drawElement(e,i,t,now));drawPackageOverlay();drawSealOverlay();$('#selectionState').textContent=statusText()}
   function animationLoop(now){if(!reducedMotion&&document.visibilityState==='visible'&&elements.some(e=>e.type==='sticker'&&itemById(e.stickerId)?.motion))draw(now);requestAnimationFrame(animationLoop)}
   function canvasPoint(ev){const r=canvas.getBoundingClientRect();return{x:(ev.clientX-r.left)*W/r.width,y:(ev.clientY-r.top)*H/r.height}}
   function hitTest(p){for(let i=elements.length-1;i>=0;i--){const e=elements[i],r=elementRadius(e);if(Math.hypot(p.x-e.x,p.y-e.y)<=r*1.05)return i}return-1}
@@ -290,13 +346,13 @@
   async function unlockSticker(item){const identity=await signedIdentity('희귀 스티커는 로그인 후 영구 해금할 수 있어요.');if(!identity)return;const balance=Number(styleState?.profile?.points?.balance||0);if(balance<Number(item.unlockCost||0)){guide(`${item.label}은 ${item.unlockCost}P가 필요해요. 지금은 ${balance}P 있어요.`);return}guide(`${item.label} 영구 해금 중…`);try{const r=await fetch(`${apiBase()}/api/v1/community/style/unlock/${encodeURIComponent(item.id)}`,{method:'POST',headers:{Accept:'application/json','Content-Type':'application/json',...(window.NUGU_AUTH?.authHeaders?.(identity)||{})},body:JSON.stringify({visitorId:identity.visitorId})});const data=await r.json().catch(()=>({}));if(!r.ok)throw Object.assign(new Error(data.error||'unlock_failed'),{code:data.error});styleState={profile:data.profile,items:data.items};renderStickerProfile();renderStickerGrid();emitStyleState();guide(`${item.label} 영구 해금 완료 ♡ 이제 횟수 차감 없이 계속 쓸 수 있어요.`)}catch(e){guide(e.code==='insufficient_style_points'?'포인트가 조금 부족해요. 덕질하다 보면 자연스럽게 쌓여요.':'지금은 해금하지 못했어요.')}}
   async function handleStickerClick(id){const item=itemById(id);if(!item)return;const access=accessFor(item);if(!access.unlocked){if(item.access==='points'){await unlockSticker(item);return}const identity=window.NUGU_AUTH?.getIdentitySync?.();if(!identity?.authenticated){await signedIdentity('꾸미기 서랍은 로그인 후 덕질 기록과 연결돼요.');return}guide('조금 더 놀다 보면 다음 꾸미기 서랍이 편지와 함께 열려요. ♡');return}if(item.asset){try{await ensureAsset(item)}catch{guide(`${item.label} 벡터 장식을 불러오지 못했어요. 다시 눌러줘.`);return}}addStickerItem(item)}
   async function loadStyleState(){const sync=window.NUGU_AUTH?.getIdentitySync?.();if(!sync?.authenticated){styleState=null;renderStickerProfile();renderStickerGrid();emitStyleState();return}try{const identity=await window.NUGU_AUTH.getIdentity();if(!identity?.authenticated)return;const r=await fetch(`${apiBase()}/api/v1/community/style/me?visitorId=${encodeURIComponent(identity.visitorId)}`,{headers:{Accept:'application/json',...(window.NUGU_AUTH?.authHeaders?.(identity)||{})},cache:'no-store'});const data=await r.json();if(!r.ok)throw new Error(data.error||'style_failed');styleState=data}catch(e){console.warn('style state',e);styleState=null}renderStickerProfile();renderStickerGrid();emitStyleState()}
-  function renderSceneCutAvailability(){const b=$('#buildBlueStage');if(b){b.disabled=!photo;b.title=photo?'베이스이미지 1장 위에 등록된 꾸미기스티커만 배치합니다.':'베이스이미지를 먼저 골라주세요.'}}
+  function renderSceneCutAvailability(){for(const id of ['buildBlueStage','buildPinkLace']){const b=$('#'+id);if(b){b.disabled=!photo;b.title=photo?'베이스이미지 1장 위에 등록된 실제 파츠만 배치합니다.':'베이스이미지를 먼저 골라주세요.'}}}
   function presetSticker(id,fallbackId,props={}){
     const candidates=[id,fallbackId].filter(Boolean);
     for(const candidate of candidates){
       const item=itemById(candidate);if(!item)continue;
       const access=accessFor(item);if(!access.unlocked)continue;
-      const value=props.value??(item.dynamic==='artist'?String(selectedArtist?.name||sourceMeta?.artist||'MY PICK').slice(0,18):item.dynamic==='date'?capturedDateLabel():item.value??'');return {type:'sticker',stickerId:item.id,value,x:props.x??W/2,y:props.y??H/2,size:props.size??(Number(item.defaultSize||0)||(item.kind==='tape'?90:76)),rotation:props.rotation??0,preset:'blue-stage'};
+      const value=props.value??(item.dynamic==='artist'?String(selectedArtist?.name||sourceMeta?.artist||'MY PICK').slice(0,18):item.dynamic==='date'?capturedDateLabel():item.value??'');return {type:'sticker',stickerId:item.id,value,x:props.x??W/2,y:props.y??H/2,size:props.size??(Number(item.defaultSize||0)||(item.kind==='tape'?90:76)),rotation:props.rotation??0,preset:props.preset||'blue-stage'};
     }
     return null;
   }
@@ -340,12 +396,41 @@
     guide('베이스이미지 1장 + 실제 꾸미기스티커만으로 스크랩북 시안을 배치했어 ♡');
     draw();
   }
+  async function buildPinkLaceTopkku(){
+    if(!photo){guide('베이스이미지를 먼저 골라줘 ♡');return}
+    const artistLabel=String(selectedArtist?.name||sourceMeta?.artist||'MY PICK').trim().slice(0,18)||'MY PICK';
+    const P=(id,fallback,props={})=>presetSticker(id,fallback,{...props,preset:'pink-lace'});
+    const additions=[
+      P('big-ribbon-pink','ribbon',{x:142,y:160,size:190,rotation:-.08}),
+      P('lace-strip-white','paper-scrap-white',{x:360,y:118,size:430,rotation:0}),
+      P('lace-strip-white','paper-scrap-white',{x:360,y:860,size:430,rotation:Math.PI}),
+      P('lace-strip-white','paper-scrap-white',{x:82,y:510,size:400,rotation:Math.PI/2}),
+      P('lace-strip-white','paper-scrap-white',{x:638,y:510,size:400,rotation:-Math.PI/2}),
+      P('pearl-garland','heart-outline',{x:360,y:190,size:300,rotation:.02}),
+      P('rose-vine-pink','flower',{x:190,y:790,size:220,rotation:-.10}),
+      P('butterfly-cluster','sparkle',{x:575,y:735,size:140,rotation:.08}),
+      P('gem-cluster','sparkle',{x:520,y:170,size:128,rotation:-.06}),
+      P('heart-outline',null,{x:93,y:610,size:54,rotation:-.12}),
+      P('heart-outline',null,{x:617,y:330,size:50,rotation:.10}),
+      P('sparkle',null,{x:600,y:560,size:46,rotation:.08}),
+      P('artist-tag','note-paper',{x:255,y:920,size:108,rotation:-.05,value:artistLabel.toUpperCase()}),
+      P('captured-date-tag','date-strip',{x:505,y:950,size:84,rotation:.025,value:capturedDateLabel()})
+    ].filter(Boolean);
+    const retained=elements.filter(e=>e.preset!=='pink-lace');
+    if(retained.length+additions.length>limits.totalObjects){guide('현재 붙어 있는 꾸미기가 많아서 핑크 레이스 시안을 더 붙일 수 없어요.');return}
+    saveHistory();
+    shellState={loaderId:'pink',frameId:'lace-white',backingId:'pink',packageId:'opp-flap',sealId:'heart'};
+    elements=[...retained,...additions];theme='pink';selected=-1;
+    renderShellControls();$$('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme==='pink'));
+    guide('실제 파츠 시안 · 탑로더 + 프레임 + 꾸미기스티커 + OPP + 씰로 완성했어 ♡');
+    draw();
+  }
   function setArtist(artist){const next=artist?.slug?{slug:String(artist.slug).toLowerCase(),name:String(artist.name||artist.korean_name||artist.slug)}:null;if(selectedArtist?.slug!==next?.slug)markDirty();selectedArtist=next;for(const e of elements){if(e.type==='sticker'&&itemById(e.stickerId)?.dynamic==='artist')e.value=String(selectedArtist?.name||sourceMeta?.artist||'MY PICK').slice(0,18)}const box=$('#topkkuArtistConnected');if(box)box.innerHTML=selectedArtist?`<b>${esc(selectedArtist.name)}</b><span>웹 보관함과 아지트 공개 대상을 이 팀으로 연결했어요.</span>`:'아직 팀이 연결되지 않았어요.';const results=$('#topkkuArtistResults');if(results)results.innerHTML='';const input=$('#topkkuArtistSearch');if(input&&selectedArtist)input.value=selectedArtist.name}
   function loadPhotoData(src,meta=null){if(!src)return;const img=new Image();img.onload=()=>{photo=img;photoView=defaultPhotoView();sourceMeta=meta;configurePhotoBox(img,meta);compositionEventKey=newCompositionKey();currentSavedId=null;currentSavedPublished=false;lastSavedEventKey='';if(meta?.artistSlug)setArtist({slug:meta.artistSlug,name:meta.artist||meta.artistSlug});selected=-1;renderSceneCutAvailability();draw();renderSaveState()};img.onerror=()=>{sourceMeta=null;resetPhotoBox();compositionEventKey='';renderSceneCutAvailability();draw()};img.src=src}
   function loadIncoming(){let raw='';try{raw=sessionStorage.getItem('nuguTopkkuIncoming')||'';sessionStorage.removeItem('nuguTopkkuIncoming')}catch{}if(!raw)return false;try{const data=JSON.parse(raw);if(!data?.image)return false;loadPhotoData(data.image,data);return true}catch{return false}}
   canvas.addEventListener('pointerdown',ev=>{const p=canvasPoint(ev),i=hitTest(p);selected=i;if(i>=0){markDirty();drag={dx:p.x-elements[i].x,dy:p.y-elements[i].y,before:{...elements[i]}};canvas.setPointerCapture?.(ev.pointerId)}draw()});
   canvas.addEventListener('pointermove',ev=>{if(!drag||selected<0)return;const p=canvasPoint(ev),e=elements[selected];e.x=clamp(p.x-drag.dx,24,W-24);e.y=clamp(p.y-drag.dy,24,H-24);draw()});
-  canvas.addEventListener('pointerup',()=>{if(drag&&selected>=0){const before=drag.before,after=elements[selected];if(before.x!==after.x||before.y!==after.y){history.push({theme,elements:elements.map((e,i)=>i===selected?{...before}:{...e}),photoView:{...photoView}});if(history.length>30)history.shift()}}drag=null});
+  canvas.addEventListener('pointerup',()=>{if(drag&&selected>=0){const before=drag.before,after=elements[selected];if(before.x!==after.x||before.y!==after.y){history.push({theme,elements:elements.map((e,i)=>i===selected?{...before}:{...e}),photoView:{...photoView},shellState:{...shellState}});if(history.length>30)history.shift()}}drag=null});
   $('#photoInput').addEventListener('change',ev=>{const file=ev.target.files?.[0];if(!file)return;const reader=new FileReader();reader.onload=()=>loadPhotoData(reader.result,null);reader.readAsDataURL(file)});
   function editPhoto(fn){if(!photo)return;saveHistory();fn(photoView);selected=-1;draw()}
   $('#photoZoomOut').onclick=()=>editPhoto(v=>v.zoom=clamp(v.zoom/1.12,1,3));$('#photoZoomIn').onclick=()=>editPhoto(v=>v.zoom=clamp(v.zoom*1.12,1,3));$('#photoLeft').onclick=()=>editPhoto(v=>v.x-=34);$('#photoRight').onclick=()=>editPhoto(v=>v.x+=34);$('#photoUp').onclick=()=>editPhoto(v=>v.y-=34);$('#photoDown').onclick=()=>editPhoto(v=>v.y+=34);$('#photoCenter').onclick=()=>editPhoto(v=>{v.zoom=1;v.x=0;v.y=0});
@@ -353,11 +438,12 @@
   $$('#stickerPackTabs [data-sticker-pack]').forEach(b=>b.addEventListener('click',()=>{activeStickerPack=b.dataset.stickerPack;$$('#stickerPackTabs [data-sticker-pack]').forEach(x=>x.classList.toggle('active',x===b));renderStickerGrid()}));
   $('#addText').addEventListener('click',()=>addText($('#textInput').value));$('#textInput').addEventListener('keydown',e=>{if(e.key==='Enter')addText(e.currentTarget.value)});
   $$('.quick-copy [data-copy]').forEach(b=>b.addEventListener('click',()=>addText(b.dataset.copy,b.dataset.textStyle||'default')));
-  $('#buildBlueStage')?.addEventListener('click',()=>buildBlueStageReconstruction());
+  $('#buildBlueStage')?.addEventListener('click',()=>buildBlueStageReconstruction());$('#buildPinkLace')?.addEventListener('click',()=>buildPinkLaceTopkku());
   function editSelected(fn){if(selected<0)return;saveHistory();fn(elements[selected]);draw()}
-  $('#smaller').onclick=()=>editSelected(e=>e.size=clamp(e.size*.88,18,180));$('#bigger').onclick=()=>editSelected(e=>e.size=clamp(e.size*1.12,18,180));$('#rotateLeft').onclick=()=>editSelected(e=>e.rotation-=Math.PI/18);$('#rotateRight').onclick=()=>editSelected(e=>e.rotation+=Math.PI/18);$('#deleteElement').onclick=()=>{if(selected<0)return;saveHistory();elements.splice(selected,1);selected=-1;draw()};
+  const maxElementSize=e=>e?.type==='sticker'&&itemById(e.stickerId)?.kind==='signature'?420:180;
+  $('#smaller').onclick=()=>editSelected(e=>e.size=clamp(e.size*.88,18,maxElementSize(e)));$('#bigger').onclick=()=>editSelected(e=>e.size=clamp(e.size*1.12,18,maxElementSize(e)));$('#rotateLeft').onclick=()=>editSelected(e=>e.rotation-=Math.PI/18);$('#rotateRight').onclick=()=>editSelected(e=>e.rotation+=Math.PI/18);$('#deleteElement').onclick=()=>{if(selected<0)return;saveHistory();elements.splice(selected,1);selected=-1;draw()};
   $('#undoBtn').onclick=()=>restore(history.pop());
-  $('#resetBtn').onclick=()=>{if(!photo&&!elements.length&&theme==='lavender')return;saveHistory();photo=null;photoView=defaultPhotoView();sourceMeta=null;resetPhotoBox();compositionEventKey='';elements=[];selected=-1;theme='lavender';currentSavedId=null;currentSavedPublished=false;lastSavedEventKey='';setArtist(null);renderSceneCutAvailability();$$('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme==='lavender'));$('#photoInput').value='';draw();renderSaveState()};
+  $('#resetBtn').onclick=()=>{if(!photo&&!elements.length&&theme==='lavender'&&JSON.stringify(shellState)===JSON.stringify(shellCatalog.defaults))return;saveHistory();photo=null;photoView=defaultPhotoView();sourceMeta=null;resetPhotoBox();compositionEventKey='';elements=[];selected=-1;theme='lavender';shellState={...shellCatalog.defaults};currentSavedId=null;currentSavedPublished=false;lastSavedEventKey='';setArtist(null);renderSceneCutAvailability();renderShellControls();$$('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme==='lavender'));$('#photoInput').value='';draw();renderSaveState()};
   function visitorId(){const a=window.NUGU_AUTH?.getIdentitySync?.();if(a?.visitorId)return a.visitorId;let id=localStorage.getItem('nuguVisitorId');if(!id){id=(crypto.randomUUID?.()||`${Date.now()}-${Math.random()}`).replace(/[^A-Za-z0-9_-]/g,'');localStorage.setItem('nuguVisitorId',id)}return id}
   async function searchArtists(q){const root=$('#topkkuArtistResults'),base=apiBase();if(!root||!base||q.trim().length<1){if(root)root.innerHTML='';return}try{const r=await fetch(`${base}/api/v1/search?q=${encodeURIComponent(q.trim())}`,{headers:{Accept:'application/json'},cache:'no-store'});const data=await r.json();const rows=(data.items||[]).slice(0,6);root.innerHTML=rows.length?rows.map(a=>`<button type="button" data-topkku-artist="${esc(a.slug)}" data-topkku-name="${esc(a.name)}">${a.image_url?`<img src="${esc(a.image_url)}" alt="">`:''}<span><b>${esc(a.name)}</b><small>${esc(a.korean_name||a.agency||'')}</small></span></button>`).join(''):'<div class="topkku-team-empty">검색되는 팀이 없어요.</div>';root.querySelectorAll('[data-topkku-artist]').forEach(b=>b.onclick=()=>setArtist({slug:b.dataset.topkkuArtist,name:b.dataset.topkkuName}))}catch{root.innerHTML='<div class="topkku-team-empty">팀 검색을 잠시 불러오지 못했어요.</div>'}}
   $('#topkkuArtistSearch')?.addEventListener('input',e=>{clearTimeout(searchTimer);const q=e.currentTarget.value;searchTimer=setTimeout(()=>searchArtists(q),220)});
@@ -374,7 +460,7 @@
     try{
       const key=compositionEventKey||newCompositionKey();compositionEventKey=key;
       const url=apiBase()+'/api/v1/community/topkku/'+encodeURIComponent(selectedArtist.slug)+'/save';
-      const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json',...(window.NUGU_AUTH?.authHeaders?.(identity)||{})},body:JSON.stringify({visitorId:identity.visitorId,eventKey:key,imageData:canvasPngData(),source:sourceMeta?.source==='watch'?'watch-topkku':'topkku',sourceContentUrl:sourceMeta?.contentUrl||'',sourceTitle:sourceMeta?.title||'',objectCount:elements.length,stickerIds:stickerIds(),effects:motionEffects(),referenceEventKey:referenceSource?.eventKey||''})});
+      const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json',...(window.NUGU_AUTH?.authHeaders?.(identity)||{})},body:JSON.stringify({visitorId:identity.visitorId,eventKey:key,imageData:canvasPngData(),source:sourceMeta?.source==='watch'?'watch-topkku':'topkku',sourceContentUrl:sourceMeta?.contentUrl||'',sourceTitle:sourceMeta?.title||'',objectCount:elements.length,stickerIds:stickerIds(),effects:motionEffects(),shell:{...shellState},referenceEventKey:referenceSource?.eventKey||''})});
       const data=await r.json().catch(()=>({}));if(!r.ok)throw Object.assign(new Error(data.error||'save_failed'),{code:data.error,status:r.status,data});
       currentSavedId=Number(data.item?.id)||null;currentSavedPublished=!!data.published||!!data.item?.published_at;lastSavedEventKey=key;if(data.usage)vaultUsage={...(vaultUsage||{}),...data.usage};
       state.innerHTML='내 웹 보관함에 저장 완료 ♡ '+(data.item?.secure_url?'<a href="'+esc(data.item.secure_url)+'" target="_blank" rel="noopener">Cloudinary 원본 보기</a>':'');
@@ -417,7 +503,7 @@
     }catch(e){console.warn('vault',e);state.textContent='내 웹 보관함을 잠시 불러오지 못했어요.'}
   }
   async function loadArtistFromQuery(){const slug=new URLSearchParams(location.search).get('artist');if(!slug||!apiBase())return;try{const r=await fetch(`${apiBase()}/api/v1/community/topkku/${encodeURIComponent(slug)}?limit=1`,{headers:{Accept:'application/json'},cache:'no-store'});if(r.ok){const data=await r.json();if(data.artist?.slug)setArtist(data.artist)}}catch{}}
-  window.__NUGU_TOPKKU_FRAME_STATE__=()=>({photoBox:{...photoBox},source:sourceMeta?.source||'',sourceSize:photo?{width:photo.naturalWidth,height:photo.naturalHeight}:null,zoom:photoView.zoom});
+  window.__NUGU_TOPKKU_FRAME_STATE__=()=>({photoBox:{...photoBox},source:sourceMeta?.source||'',sourceSize:photo?{width:photo.naturalWidth,height:photo.naturalHeight}:null,zoom:photoView.zoom,shell:{...shellState}});
   window.addEventListener('nugu-auth-changed',()=>{loadStyleState();loadVault()});
-  window.NUGU_TOPKKU_LOAD_VAULT=loadVault;window.NUGU_TOPKKU_LOAD_STYLE=loadStyleState;window.NUGU_TOPKKU_API_BASE=apiBase;$('#versionLabel').textContent=(window.NUGU_CONFIG||{}).build||'Updated 2026.09.12';preloadStickerAssets();setArtist(null);loadReferenceSource();renderStickerProfile();renderStickerGrid();renderSaveState();renderSceneCutAvailability();draw();requestAnimationFrame(animationLoop);const incoming=loadIncoming();if(!incoming)loadArtistFromQuery();loadStyleState();loadVault();
+  window.NUGU_TOPKKU_LOAD_VAULT=loadVault;window.NUGU_TOPKKU_LOAD_STYLE=loadStyleState;window.NUGU_TOPKKU_API_BASE=apiBase;$('#versionLabel').textContent=(window.NUGU_CONFIG||{}).build||'Updated 2026.09.12';preloadStickerAssets();setArtist(null);loadReferenceSource();renderStickerProfile();renderStickerGrid();renderShellControls();renderSaveState();renderSceneCutAvailability();draw();requestAnimationFrame(animationLoop);const incoming=loadIncoming();if(!incoming)loadArtistFromQuery();loadStyleState();loadVault();
 })();
