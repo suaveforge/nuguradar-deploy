@@ -40,7 +40,7 @@
       '<h2>'+esc(c.title||'Official video')+'</h2><p>'+views+'✓ verified source</p></div>'+
       '<div class="mobile-reel-actions"><button type="button" class="mobile-reel-action reel-sound"><strong>🔇</strong><span>소리</span></button>'+
       '<button type="button" class="mobile-reel-action reel-comments"><strong>💬</strong><span>댓글</span></button>'+
-      '<a class="mobile-reel-action reel-topkku" href="#"><strong>🎀</strong><span>탑꾸</span></a>'+
+      '<button type="button" class="mobile-reel-action reel-topkku"><strong>🎀</strong><span>탑꾸</span></button>'+
       '<a class="mobile-reel-action" href="'+roomHref(c)+'"><strong>🏠</strong><span>아지트</span></a>'+
       '<a class="mobile-reel-action" href="'+esc(c.content_url||'#')+'" target="_blank" rel="noopener"><strong>↗</strong><span>원본</span></a></div>'+
       '<div class="mobile-reel-hint">'+(desktopReels?'마우스 휠 / ↑↓ 로 다음 영상':'위로 넘기면 다음 영상')+'</div><div class="mobile-reel-state"></div></article>';
@@ -147,8 +147,18 @@
     el.querySelector('.mobile-reel-gesture')?.addEventListener('click',()=>{const frame=ensureFrame(el,el===active);if(!frame)return;paused=!paused;send(frame,paused?'pauseVideo':'playVideo');if(!paused)playActive(el);flash(el,paused?'일시정지':'재생')});
     el.querySelector('.reel-sound')?.addEventListener('click',e=>{e.stopPropagation();soundOn=!soundOn;const frame=ensureFrame(el,el===active);send(frame,soundOn?'unMute':'mute');if(soundOn)send(frame,'setVolume',[100]);if(el===active&&!paused)send(frame,'playVideo');document.querySelectorAll('.reel-sound').forEach(b=>{b.classList.toggle('sound-on',soundOn);b.querySelector('strong').textContent=soundOn?'🔊':'🔇';b.querySelector('span').textContent=soundOn?'소리 켬':'소리'});flash(el,soundOn?'소리 켬':'음소거')});
     el.querySelector('.reel-comments')?.addEventListener('click',e=>{e.stopPropagation();const frame=el.querySelector('iframe');send(frame,'pauseVideo');paused=true;window.NUGU_WATCH_OPEN_CONTENT?.(c,currentSeconds(el))});
-    el.querySelector('.reel-topkku')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();directReelTopkku(el,c)});
+    /* Topkku is handled by the capture-phase delegated handler below so touch taps cannot be swallowed by the video gesture layer. */
   }
+  feed.addEventListener('click',e=>{
+    const button=e.target.closest?.('.reel-topkku');
+    if(!button||!feed.contains(button))return;
+    const el=button.closest('.mobile-reel'),c=el?items.get(el.dataset.key):null;
+    if(!el||!c)return;
+    e.preventDefault();e.stopImmediatePropagation();
+    flash(el,'탑꾸 장면 준비 중…');
+    directReelTopkku(el,c);
+  },true);
+
   function deactivate(el){if(!el)return;send(el.querySelector('iframe'),'pauseVideo');el.classList.remove('active')}
   function activate(el){
     if(!el)return;

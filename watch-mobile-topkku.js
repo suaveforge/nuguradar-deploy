@@ -2,7 +2,8 @@
   const body=document.getElementById('playerBody');
   if(!body)return;
   const canDirectCapture=()=>typeof navigator.mediaDevices?.getDisplayMedia==='function';
-  if(canDirectCapture())return;
+  const mobileLike=()=>matchMedia('(pointer: coarse)').matches||Number(navigator.maxTouchPoints||0)>0||/Android|iPhone|iPad|iPod/i.test(navigator.userAgent||'');
+  if(!mobileLike()&&canDirectCapture())return;
 
   const config=window.NUGU_CONFIG||{},api=String(config.apiBase||'').replace(/\/$/,'');
   const $=(s,r=document)=>r.querySelector(s);
