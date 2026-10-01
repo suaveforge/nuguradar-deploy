@@ -47,10 +47,10 @@
         </button>
         <div class="growth-letter" id="growthLetter" hidden>
           <div class="letter-tape"></div>
-          <span class="letter-kicker">FROM NUGU RADAR</span>
+          <span class="letter-kicker">FROM IDOL</span>
           <h2>${esc(pending.title)}</h2>
           <p>${esc(pending.body)}</p>
-          <div class="letter-sign">— NUGU RADAR 드림 ♡</div>
+          <div class="letter-sign">— IDOL · FOR MY IDOL ♡</div>
           <div class="keepsake-benefits">
             <b>이번에 같이 온 것들</b>
             <div class="keepsake-item-row">
