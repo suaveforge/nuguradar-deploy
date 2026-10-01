@@ -35,6 +35,7 @@
     {id:'pearl-garland',label:'진주 가랜드',pack:'시그니처',access:'free',minBand:2,kind:'signature',asset:'assets/topkku/pearl-garland.svg',assetScale:1.0,defaultSize:220,maxPerCanvas:4},
     {id:'metal-chain-long',label:'메탈 체인',pack:'시그니처',access:'activity',minBand:2,kind:'signature',asset:'assets/topkku/metal-chain.svg',assetScale:1.0,defaultSize:220,maxPerCanvas:4},
     {id:'rose-vine-pink',label:'핑크 장미 덩굴',pack:'시그니처',access:'free',minBand:2,kind:'signature',asset:'assets/topkku/rose-vine-pink.svg',assetScale:1.0,defaultSize:210,maxPerCanvas:3},
+    {id:'rose-pearl-corner-pink',label:'로즈 펄 코너',pack:'시그니처',access:'free',minBand:2,kind:'signature',asset:'assets/topkku/rose-pearl-corner-pink.svg',assetScale:1.0,defaultSize:230,maxPerCanvas:2},
     {id:'rose-vine-black',label:'블랙 장미 덩굴',pack:'시그니처',access:'activity',minBand:2,kind:'signature',asset:'assets/topkku/rose-vine-black.svg',assetScale:1.0,defaultSize:210,maxPerCanvas:3},
     {id:'butterfly-cluster',label:'나비 클러스터',pack:'시그니처',access:'free',minBand:2,kind:'signature',asset:'assets/topkku/butterfly-cluster.svg',assetScale:1.0,defaultSize:150,maxPerCanvas:3},
     {id:'gem-cluster',label:'보석 클러스터',pack:'시그니처',access:'activity',minBand:3,kind:'signature',asset:'assets/topkku/gem-cluster.svg',assetScale:1.0,defaultSize:170,maxPerCanvas:3},
