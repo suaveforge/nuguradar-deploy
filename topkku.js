@@ -145,11 +145,20 @@
     ctx.save();
     if(item.style==='solid'){roundedPath(x,y,w,h,photoBox.r+10);ctx.strokeStyle=item.color;ctx.lineWidth=20;ctx.stroke();ctx.globalAlpha=.32;ctx.strokeStyle='#fff';ctx.lineWidth=3;ctx.stroke()}
     else if(item.style==='lace'){
-      const c=item.color||'#fffdf8';ctx.strokeStyle=c;ctx.fillStyle=c;ctx.lineWidth=7;roundedPath(x,y,w,h,photoBox.r+10);ctx.stroke();
-      const step=28,r=7;
-      for(let xx=x+18;xx<x+w-12;xx+=step){ctx.beginPath();ctx.arc(xx,y,r,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(xx,y+h,r,0,Math.PI*2);ctx.fill()}
-      for(let yy=y+18;yy<y+h-12;yy+=step){ctx.beginPath();ctx.arc(x,yy,r,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(x+w,yy,r,0,Math.PI*2);ctx.fill()}
-      ctx.globalAlpha=.30;ctx.strokeStyle=item.id==='lace-black'?'#fff':'#b9aab2';ctx.lineWidth=1.5;roundedPath(x-5,y-5,w+10,h+10,photoBox.r+12);ctx.stroke();
+      const c=item.color||'#fffdf8',edge=item.id==='lace-black'?'rgba(255,255,255,.55)':'rgba(170,145,160,.38)';
+      ctx.strokeStyle=c;ctx.lineWidth=8;roundedPath(x,y,w,h,photoBox.r+10);ctx.stroke();
+      const step=34,lobe=11;
+      ctx.lineWidth=5;ctx.strokeStyle=c;ctx.fillStyle='rgba(255,255,255,.10)';
+      for(let xx=x+24;xx<x+w-18;xx+=step){
+        ctx.beginPath();ctx.arc(xx,y,lobe,Math.PI,0);ctx.stroke();
+        ctx.beginPath();ctx.arc(xx,y+h,lobe,0,Math.PI);ctx.stroke();
+      }
+      for(let yy=y+24;yy<y+h-18;yy+=step){
+        ctx.beginPath();ctx.arc(x,yy,lobe,-Math.PI/2,Math.PI/2);ctx.stroke();
+        ctx.beginPath();ctx.arc(x+w,yy,lobe,Math.PI/2,Math.PI*1.5);ctx.stroke();
+      }
+      ctx.globalAlpha=.48;ctx.strokeStyle=edge;ctx.lineWidth=1.6;roundedPath(x-5,y-5,w+10,h+10,photoBox.r+12);ctx.stroke();
+      ctx.globalAlpha=.28;ctx.strokeStyle=edge;ctx.lineWidth=1.2;roundedPath(x+6,y+6,w-12,h-12,photoBox.r+7);ctx.stroke();
     }
     ctx.restore();
   }
@@ -401,20 +410,15 @@
     const artistLabel=String(selectedArtist?.name||sourceMeta?.artist||'MY PICK').trim().slice(0,18)||'MY PICK';
     const P=(id,fallback,props={})=>presetSticker(id,fallback,{...props,preset:'pink-lace'});
     const additions=[
-      P('big-ribbon-pink','ribbon',{x:142,y:160,size:190,rotation:-.08}),
-      P('lace-strip-white','paper-scrap-white',{x:360,y:118,size:430,rotation:0}),
-      P('lace-strip-white','paper-scrap-white',{x:360,y:860,size:430,rotation:Math.PI}),
-      P('lace-strip-white','paper-scrap-white',{x:82,y:510,size:400,rotation:Math.PI/2}),
-      P('lace-strip-white','paper-scrap-white',{x:638,y:510,size:400,rotation:-Math.PI/2}),
-      P('pearl-garland','heart-outline',{x:360,y:190,size:300,rotation:.02}),
-      P('rose-vine-pink','flower',{x:190,y:790,size:220,rotation:-.10}),
-      P('butterfly-cluster','sparkle',{x:575,y:735,size:140,rotation:.08}),
-      P('gem-cluster','sparkle',{x:520,y:170,size:128,rotation:-.06}),
-      P('heart-outline',null,{x:93,y:610,size:54,rotation:-.12}),
-      P('heart-outline',null,{x:617,y:330,size:50,rotation:.10}),
-      P('sparkle',null,{x:600,y:560,size:46,rotation:.08}),
-      P('artist-tag','note-paper',{x:255,y:920,size:108,rotation:-.05,value:artistLabel.toUpperCase()}),
-      P('captured-date-tag','date-strip',{x:505,y:950,size:84,rotation:.025,value:capturedDateLabel()})
+      P('big-ribbon-pink','ribbon',{x:108,y:132,size:150,rotation:-.12}),
+      P('gem-cluster','sparkle',{x:576,y:250,size:104,rotation:.07}),
+      P('heart-outline',null,{x:72,y:510,size:52,rotation:-.08}),
+      P('sparkle',null,{x:646,y:510,size:44,rotation:.12}),
+      P('butterfly-cluster','sparkle',{x:585,y:710,size:108,rotation:.06}),
+      P('rose-vine-pink','flower',{x:180,y:842,size:190,rotation:-.13}),
+      P('pearl-garland','heart-outline',{x:360,y:884,size:250,rotation:.015}),
+      P('artist-tag','note-paper',{x:245,y:982,size:104,rotation:-.045,value:artistLabel.toUpperCase()}),
+      P('captured-date-tag','date-strip',{x:505,y:990,size:82,rotation:.02,value:capturedDateLabel()})
     ].filter(Boolean);
     const retained=elements.filter(e=>e.preset!=='pink-lace');
     if(retained.length+additions.length>limits.totalObjects){guide('현재 붙어 있는 꾸미기가 많아서 핑크 레이스 시안을 더 붙일 수 없어요.');return}
@@ -422,7 +426,7 @@
     shellState={loaderId:'pink',frameId:'lace-white',backingId:'pink',packageId:'opp-flap',sealId:'heart'};
     elements=[...retained,...additions];theme='pink';selected=-1;
     renderShellControls();$$('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme==='pink'));
-    guide('실제 파츠 시안 · 탑로더 + 프레임 + 꾸미기스티커 + OPP + 씰로 완성했어 ♡');
+    guide('Pink Lace v2 · 사진을 가리지 않고 실제 파츠만으로 완성했어 ♡');
     draw();
   }
   function setArtist(artist){const next=artist?.slug?{slug:String(artist.slug).toLowerCase(),name:String(artist.name||artist.korean_name||artist.slug)}:null;if(selectedArtist?.slug!==next?.slug)markDirty();selectedArtist=next;for(const e of elements){if(e.type==='sticker'&&itemById(e.stickerId)?.dynamic==='artist')e.value=String(selectedArtist?.name||sourceMeta?.artist||'MY PICK').slice(0,18)}const box=$('#topkkuArtistConnected');if(box)box.innerHTML=selectedArtist?`<b>${esc(selectedArtist.name)}</b><span>웹 보관함과 아지트 공개 대상을 이 팀으로 연결했어요.</span>`:'아직 팀이 연결되지 않았어요.';const results=$('#topkkuArtistResults');if(results)results.innerHTML='';const input=$('#topkkuArtistSearch');if(input&&selectedArtist)input.value=selectedArtist.name}
