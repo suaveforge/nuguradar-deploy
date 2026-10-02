@@ -54,7 +54,7 @@ body.topkku-editing-focus .topkku-workspace{padding-top:18px}
 @media(max-width:560px){
   body.topkku-editing-focus .topbar{display:none}
   .topkku-stage-wrap{top:0}
-  .canvas-shell{width:min(100%,calc((54vh - 86px)*.6667));max-width:330px}
+  .canvas-shell{width:min(calc(100vw - 32px),360px);min-width:0;max-width:360px}
   .topkku-tools{max-height:39vh}
   .tool-block{padding:12px 0}
 }
