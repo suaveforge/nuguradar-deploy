@@ -506,10 +506,9 @@
     const P=(id,fallback,props={})=>presetSticker(id,fallback,{...props,preset:'midnight-rose'});
     const additions=[
       P('satin-bow-black-silver','silver-star',{x:58,y:158,size:146,rotation:-.075}),
-      P('rose-vine-black','paper-scrap-black',{x:142,y:850,size:200,rotation:-.10}),
-      P('metal-chain-long','pearl-garland',{x:520,y:842,size:224,rotation:.028}),
-      P('chrome-heart','heart-outline',{x:78,y:620,size:58,rotation:-.10}),
-      P('gem-cluster','sparkle',{x:590,y:650,size:86,rotation:.06}),
+      P('gothic-rose-chain-corner','rose-vine-black',{x:164,y:842,size:236,rotation:-.045}),
+      P('metal-chain-long','pearl-garland',{x:526,y:842,size:218,rotation:.025}),
+      P('gem-cluster','sparkle',{x:592,y:638,size:76,rotation:.055}),
       P('artist-tag','note-paper',{x:244,y:982,size:100,rotation:-.035,value:artistLabel.toUpperCase()}),
       P('captured-date-tag','date-strip',{x:510,y:991,size:78,rotation:.015,value:capturedDateLabel()})
     ].filter(Boolean);
@@ -519,7 +518,7 @@
     shellState={loaderId:'black',frameId:'atelier-black',backingId:'black',packageId:'opp-flap',sealId:'none'};
     elements=[...retained,...additions];theme='midnight';selected=-1;
     renderShellControls();document.querySelectorAll('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme==='midnight'));
-    guide('Midnight Rose · 블랙 장미 + 메탈 체인 + 비대칭 실버 프레임 실제 파츠 시안 ✦');
+    guide('Midnight Rose v2 · 고딕 로즈 체인 코너 + 메탈 체인 + 비대칭 실버 프레임 ✦');
     draw();
   }
   async function buildBlueJewelTopkku(){
@@ -528,10 +527,9 @@
     const P=(id,fallback,props={})=>presetSticker(id,fallback,{...props,preset:'blue-jewel'});
     const additions=[
       P('satin-bow-pearl-blue','satin-bow-pearl-pink',{x:58,y:158,size:146,rotation:-.075}),
-      P('butterfly-cluster','sparkle',{x:132,y:842,size:150,rotation:-.08}),
-      P('crystal-heart-chain-blue','pearl-garland',{x:522,y:842,size:228,rotation:.022}),
-      P('silver-star','star',{x:622,y:220,size:54,rotation:.08}),
-      P('mini-gem','sparkle',{x:88,y:600,size:46,rotation:-.08}),
+      P('blue-crystal-butterfly-corner','butterfly-cluster',{x:164,y:846,size:236,rotation:-.045}),
+      P('crystal-heart-chain-blue','pearl-garland',{x:526,y:842,size:224,rotation:.022}),
+      P('silver-star','star',{x:622,y:220,size:50,rotation:.08}),
       P('artist-tag','note-paper',{x:244,y:982,size:100,rotation:-.035,value:artistLabel.toUpperCase()}),
       P('captured-date-tag','date-strip',{x:510,y:991,size:78,rotation:.015,value:capturedDateLabel()})
     ].filter(Boolean);
@@ -541,7 +539,7 @@
     shellState={loaderId:'clear',frameId:'atelier-blue',backingId:'blue',packageId:'opp-flap',sealId:'none'};
     elements=[...retained,...additions];theme='stageblue';selected=-1;
     renderShellControls();document.querySelectorAll('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme==='stageblue'));
-    guide('Blue Jewel · 블루 새틴 + 크리스탈 체인 + 비대칭 블루 프레임 실제 파츠 시안 ✦');
+    guide('Blue Jewel v2 · 블루 크리스탈 버터플라이 코너 + 크리스탈 체인 ✦');
     draw();
   }
   function setArtist(artist){const next=artist?.slug?{slug:String(artist.slug).toLowerCase(),name:String(artist.name||artist.korean_name||artist.slug)}:null;if(selectedArtist?.slug!==next?.slug)markDirty();selectedArtist=next;for(const e of elements){if(e.type==='sticker'&&itemById(e.stickerId)?.dynamic==='artist')e.value=String(selectedArtist?.name||sourceMeta?.artist||'MY PICK').slice(0,18)}const box=$('#topkkuArtistConnected');if(box)box.innerHTML=selectedArtist?`<b>${esc(selectedArtist.name)}</b><span>웹 보관함과 아지트 공개 대상을 이 팀으로 연결했어요.</span>`:'아직 팀이 연결되지 않았어요.';const results=$('#topkkuArtistResults');if(results)results.innerHTML='';const input=$('#topkkuArtistSearch');if(input&&selectedArtist)input.value=selectedArtist.name}

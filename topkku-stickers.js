@@ -40,6 +40,8 @@
     {id:'rose-vine-pink',label:'핑크 장미 덩굴',pack:'시그니처',access:'free',minBand:2,kind:'signature',asset:'assets/topkku/rose-vine-pink.svg',assetScale:1.0,defaultSize:210,maxPerCanvas:3},
     {id:'rose-pearl-corner-pink',label:'로즈 펄 코너',pack:'시그니처',access:'free',minBand:2,kind:'signature',asset:'assets/topkku/rose-pearl-corner-pink.svg',assetScale:1.0,defaultSize:230,maxPerCanvas:2},
     {id:'rose-vine-black',label:'블랙 장미 덩굴',pack:'시그니처',access:'activity',minBand:2,kind:'signature',asset:'assets/topkku/rose-vine-black.svg',assetScale:1.0,defaultSize:210,maxPerCanvas:3},
+    {id:'gothic-rose-chain-corner',label:'고딕 로즈 체인 코너',pack:'시그니처',access:'activity',minBand:2,kind:'signature',asset:'assets/topkku/gothic-rose-chain-corner.svg',assetScale:1.0,defaultSize:230,maxPerCanvas:2},
+    {id:'blue-crystal-butterfly-corner',label:'블루 크리스탈 버터플라이 코너',pack:'시그니처',access:'free',minBand:2,kind:'signature',asset:'assets/topkku/blue-crystal-butterfly-corner.svg',assetScale:1.0,defaultSize:230,maxPerCanvas:2},
     {id:'butterfly-cluster',label:'나비 클러스터',pack:'시그니처',access:'free',minBand:2,kind:'signature',asset:'assets/topkku/butterfly-cluster.svg',assetScale:1.0,defaultSize:150,maxPerCanvas:3},
     {id:'gem-cluster',label:'보석 클러스터',pack:'시그니처',access:'activity',minBand:3,kind:'signature',asset:'assets/topkku/gem-cluster.svg',assetScale:1.0,defaultSize:170,maxPerCanvas:3},
     {id:'doodle-smile',label:'스마일 낙서',pack:'스크랩북',access:'activity',minBand:2,kind:'doodle',asset:'assets/topkku/doodle-smile.svg',assetScale:.72,defaultSize:78},
