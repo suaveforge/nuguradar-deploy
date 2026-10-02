@@ -88,6 +88,7 @@ Disallow: /tracks/qid-q124518472/unhero/
 Disallow: /tracks/qid-q124518472/gravity/
 Disallow: /tracks/qid-q124518472/smile/
 Disallow: /tracks/qid-q65053641/got-it/
+Disallow: /tracks/qid-q51885404/i-like-you/
 Disallow: /tracks/qid-q51885404/narr-84/
 Disallow: /tracks/qid-q109256946/j/
 Disallow: /tracks/qid-q127162707/dumb-hot/
@@ -157,6 +158,7 @@ Disallow: /tracks/qid-q15979639/generation-hrs/
 Disallow: /tracks/qid-q15979639/high-beam/
 Disallow: /tracks/qid-q15979639/iconic-heart/
 Disallow: /tracks/qid-q15979639/make-it-hot/
+Disallow: /tracks/qid-q15979639/pedazos/
 Disallow: /tracks/qid-q15979639/song-for-you/
 Disallow: /tracks/qid-q15979639/sunburst/
 Disallow: /tracks/qid-q15979639/surfin/
@@ -175,6 +177,7 @@ Disallow: /tracks/qid-q476119/why-so-lonely/
 Disallow: /tracks/qid-q94615987/summer/
 Disallow: /tracks/qid-q94615987/voodoo-doll/
 Disallow: /tracks/qid-q117354566/girls-on-fire/
+Disallow: /tracks/qid-q117354566/zzirit-feat-lu-sa-sonza/
 Disallow: /tracks/qid-q65665588/like-always/
 Disallow: /tracks/qid-q483626/continue/
 Disallow: /tracks/qid-q118178306/animal/
