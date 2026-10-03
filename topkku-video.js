@@ -8,16 +8,16 @@
   const api=String((window.NUGU_CONFIG||{}).apiBase||'').replace(/\/$/,'');
   const STORY_INFO={
     fan:{
-      kicker:'FAN FILM · 약 48초',
-      title:'우리만 알던 애를, 우리만의 방식으로 남긴다.',
-      desc:'원석을 발견해 영상을 미친 듯이 넘기다가 한 장면에서 멈추고, 킬러 탑꾸·성장 편지·선물꾸러미까지 이어지는 실제 덕질 흐름입니다.',
-      steps:['원석을 먼저 발견','Watch를 계속 넘기기','꽂힌 장면 → 탑꾸','킬러 탑꾸 만들기','성장 편지 열기','선물꾸러미 받기','다른 팬 취향과 연결','우리만 알던 시절을 기록']
+      kicker:'FAN FILM · 약 60초',
+      title:'발견하고, 같이 놀고, 오래 좋아한 흔적이 남는다.',
+      desc:'원석 발견부터 Watch·탑꾸·Pick·아지트·Radar Time/Glow·팬 활동·성장·선물·졸업 기록까지 핫바지의 전체 덕질 루프를 실제 화면으로 압축합니다.',
+      steps:['원석을 먼저 발견','Watch를 계속 넘기기','꽂힌 장면 → 탑꾸','7초 직접 꾸미기','취향함·취향대결','Pick → 우리 아지트','Radar Time → Glow','팬덤 온도·전광판·Live Pulse','성장 편지·덕질 결·선물','커져도 기록은 남기기']
     },
     investor:{
-      kicker:'INVESTOR FILM · 약 55초',
-      title:'발견이 시청에서 끝나지 않고, 창작과 보상과 관계로 이어진다.',
-      desc:'발견·연속 시청·UGC·고품질 팬콘텐츠·성장 보상·팬간 선물·소셜 관계·재방문까지 실제 제품 루프로 보여줍니다.',
-      steps:['발견 이전 구간 선점','연속 콘텐츠 소비','1클릭 UGC 진입','킬러 팬콘텐츠 확장','성장 보상','팬간 선물','저장·댓글·참고 관계','재방문 루프']
+      kicker:'INVESTOR FILM · 약 66초',
+      title:'발견에서 팬 커뮤니티와 장기 리텐션까지 한 루프로.',
+      desc:'발견·연속시청·UGC·Pick·아지트 체류·Glow·소셜 가시성·성장·팬간 선물·졸업 아카이브까지 제품 전체 루프를 실제 화면으로 보여줍니다.',
+      steps:['Discovery surface','Continuous Watch','One-click UGC','7초 실제 편집','Social UGC','Pick & Hideout','Time → Glow','Fandom activity visibility','Growth · traits · gifts','Graduation archive']
     }
   };
   const DECORATION_MONTAGE_TARGET_MS=7000;
@@ -25,6 +25,7 @@
   let running=false,runId=0,recorder=null,recordStream=null,chunks=[],downloadUrl='',lastRecordingBlob=null,safetyTimer=null,source=null;
 
   function setStatus(text){if(status)status.textContent=text}
+  const escHtml=s=>String(s??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
   function setScene(text,idx){if(sceneState)sceneState.textContent=text||'';document.querySelectorAll('#storyOutline li').forEach((el,i)=>el.classList.toggle('active',i===idx))}
   function renderStory(){
     const info=STORY_INFO[selectedStory];
@@ -178,45 +179,113 @@
     return run===runId;
   }
 
+  async function showTopkkuSocial(run,fanMode){
+    setScene('탑꾸 · 다른 팬 취향과 연결',4);
+    await focusFrame('#topkkuGallery','start');
+    await showCaption(fanMode?'예쁜 건 취향함에 담고, 또 따라 꾸민다.':'UGC는 취향함·참고꾸미기로 다시 창작을 만듭니다.',fanMode?'취향함':'SOCIAL UGC',760);
+    if(run!==runId)return false;
+    await focusFrame('#topkkuBalance','center');
+    await showCaption(fanMode?'이번 주엔 둘 중 뭐가 더 좋은지도 고르고.':'주간 취향대결이 오래된 작품까지 다시 발견시킵니다.',fanMode?'취향대결':'WEEKLY BATTLE',700);
+    if(run!==runId)return false;
+    await focusFrame('#topkkuMakerTrend','center');
+    await wait(220);return run===runId;
+  }
+  function applyHideoutVideoState(){
+    const doc=frameDoc();if(!doc)return;
+    const pick=doc.querySelector('#pickPanel'),time=doc.querySelector('#timePanel');
+    if(pick)pick.innerHTML='<h2>내 레이더에 있어 ♡</h2><p>처음 찍어둔 순간 · 내가 먼저 발견한 기록도 그대로 보관 중.</p><button class="pick-button secondary" type="button">My Radar · Pick 완료 ✓</button><div class="community-message">이 팀 아지트에서 같이 놀 수 있어요.</div>';
+    if(time)time.innerHTML='<h2>Radar Time</h2><p>이 방에서 진짜 머문 시간만 쌓여요.</p><div class="timer-display">24m 18s</div><div class="timer-note">24m 모음 · 이번 방문 6m</div><div class="glow-actions"><button class="glow-button" type="button">응원 +1m</button><button class="glow-button" type="button">응원 +5m</button></div><div class="community-message">모은 시간을 이 팀에게 보내기 ♡</div>';
+  }
+  async function showHideoutCore(run,fanMode){
+    const slug=source?.artist_slug;if(!slug)return run===runId;
+    setScene('Pick · 우리 아지트',5);
+    await loadFrame('room.html?artist='+encodeURIComponent(slug),'#roomHero');await wait(650);applyHideoutVideoState();
+    await focusFrame('#roomHero','center');
+    await showCaption(fanMode?'찾았으면 그냥 보고 끝이 아니라, 우리방이 생긴다.':'Pick이 발견을 팬 아지트와 장기 관계로 연결합니다.',fanMode?'우리 아지트':'PICK → HIDEOUT',850);
+    if(run!==runId)return false;
+    await focusFrame('#pickPanel','center');
+    await showCaption(fanMode?'내 팀으로 Pick. 먼저 좋아한 순간도 남고.':'Pick은 최대 세 팀의 초기 발견 기록과 커뮤니티 참여를 묶습니다.',fanMode?'PICK ♡':'PICK',720);
+    if(run!==runId)return false;
+    setScene('Radar Time · Glow',6);await focusFrame('#timePanel','center');
+    await showCaption(fanMode?'여기서 놀던 시간이 쌓이고, 그 시간을 최애에게 보낸다.':'실제 아지트 체류가 Radar Time이 되고 Glow 응원으로 소비됩니다.',fanMode?'RADAR TIME → GLOW':'TIME → SUPPORT',850);
+    if(run!==runId)return false;
+    const watchTab=frameDoc()?.querySelector('[data-hideout-tab="watch"]');if(watchTab){watchTab.click();await wait(220)}
+    await focusFrame('#watchTogether','start');
+    await showCaption(fanMode?'영상도 같이 보고, “0:43 여기 봐”를 그 초에 남긴다.':'영상 핀과 타임스탬프 수다가 콘텐츠 소비를 공동 기록으로 바꿉니다.',fanMode?'같이보기 · 장면 수다':'VIDEO PIN · TIMESTAMP',850);
+    return run===runId;
+  }
+  async function latestPulse(){
+    if(!api)return null;try{const r=await fetch(api+'/api/v1/community/broadcasts?latest=1',{headers:{Accept:'application/json'},cache:'no-store'});if(!r.ok)return null;const d=await r.json();return (d.items||[])[0]||null}catch{return null}
+  }
+  async function showCommunityVisibility(run,fanMode){
+    setScene('팬덤 온도 · 전광판 · Live Pulse',7);
+    await loadFrame('index.html#fanHeat','#fanHeat');await focusFrame('#fanHeat','center');
+    await showCaption(fanMode?'어느 아지트가 지금 제일 시끄러운지도 보이고.':'팬덤 온도는 Momentum과 분리된 실제 팬 활동 신호입니다.',fanMode?'FAN ROOMS THIS WEEK':'FANDOM TEMPERATURE',700);
+    if(run!==runId)return false;
+    await focusFrame('#fanBillboard','center');await wait(480);
+    await showCaption(fanMode?'마음껏 놀다 보면 팬도 전광판에 뜬다.':'팬 전광판은 Watch·아지트·탑꾸 활동을 팬 정체성과 인정으로 돌려줍니다.',fanMode?'FAN BILLBOARD':'FAN RECOGNITION',760);
+    if(run!==runId)return false;
+    const doc=frameDoc();if(doc){
+      if(!doc.querySelector('link[data-video-live-pulse]')){const l=doc.createElement('link');l.rel='stylesheet';l.href='live-pulse.css';l.dataset.videoLivePulse='1';doc.head.appendChild(l)}
+      doc.querySelector('.live-pulse-root[data-video-demo]')?.remove();
+      const item=await latestPulse(),icons={'topkku-published':'🎀','topkku-taste-milestone':'♡','topkku-comment-milestone':'💬','gift-arrived':'🎁','room-video-added':'📼','glow-burst':'✦'};
+      const pulse=doc.createElement('aside');pulse.className='live-pulse-root is-visible importance-2';pulse.dataset.videoDemo='1';
+      const title=item?.title||'새 팬 활동이 생겼어요';const body=item?.body||'탑꾸 · 선물 · Glow 같은 의미 있는 활동이 여기 바로 보여요.';
+      pulse.innerHTML='<div class="live-pulse-card"><span class="live-pulse-dot"></span><div class="live-pulse-icon">'+(icons[item?.kind]||'✦')+'</div><div class="live-pulse-copy"><small>지금 IDOL에서</small><b>'+escHtml(title)+'</b><span>'+escHtml(body)+'</span></div></div>';
+      doc.body.appendChild(pulse);await wait(260);
+    }
+    await showCaption(fanMode?'탑꾸, 선물, Glow 같은 일이 지금 바로 떠오르고.':'Live Pulse가 의미 있는 공개 활동을 제품 전체에 다시 순환시킵니다.',fanMode?'LIVE PULSE':'CROSS-FEATURE PULSE',780);
+    return run===runId;
+  }
+  async function showHallEnding(run,fanMode){
+    setScene('Hall of Fame · 졸업 기록',9);
+    await loadFrame('hall-of-fame.html','.hall-hero');await focusFrame('.hall-hero','center');
+    await showCaption(fanMode?'그리고 진짜 커져도, 우리가 먼저 좋아했던 기록은 안 사라진다.':'Radar를 졸업한 팀도 초기 발견과 성장 기록을 Hall of Fame에 보존합니다.',fanMode?'우리만 알던 시절 → 기록':'GRADUATION ARCHIVE',1250);
+    await wait(420);return run===runId;
+  }
+
   async function showGrowthRewardDemo(run,fanMode){
     const doc=frameDoc(),root=doc?.querySelector('#growthKeepsakeLayer');if(!root||run!==runId)return false;
-    setScene('성장 편지 · 새 꾸미기 해금',4);
+    setScene('성장 편지 · 새 꾸미기 해금',8);
     root.hidden=false;
-    root.innerHTML='<div class="keepsake-backdrop"><section class="growth-keepsake" role="dialog" aria-modal="true"><button class="keepsake-envelope" type="button" id="videoGrowthEnvelope"><span class="envelope-flap"></span><span class="envelope-seal">♡</span><b>당신에게 온 편지가 있어요</b><small>눌러서 열어보기</small></button><div class="growth-letter" id="videoGrowthLetter" hidden><div class="letter-tape"></div><span class="letter-kicker">FROM IDOL</span><h2>우리방 단골이 되었어요 ♡</h2><p>좋아하는 순간을 오래 모아온 당신에게 새 꾸미기 서랍을 열어둘게요.</p><div class="letter-sign">— IDOL · FOR MY IDOL ♡</div><div class="keepsake-benefits"><b>이번에 같이 온 것들</b><div class="keepsake-item-row"><article><img src="assets/topkku/satin-bow-pearl-pink.svg" alt=""><span>새틴 리본</span></article><article><img src="assets/topkku/pearl-chain.svg" alt=""><span>진주 체인</span></article><article><img src="assets/topkku/gem.svg" alt=""><span>샤이닝 젬</span></article></div></div><aside class="next-envelope-peek"><span>조금 더 함께 놀면…</span><b>찐팬</b><small>다음 서랍도 조용히 준비해둘게요.</small></aside></div></section></div>';
+    root.innerHTML='<div class="keepsake-backdrop"><section class="growth-keepsake" role="dialog" aria-modal="true"><button class="keepsake-envelope" type="button" id="videoGrowthEnvelope"><span class="envelope-flap"></span><span class="envelope-seal">♡</span><b>당신에게 온 편지가 있어요</b><small>눌러서 열어보기</small></button><div class="growth-letter" id="videoGrowthLetter" hidden><div class="letter-tape"></div><span class="letter-kicker">FROM IDOL</span><h2>우리방 단골이 되었어요 ♡</h2><p>좋아하는 순간을 오래 모아온 당신에게 새 꾸미기 서랍을 열어둘게요.</p><div class="letter-sign">덕질 결 · 원석 탐험가 · 꾸미기 장인</div><div class="letter-sign">— IDOL · FOR MY IDOL ♡</div><div class="keepsake-benefits"><b>이번에 같이 온 것들</b><div class="keepsake-item-row"><article><img src="assets/topkku/satin-bow-pearl-pink.svg" alt=""><span>새틴 리본</span></article><article><img src="assets/topkku/pearl-chain.svg" alt=""><span>진주 체인</span></article><article><img src="assets/topkku/gem.svg" alt=""><span>샤이닝 젬</span></article></div></div><aside class="next-envelope-peek"><span>조금 더 함께 놀면…</span><b>찐팬</b><small>다음 서랍도 조용히 준비해둘게요.</small></aside></div></section></div>';
     await wait(520);
     const env=doc.querySelector('#videoGrowthEnvelope'),letter=doc.querySelector('#videoGrowthLetter');
     env?.classList.add('opened');await wait(380);if(env)env.hidden=true;if(letter){letter.hidden=false;letter.classList.add('arrive')}
     await showCaption(fanMode?'놀다 보니 편지가 오고, 새 꾸미기가 한꺼번에 열린다.':'활동은 숫자 레벨 대신 편지와 실제 꾸미기 해금으로 돌아옵니다.',fanMode?'성장 편지':'PROGRESSION',1250);
     await wait(760);if(run!==runId)return false;
-    setScene('선물꾸러미 · 팬에게서 도착',5);
+    setScene('선물꾸러미 · 팬에게서 도착',8);
     root.innerHTML='<div class="keepsake-backdrop"><section class="gift-keepsake" role="dialog" aria-modal="true"><div class="gift-ribbon">FOR YOU</div><span class="letter-kicker">SOMEONE LEFT YOU A GIFT</span><h2>누가 작은 선물을 두고 갔어요 ♡</h2><div class="gift-stack"><article class="received-gift-card"><div class="received-gift-object"><img src="assets/topkku/crystal-heart-chain-pink.svg" alt=""></div><div><b>크리스탈 하트 체인</b><span>같이 덕질하던 팬이 보냈어요</span><p>“이거 네 탑꾸에 진짜 잘 어울릴 것 같아서 ♡”</p><small>이 꾸미기는 이제 내 서랍에 계속 남아요.</small></div></article></div><button class="keepsake-main" type="button">내 서랍에 잘 넣어둘게요 ♡</button></section></div>';
     await showCaption(fanMode?'그리고 진짜 다른 팬한테 선물도 온다.':'팬의 반응이 영구 소장 가능한 꾸미기 선물로 이어집니다.',fanMode?'선물꾸러미':'FAN-TO-FAN GIFT',1320);
     await wait(760);root.hidden=true;root.innerHTML='';return run===runId;
   }
   async function fanStory(run,prepared=false){
     if(!prepared)await loadFrame('index.html#hidden','#hidden');else await focusFrame('#hidden','center');
-    setScene('Hidden Gems · 원석 발견',0);await showCaption('아무도 모를 때 발견한 애가 제일 좋다.','HIDDEN GEMS',1450);await wait(520);
+    setScene('Hidden Gems · 원석 발견',0);await showCaption('아무도 모를 때 발견한 애가 제일 좋다.','HIDDEN GEMS',1250);await wait(360);
     if(!await watchIntoTopkku(run,true))return;
     if(!await decorateTopkku(run,true))return;
+    if(!await showTopkkuSocial(run,true))return;
+    if(!await showHideoutCore(run,true))return;
+    if(!await showCommunityVisibility(run,true))return;
+    await loadFrame('topkku.html?from=video-studio-reward','#growthKeepsakeLayer');await wait(420);
     if(!await showGrowthRewardDemo(run,true))return;
-    setScene('탑꾸 구경 · 취향 연결',6);await focusFrame('#topkkuGallery','start');await showCaption('나랑 비슷한 애들이 좋아한 순간도 구경하고.','FANS’ TOPKKU',1200);await wait(460);
-    if(run!==runId)return;
-    await focusFrame('#topkkuBalance','center');await showCaption('이번 주엔 서로의 탑꾸를 놓고 취향대결도 하고.','WEEKLY TASTE BATTLE',1120);await wait(420);
-    await focusFrame('#topkkuMakerTrend','center');await showCaption('유명해지기 전부터 좋아했던 순간이 내 기록으로 쌓인다.','FOR MY IDOL',1450);await wait(620);
-    setScene('완료 · 우리만의 기록',7);
+    if(!await showHallEnding(run,true))return;
+    setScene('완료 · 발견부터 졸업까지',9);
   }
   async function investorStory(run,prepared=false){
     if(!prepared)await loadFrame('index.html#radar','#radar');else await focusFrame('#radar','center');
-    setScene('Radar · 발견',0);await showCaption('메이저가 된 뒤가 아니라, 발견 이전부터 팬 여정을 시작합니다.','01 · DISCOVERY',1400);await wait(460);
-    await focusFrame('#hidden','center');await showCaption('유명도보다 아직 작은 팀의 움직임과 발견 경험을 앞에 둡니다.','DISCOVERY SURFACE',1120);await wait(420);
+    setScene('Radar · 발견',0);await showCaption('메이저가 된 뒤가 아니라, 발견 이전부터 팬 여정을 시작합니다.','01 · DISCOVERY',1200);await wait(320);
+    await focusFrame('#hidden','center');await showCaption('작은 팀의 변화와 발견 경험을 제품 전면에 둡니다.','DISCOVERY SURFACE',900);await wait(260);
     if(!await watchIntoTopkku(run,false))return;
     if(!await decorateTopkku(run,false))return;
+    if(!await showTopkkuSocial(run,false))return;
+    if(!await showHideoutCore(run,false))return;
+    if(!await showCommunityVisibility(run,false))return;
+    await loadFrame('topkku.html?from=video-studio-reward','#growthKeepsakeLayer');await wait(420);
     if(!await showGrowthRewardDemo(run,false))return;
-    setScene('Gallery · 관계',6);await focusFrame('#topkkuGallery','start');await showCaption('저장 · 댓글 · 참고꾸미기가 작품과 팬 사이의 관계를 만듭니다.','SOCIAL GRAPH',1250);await wait(460);
-    if(run!==runId)return;
-    await focusFrame('#topkkuMakerTrend','center');await showCaption('반응은 메이커 정체성과 다음 방문의 이유로 누적됩니다.','MAKER IDENTITY',1180);await wait(420);
-    await focusFrame('#topkkuVault','center');await showCaption('소비가 소장과 정리와 재방문으로 바뀝니다.','RETENTION',1100);await wait(420);
-    await showCaption('발견 → 연속시청 → 창작 → 보상 → 관계 → 재방문','IDOL LOOP',1750);setScene('완료 · 제품 루프',7);
+    if(!await showHallEnding(run,false))return;
+    await showCaption('발견 → 시청 → 창작 → Pick → 체류/응원 → 관계 → 성장 → 기록','IDOL LOOP',1500);
+    setScene('완료 · 전체 제품 루프',9);
   }
   async function prepareFirstFrame(){
     await resolveSource();
@@ -305,7 +374,7 @@
         }else setStatus('촬영 완료 · WebM 저장 버튼이 열렸습니다.');
       };
       recorder.start(500);setStatus('REC · 실제 웹빌드를 자동조작하고 있습니다.');
-      safetyTimer=setTimeout(()=>{if(recorder&&recorder.state!=='inactive')stopRecording()},80000);
+      safetyTimer=setTimeout(()=>{if(recorder&&recorder.state!=='inactive')stopRecording()},105000);
       setTimeout(()=>runStory(true),120);
     }catch(err){
       console.warn('TOPKKU_VIDEO_CAPTURE_CANCELLED',err);stopStream();document.documentElement.classList.remove('video-window-recording');setStatus('화면 공유가 취소되었습니다. 현재 탭을 선택하면 자동촬영을 시작할 수 있습니다.');
