@@ -4,7 +4,7 @@
   const params=new URLSearchParams(location.search);
   const captureWindow=params.get('capture')==='1';
   const frame=$('#videoFrame'),viewport=$('#videoViewport'),caption=$('#videoCaption'),touch=$('#videoTouch');
-  const status=$('#videoStatus'),sceneState=$('#sceneState'),download=$('#videoDownload');
+  const status=$('#videoStatus'),sceneState=$('#sceneState'),download=$('#videoDownload'),captureSave=$('#captureWindowSave'),captureResult=$('#captureWindowResult');
   const api=String((window.NUGU_CONFIG||{}).apiBase||'').replace(/\/$/,'');
   const STORY_INFO={
     fan:{
@@ -20,8 +20,9 @@
       steps:['발견 이전 구간 선점','연속 콘텐츠 소비','1클릭 UGC 진입','킬러 팬콘텐츠 확장','성장 보상','팬간 선물','저장·댓글·참고 관계','재방문 루프']
     }
   };
+  const DECORATION_MONTAGE_TARGET_MS=7000;
   let selectedStory=params.get('story')==='investor'?'investor':'fan';
-  let running=false,runId=0,recorder=null,recordStream=null,chunks=[],downloadUrl='',safetyTimer=null,source=null;
+  let running=false,runId=0,recorder=null,recordStream=null,chunks=[],downloadUrl='',lastRecordingBlob=null,safetyTimer=null,source=null;
 
   function setStatus(text){if(status)status.textContent=text}
   function setScene(text,idx){if(sceneState)sceneState.textContent=text||'';document.querySelectorAll('#storyOutline li').forEach((el,i)=>el.classList.toggle('active',i===idx))}
@@ -144,21 +145,36 @@
     await waitFrame('#topkkuCanvas',10000);await waitSelection(10000);await wait(520);
     return run===runId;
   }
+  function editorFrameState(){try{return frame.contentWindow.__NUGU_TOPKKU_FRAME_STATE__?.()||null}catch{return null}}
+  function editorDemoApi(){try{return frame.contentWindow.NUGU_TOPKKU_VIDEO_DEMO||null}catch{return null}}
+  async function waitElementAdded(before,timeout=2800){
+    const start=performance.now();while(performance.now()-start<timeout){if(Number(editorFrameState()?.elementCount||0)>before)return true;await wait(70)}return false;
+  }
+  async function addDemoSticker(id,placement){
+    const before=Number(editorFrameState()?.elementCount||0);
+    const ok=await tapFrame('[data-sticker-id="'+id+'"]',90);if(!ok)return false;
+    await waitElementAdded(before,2800);editorDemoApi()?.positionSelected?.(placement);await wait(120);return true;
+  }
   async function decorateTopkku(run,fanMode){
-    setScene('탑꾸 · 보면서 꾸미기',2);
-    await showCaption(fanMode?'완성 화면은 계속 보고, 꾸미기 서랍만 움직인다.':'편집 캔버스와 도구를 동시에 유지해 조작 피드백을 즉시 봅니다.',fanMode?'TOPKKU':'EDITOR UX',1100);
+    const montageStart=performance.now();
+    setScene('탑꾸 · 7초 압축 꾸미기',2);
+    await showCaption(fanMode?'예쁜 것만 골라서, 바로 붙인다.':'실제 스티커 선택과 배치를 7초 안에 압축해 보여줍니다.',fanMode?'TOPKKU':'EDITOR · REAL ACTIONS',700);
     if(run!==runId)return false;
-    setScene('킬러 탑꾸 · Blue Stage',3);
-    const blue=await tapFrame('#buildBlueStage',620);
-    if(blue)await showCaption(fanMode?'한 컷이 블루 스크랩으로 확 바뀌고.':'같은 원본이 완성도 높은 팬콘텐츠로 즉시 확장됩니다.',fanMode?'BLUE STAGE':'KILLER CONTENT',1050);
+    await tapFrame('[data-theme="pink"]',70);
+    await tapFrame('[data-sticker-pack="시그니처"]',70);
+    await addDemoSticker('big-ribbon-pink',{x:.20,y:.18,sizeScale:.62,rotation:-.10});
+    await addDemoSticker('satin-bow-pearl-pink',{x:.80,y:.20,sizeScale:.56,rotation:.08});
+    await addDemoSticker('lace-strip-white',{x:.50,y:.84,sizeScale:.86,rotation:.015});
     if(run!==runId)return false;
-    const pink=await tapFrame('#buildPinkLace',650);
-    if(pink)await showCaption(fanMode?'이번엔 핑크 레이스. 계속 따라 만들고 싶게.':'스타일 세트가 창작 진입 장벽을 낮추면서 결과물 품질을 끌어올립니다.',fanMode?'PINK LACE':'KILLER CONTENT',1120);
-    if(run!==runId)return false;
-    if(fanMode){
-      const copied=await tapFrame('[data-copy="우리만 알던 시절"]',380);
-      if(copied)await showCaption('우리만 알던 시절 ♡','SAY IT',820);
-    }
+    await tapFrame('[data-sticker-pack="다꾸"]',70);
+    await addDemoSticker('tape-pink',{x:.21,y:.70,sizeScale:1.08,rotation:-.12});
+    await addDemoSticker('note-paper',{x:.80,y:.70,sizeScale:.92,rotation:.07});
+    if(fanMode)await tapFrame('[data-copy="우리만 알던 시절"]',80);
+    await tapFrame('#topkkuPackageOptions [data-shell-id="opp-flap"]',90);
+    await tapFrame('#topkkuSealOptions [data-shell-id="for-you"]',90);
+    editorDemoApi()?.clearSelection?.();
+    await showCaption(fanMode?'OPP 봉투에 넣고, For you 씰로 끝.':'완성작은 OPP 포장과 씰까지 하나의 결과물로 마감됩니다.',fanMode?'PACK IT ♡':'PACKAGING',780);
+    const remain=DECORATION_MONTAGE_TARGET_MS-(performance.now()-montageStart);if(remain>0)await wait(remain);
     return run===runId;
   }
 
@@ -236,8 +252,29 @@
     const dx=450-window.innerWidth,dy=800-window.innerHeight;
     if(Math.abs(dx)>2||Math.abs(dy)>2){try{window.resizeBy(dx,dy)}catch{}}
   }
+  function recordingFileName(){return 'topkku-'+selectedStory+'-'+new Date().toISOString().replace(/[:.]/g,'-')+'.webm'}
+  async function saveLastRecording(){
+    if(!lastRecordingBlob){setStatus('저장할 촬영 영상이 없습니다.');return false}
+    const name=recordingFileName();
+    if(typeof window.showSaveFilePicker==='function'){
+      try{
+        const handle=await window.showSaveFilePicker({suggestedName:name,types:[{description:'WebM video',accept:{'video/webm':['.webm']}}]});
+        const writable=await handle.createWritable();await writable.write(lastRecordingBlob);await writable.close();
+        if(captureResult){captureResult.hidden=false;captureResult.classList.add('saved');captureResult.textContent='파일 저장 완료 · 필요하면 아래 버튼으로 다시 저장할 수 있어요.'}
+        setStatus('파일 저장 완료 · 선택한 위치에 WebM을 썼습니다.');return true
+      }catch(err){
+        if(err?.name==='AbortError'){setStatus('영상 저장을 취소했습니다. 촬영본은 이 창에 그대로 남아 있습니다.');return false}
+        console.warn('TOPKKU_VIDEO_FILE_PICKER_FAILED',err)
+      }
+    }
+    const a=document.createElement('a');a.href=downloadUrl||URL.createObjectURL(lastRecordingBlob);a.download=name;document.body.appendChild(a);a.click();a.remove();
+    if(captureResult){captureResult.hidden=false;captureResult.classList.add('saved');captureResult.textContent='브라우저 다운로드를 시작했습니다. 다운로드 목록에서 파일을 확인하세요.'}
+    setStatus('브라우저 다운로드를 시작했습니다.');return true
+  }
+
   async function startRecording(){
     if(recorder||running)return;
+    lastRecordingBlob=null;if(captureSave)captureSave.hidden=true;if(captureResult){captureResult.hidden=true;captureResult.classList.remove('saved');captureResult.textContent=''};
     if(!navigator.mediaDevices?.getDisplayMedia||!('MediaRecorder'in window)){setStatus('이 브라우저는 현재 탭 자동촬영을 지원하지 않습니다. 미리보기만 사용할 수 있습니다.');return}
     try{
       setStatus('화면 공유에서 현재 탭을 선택하세요.');
@@ -258,10 +295,14 @@
       recorder.onstop=()=>{
         if(safetyTimer){clearTimeout(safetyTimer);safetyTimer=null}
         if(downloadUrl)URL.revokeObjectURL(downloadUrl);
-        const blob=new Blob(chunks,{type:recorder?.mimeType||'video/webm'});downloadUrl=URL.createObjectURL(blob);
-        if(download){download.href=downloadUrl;download.download='topkku-'+selectedStory+'-'+new Date().toISOString().slice(0,10)+'.webm';download.hidden=false}
-        recorder=null;stopStream();document.documentElement.classList.remove('video-window-recording');setStatus('촬영 완료 · WebM 저장 버튼이 열렸습니다.');
-        if(captureWindow){$('#captureWindowGate').hidden=false;renderStory()}
+        const blob=new Blob(chunks,{type:recorder?.mimeType||'video/webm'});lastRecordingBlob=blob;downloadUrl=URL.createObjectURL(blob);
+        const filename=recordingFileName();if(download){download.href=downloadUrl;download.download=filename;download.hidden=false}
+        recorder=null;stopStream();document.documentElement.classList.remove('video-window-recording');
+        if(captureWindow){
+          $('#captureWindowGate').hidden=false;if(captureSave)captureSave.hidden=false;
+          if(captureResult){captureResult.hidden=false;captureResult.classList.remove('saved');captureResult.textContent='촬영 완료 · 아래 “촬영 영상 저장”을 눌러 파일 위치를 선택하세요.'}
+          setStatus('촬영 완료 · 촬영창의 저장 버튼으로 파일을 저장하세요.');
+        }else setStatus('촬영 완료 · WebM 저장 버튼이 열렸습니다.');
       };
       recorder.start(500);setStatus('REC · 실제 웹빌드를 자동조작하고 있습니다.');
       safetyTimer=setTimeout(()=>{if(recorder&&recorder.state!=='inactive')stopRecording()},80000);
@@ -277,6 +318,7 @@
   $('#videoStop')?.addEventListener('click',stopRecording);
   $('#videoCaptureWindow')?.addEventListener('click',()=>{const url='topkku-video.html?capture=1&story='+encodeURIComponent(selectedStory);window.open(url,'topkku-video-capture','popup,width=520,height=920,resizable=yes,scrollbars=no')});
   $('#captureWindowStart')?.addEventListener('click',async()=>{$('#captureWindowGate').hidden=true;fitCaptureWindow();await wait(120);startRecording()});
+  $('#captureWindowSave')?.addEventListener('click',saveLastRecording);
   $('#captureWindowClose')?.addEventListener('click',()=>window.close());
   if(captureWindow){document.documentElement.classList.add('video-capture-window');$('#captureWindowGate').hidden=false;setTimeout(fitCaptureWindow,120)}
   renderStory();prepareFirstFrame();

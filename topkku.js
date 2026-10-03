@@ -624,6 +624,16 @@
     }catch(e){console.warn('vault',e);state.textContent='내 웹 보관함을 잠시 불러오지 못했어요.'}
   }
   async function loadArtistFromQuery(){const slug=new URLSearchParams(location.search).get('artist');if(!slug||!apiBase())return;try{const r=await fetch(`${apiBase()}/api/v1/community/topkku/${encodeURIComponent(slug)}?limit=1`,{headers:{Accept:'application/json'},cache:'no-store'});if(r.ok){const data=await r.json();if(data.artist?.slug)setArtist(data.artist)}}catch{}}
+  window.NUGU_TOPKKU_VIDEO_DEMO={
+    positionSelected({x=.5,y=.5,sizeScale=1,rotation=0}={}){
+      if(selected<0||!elements[selected]||elements[selected].type!=='sticker')return false;
+      const e=elements[selected],max=maxElementSize(e);
+      e.x=clamp(Number(x)*W,24,W-24);e.y=clamp(Number(y)*H,24,H-24);
+      e.size=clamp(e.size*Math.max(.25,Math.min(2,Number(sizeScale)||1)),18,max);
+      e.rotation=Number(rotation)||0;draw();return true
+    },
+    clearSelection(){selected=-1;draw();return true}
+  };
   window.__NUGU_TOPKKU_FRAME_STATE__=()=>({photoBox:{...photoBox},source:sourceMeta?.source||'',sourceSize:photo?{width:photo.naturalWidth,height:photo.naturalHeight}:null,zoom:photoView.zoom,shell:{...shellState},elementCount:elements.length,presetTags:[...new Set(elements.map(e=>e.preset).filter(Boolean))]});
   window.addEventListener('nugu-auth-changed',()=>{loadStyleState();loadVault()});
   window.NUGU_TOPKKU_LOAD_VAULT=loadVault;window.NUGU_TOPKKU_LOAD_STYLE=loadStyleState;window.NUGU_TOPKKU_API_BASE=apiBase;$('#versionLabel').textContent=(window.NUGU_CONFIG||{}).build||'Updated 2026.09.12';preloadStickerAssets();setArtist(null);loadReferenceSource();renderStickerProfile();renderStickerGrid();renderShellControls();renderSaveState();renderSceneCutAvailability();draw();requestAnimationFrame(animationLoop);const incoming=loadIncoming();if(!incoming)loadArtistFromQuery();loadStyleState();loadVault();
