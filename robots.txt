@@ -153,6 +153,7 @@ Disallow: /tracks/qid-q108865419/bye-bye-bye/
 Disallow: /tracks/qid-q7335169/v10/
 Disallow: /tracks/qid-q66710876/we-do/
 Disallow: /tracks/qid-q110920753/no-fear-feat-punchnello/
+Disallow: /tracks/qid-q118977203/that/
 Disallow: /tracks/qid-q86730786/iri-who/
 Disallow: /tracks/qid-q15979639/blingy/
 Disallow: /tracks/qid-q15979639/blingy-rom-baawla-remix/
@@ -168,6 +169,7 @@ Disallow: /tracks/qid-q15979639/winds-of-time/
 Disallow: /tracks/qid-q60550265/fxxking-star/
 Disallow: /tracks/qid-q61057550/danger/
 Disallow: /tracks/qid-q28418030/count-down/
+Disallow: /tracks/qid-q141030335/grls/
 Disallow: /tracks/qid-q141030335/sun-kiss/
 Disallow: /tracks/qid-q124091148/soda-soda/
 Disallow: /tracks/qid-q124362218/milky-way/
