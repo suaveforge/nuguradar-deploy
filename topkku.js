@@ -484,12 +484,18 @@
     const artistLabel=String(selectedArtist?.name||sourceMeta?.artist||'MY PICK').trim().slice(0,18)||'MY PICK';
     const P=(id,fallback,props={})=>presetSticker(id,fallback,{...props,preset:'pink-lace'});
     const additions=[
-      P('satin-bow-pearl-pink','big-ribbon-pink',{x:58,y:158,size:146,rotation:-.075}),
-      P('rose-pearl-corner-pink','rose-vine-pink',{x:150,y:858,size:210,rotation:-.06}),
-      P('crystal-heart-chain-pink','pearl-garland',{x:522,y:842,size:232,rotation:.022}),
-      P('sparkle',null,{x:642,y:555,size:30,rotation:.10}),
-      P('artist-tag','note-paper',{x:244,y:982,size:100,rotation:-.035,value:artistLabel.toUpperCase()}),
-      P('captured-date-tag','date-strip',{x:510,y:991,size:78,rotation:.015,value:capturedDateLabel()})
+      // Couture base: lace first, then pearl/film, then the two hero clusters.
+      // Every item is a registered engine part; no precomposed master overlay is used.
+      P('lace-strip-white',null,{x:360,y:148,size:404,rotation:.004}),
+      P('lace-strip-white',null,{x:116,y:505,size:390,rotation:Math.PI/2}),
+      P('lace-strip-white',null,{x:604,y:505,size:390,rotation:-Math.PI/2}),
+      P('lace-strip-white',null,{x:360,y:894,size:404,rotation:-.010}),
+      P('pearl-garland','crystal-heart-chain-pink',{x:405,y:818,size:372,rotation:-.048}),
+      P('crystal-heart-chain-pink','pearl-garland',{x:568,y:350,size:252,rotation:1.42}),
+      P('pink-film-butterfly-corner','film-frame-empty',{x:568,y:640,size:292,rotation:.035}),
+      P('rose-pearl-corner-pink','rose-vine-pink',{x:180,y:825,size:330,rotation:-.090}),
+      P('satin-bow-pearl-pink','big-ribbon-pink',{x:145,y:176,size:270,rotation:-.082}),
+      P('captured-date-tag','date-strip',{x:508,y:936,size:56,rotation:.014,value:capturedDateLabel()})
     ].filter(Boolean);
     const retained=retainUserElements();
     if(retained.length+additions.length>limits.totalObjects){guide('현재 붙어 있는 꾸미기가 많아서 핑크 레이스 시안을 더 붙일 수 없어요.');return}
@@ -497,7 +503,7 @@
     shellState={loaderId:'clear',frameId:'atelier-pink',backingId:'cream',packageId:'opp-flap',sealId:'none'};
     elements=[...retained,...additions];theme='pink';selected=-1;
     renderShellControls();$$('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme==='pink'));
-    guide('Pink Lace v7 · 비대칭 아틀리에 펄 프레임 + 실제 파츠 시안 ♡');
+    guide('Pink Lace v9 · 새틴 리본 + 4면 레이스 + 크리스털 체인 + 로즈 펄 + 필름 나비 군집 ♡');
     draw();
   }
   async function buildMidnightRoseTopkku(){
