@@ -189,13 +189,13 @@
     }
     else if(item.style==='atelier'){
       const accent=item.color||'#df8fb3',pearl=item.pearl||'#fffafc',metal=item.metal||'#c8cbd6',base=item.base||(item.dark?'#111219':'#fff9fc');
-      const dark=!!item.dark,outerX=x-7,outerY=y-7,outerW=w+14,outerH=h+14;
-      ctx.shadowColor=dark?'rgba(0,0,0,.42)':'rgba(105,54,80,.18)';ctx.shadowBlur=16;ctx.shadowOffsetY=6;
-      roundedPath(outerX,outerY,outerW,outerH,photoBox.r+15);ctx.strokeStyle=base;ctx.lineWidth=18;ctx.stroke();
+      const dark=!!item.dark,pinkPhysical=item.id==='atelier-pink',outerX=x-7,outerY=y-7,outerW=w+14,outerH=h+14;
+      ctx.shadowColor=dark?'rgba(0,0,0,.42)':pinkPhysical?'rgba(93,57,78,.12)':'rgba(105,54,80,.18)';ctx.shadowBlur=pinkPhysical?12:16;ctx.shadowOffsetY=pinkPhysical?4:6;
+      roundedPath(outerX,outerY,outerW,outerH,photoBox.r+15);ctx.strokeStyle=pinkPhysical?'rgba(255,250,252,.76)':base;ctx.lineWidth=pinkPhysical?13:18;ctx.stroke();
       ctx.shadowBlur=0;ctx.shadowOffsetY=0;
-      roundedPath(outerX,outerY,outerW,outerH,photoBox.r+15);ctx.strokeStyle=accent;ctx.lineWidth=7;ctx.stroke();
-      roundedPath(x+2,y+2,w-4,h-4,photoBox.r+7);ctx.strokeStyle=dark?'rgba(238,241,247,.80)':'rgba(255,255,255,.98)';ctx.lineWidth=3.2;ctx.stroke();
-      roundedPath(x+9,y+9,w-18,h-18,photoBox.r+1);ctx.strokeStyle=dark?'rgba(130,137,151,.48)':'rgba(191,119,151,.34)';ctx.lineWidth=1.6;ctx.stroke();
+      ctx.globalAlpha=pinkPhysical?.58:1;roundedPath(outerX,outerY,outerW,outerH,photoBox.r+15);ctx.strokeStyle=accent;ctx.lineWidth=pinkPhysical?4.5:7;ctx.stroke();ctx.globalAlpha=1;
+      roundedPath(x+2,y+2,w-4,h-4,photoBox.r+7);ctx.strokeStyle=dark?'rgba(238,241,247,.80)':pinkPhysical?'rgba(255,255,255,.84)':'rgba(255,255,255,.98)';ctx.lineWidth=pinkPhysical?2.2:3.2;ctx.stroke();
+      roundedPath(x+9,y+9,w-18,h-18,photoBox.r+1);ctx.strokeStyle=dark?'rgba(130,137,151,.48)':pinkPhysical?'rgba(191,119,151,.18)':'rgba(191,119,151,.34)';ctx.lineWidth=pinkPhysical?1:1.6;ctx.stroke();
 
       const pearlAt=(px,py,r=4.9)=>{
         const g=ctx.createRadialGradient(px-r*.34,py-r*.42,1,px,py,r);
@@ -208,7 +208,7 @@
         ctx.fillStyle=g;ctx.strokeStyle=dark?'rgba(255,255,255,.46)':'rgba(138,123,158,.52)';ctx.lineWidth=1.1;
         ctx.fillRect(-7*scale,-7*scale,14*scale,14*scale);ctx.strokeRect(-7*scale,-7*scale,14*scale,14*scale);ctx.restore();
       };
-      const top=[.09,.135,.19,.67,.735,.81,.855],bottom=[.12,.17,.225,.70,.765,.825,.88],left=[.19,.245,.61,.67,.72],right=[.14,.20,.47,.535,.79,.845];
+      const top=pinkPhysical?[.11,.18,.72,.81]:[.09,.135,.19,.67,.735,.81,.855],bottom=pinkPhysical?[.14,.23,.74,.86]:[.12,.17,.225,.70,.765,.825,.88],left=pinkPhysical?[.22,.66,.73]:[.19,.245,.61,.67,.72],right=pinkPhysical?[.17,.51,.82]:[.14,.20,.47,.535,.79,.845];
       for(const p of top)pearlAt(x+w*p,y-8,4.7);
       for(const p of bottom)pearlAt(x+w*p,y+h+8,4.7);
       for(const p of left)pearlAt(x-8,y+h*p,4.7);
@@ -272,7 +272,7 @@
     for(let i=0;i<26;i++){const px=x+stageNoise(seed*71+i*4.7)*w,py=y+stageNoise(seed*83+i*6.1)*h,r=.45+stageNoise(seed*97+i)*1.45;ctx.beginPath();ctx.arc(px,py,r,0,Math.PI*2);ctx.fill()}
     ctx.restore();ctx.globalAlpha=1;ctx.restore();
   }
-  function drawFrame(t){ctx.save();ctx.shadowColor='rgba(0,0,0,.20)';ctx.shadowBlur=28;ctx.shadowOffsetY=18;roundedPath(photoBox.x-24,photoBox.y-24,photoBox.w+48,photoBox.h+48,46);ctx.fillStyle=t.paper;ctx.fill();ctx.restore();ctx.save();roundedPath(photoBox.x,photoBox.y,photoBox.w,photoBox.h,photoBox.r);ctx.clip();if(photo)drawPhoto(photo,photoBox.x,photoBox.y,photoBox.w,photoBox.h);else{ctx.fillStyle=theme==='midnight'?'#313044':'#f4f1f7';ctx.fillRect(photoBox.x,photoBox.y,photoBox.w,photoBox.h);ctx.fillStyle=theme==='midnight'?'#aba5c6':'#90899b';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='700 28px system-ui,sans-serif';ctx.fillText('최애 사진을 올려주세요 ♡',W/2,H/2-8);ctx.font='500 17px system-ui,sans-serif';ctx.fillText('사진은 이 브라우저 밖으로 나가지 않아요',W/2,H/2+34)}ctx.restore();ctx.save();roundedPath(photoBox.x-11,photoBox.y-11,photoBox.w+22,photoBox.h+22,38);ctx.strokeStyle=t.frame;ctx.lineWidth=12;ctx.stroke();ctx.restore()}
+  function drawFrame(t){const physicalPink=theme==='pink'&&shellState.frameId==='none'&&shellState.loaderId==='clear';ctx.save();ctx.shadowColor='rgba(0,0,0,.20)';ctx.shadowBlur=28;ctx.shadowOffsetY=18;roundedPath(photoBox.x-24,photoBox.y-24,photoBox.w+48,photoBox.h+48,46);ctx.fillStyle=t.paper;ctx.fill();ctx.restore();ctx.save();roundedPath(photoBox.x,photoBox.y,photoBox.w,photoBox.h,photoBox.r);ctx.clip();if(photo)drawPhoto(photo,photoBox.x,photoBox.y,photoBox.w,photoBox.h);else{ctx.fillStyle=theme==='midnight'?'#313044':'#f4f1f7';ctx.fillRect(photoBox.x,photoBox.y,photoBox.w,photoBox.h);ctx.fillStyle=theme==='midnight'?'#aba5c6':'#90899b';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='700 28px system-ui,sans-serif';ctx.fillText('최애 사진을 올려주세요 ♡',W/2,H/2-8);ctx.font='500 17px system-ui,sans-serif';ctx.fillText('사진은 이 브라우저 밖으로 나가지 않아요',W/2,H/2+34)}ctx.restore();ctx.save();roundedPath(photoBox.x-11,photoBox.y-11,photoBox.w+22,photoBox.h+22,38);ctx.strokeStyle=physicalPink?'rgba(255,252,253,.78)':t.frame;ctx.lineWidth=physicalPink?5:12;ctx.stroke();if(physicalPink){roundedPath(photoBox.x-7,photoBox.y-7,photoBox.w+14,photoBox.h+14,35);ctx.strokeStyle='rgba(211,126,161,.20)';ctx.lineWidth=1.5;ctx.stroke()}ctx.restore()}
   function drawStaticCover(img,x,y,w,h){if(!img?.naturalWidth||!img?.naturalHeight)return;const scale=Math.max(w/img.naturalWidth,h/img.naturalHeight),dw=img.naturalWidth*scale,dh=img.naturalHeight*scale;ctx.drawImage(img,x+(w-dw)/2,y+(h-dh)/2,dw,dh)}
   function drawStaticCoverFocus(img,x,y,w,h,focusX=.5,focusY=.5,zoom=1){
     if(!img?.naturalWidth||!img?.naturalHeight)return;
@@ -486,24 +486,24 @@
     const additions=[
       // Couture base: lace first, then pearl/film, then the two hero clusters.
       // Every item is a registered engine part; no precomposed master overlay is used.
-      P('lace-strip-white',null,{x:360,y:148,size:404,rotation:.004}),
-      P('lace-strip-white',null,{x:116,y:505,size:390,rotation:Math.PI/2}),
-      P('lace-strip-white',null,{x:604,y:505,size:390,rotation:-Math.PI/2}),
-      P('lace-strip-white',null,{x:360,y:894,size:404,rotation:-.010}),
-      P('pearl-garland','crystal-heart-chain-pink',{x:405,y:818,size:372,rotation:-.048}),
-      P('crystal-heart-chain-pink','pearl-garland',{x:568,y:350,size:252,rotation:1.42}),
-      P('pink-film-butterfly-corner','film-frame-empty',{x:568,y:640,size:292,rotation:.035}),
-      P('rose-pearl-corner-pink','rose-vine-pink',{x:180,y:825,size:330,rotation:-.090}),
-      P('satin-bow-pearl-pink','big-ribbon-pink',{x:145,y:176,size:270,rotation:-.082}),
-      P('captured-date-tag','date-strip',{x:508,y:936,size:56,rotation:.014,value:capturedDateLabel()})
+      P('lace-strip-white',null,{x:360,y:146,size:420,rotation:.004}),
+      P('lace-strip-white',null,{x:112,y:520,size:398,rotation:Math.PI/2}),
+      P('lace-strip-white',null,{x:622,y:405,size:255,rotation:-Math.PI/2}),
+      P('lace-strip-white',null,{x:360,y:900,size:422,rotation:-.010}),
+      P('pearl-garland','crystal-heart-chain-pink',{x:392,y:822,size:404,rotation:-.050}),
+      P('crystal-heart-chain-pink','pearl-garland',{x:586,y:338,size:286,rotation:1.40}),
+      P('pink-film-butterfly-corner','film-frame-empty',{x:585,y:646,size:326,rotation:.028}),
+      P('rose-pearl-corner-pink','rose-vine-pink',{x:166,y:834,size:376,rotation:-.085}),
+      P('satin-bow-pearl-pink','big-ribbon-pink',{x:126,y:166,size:294,rotation:-.078}),
+      P('captured-date-tag','date-strip',{x:510,y:940,size:50,rotation:.012,value:capturedDateLabel()})
     ].filter(Boolean);
     const retained=retainUserElements();
     if(retained.length+additions.length>limits.totalObjects){guide('현재 붙어 있는 꾸미기가 많아서 핑크 레이스 시안을 더 붙일 수 없어요.');return}
     saveHistory();
-    shellState={loaderId:'clear',frameId:'atelier-pink',backingId:'cream',packageId:'opp-flap',sealId:'none'};
+    shellState={loaderId:'clear',frameId:'none',backingId:'cream',packageId:'opp-flap',sealId:'none'};
     elements=[...retained,...additions];theme='pink';selected=-1;
     renderShellControls();$$('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme==='pink'));
-    guide('Pink Lace v9 · 새틴 리본 + 4면 레이스 + 크리스털 체인 + 로즈 펄 + 필름 나비 군집 ♡');
+    guide('Pink Lace v13 · 새틴 리본 + 4면 레이스 + 크리스털 체인 + 로즈 펄 + 필름 나비 군집 ♡');
     draw();
   }
   async function buildMidnightRoseTopkku(){

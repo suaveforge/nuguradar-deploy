@@ -1,30 +1,50 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 150">
 <defs>
-  <filter id="s" x="-10%" y="-30%" width="120%" height="170%"><feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#695f66" flood-opacity=".22"/></filter>
-  <linearGradient id="thread" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff"/><stop offset=".55" stop-color="#fffdf9"/><stop offset="1" stop-color="#ddd3d1"/></linearGradient>
-  <linearGradient id="organza" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff" stop-opacity=".76"/><stop offset=".45" stop-color="#fffaf8" stop-opacity=".34"/><stop offset=".75" stop-color="#f6ece9" stop-opacity=".50"/><stop offset="1" stop-color="#e8ddda" stop-opacity=".70"/></linearGradient>
-  <linearGradient id="stitch" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#ddd2d1"/><stop offset=".18" stop-color="#fff"/><stop offset=".5" stop-color="#ece1df"/><stop offset=".82" stop-color="#fff"/><stop offset="1" stop-color="#d8ccca"/></linearGradient>
+  <linearGradient id="cloth" x1="0" y1="0" x2="0" y2="1">
+    <stop stop-color="#fff" stop-opacity=".94"/><stop offset=".25" stop-color="#fffaf8" stop-opacity=".84"/>
+    <stop offset=".62" stop-color="#f4eae7" stop-opacity=".70"/><stop offset="1" stop-color="#ddd2cf" stop-opacity=".82"/>
+  </linearGradient>
+  <linearGradient id="thread" x1="0" y1="0" x2="1" y2="0">
+    <stop stop-color="#d7cdcb"/><stop offset=".12" stop-color="#fff"/><stop offset=".32" stop-color="#e8dfdd"/>
+    <stop offset=".52" stop-color="#fff"/><stop offset=".74" stop-color="#ddd3d1"/><stop offset=".92" stop-color="#fff"/><stop offset="1" stop-color="#d4cac8"/>
+  </linearGradient>
+  <filter id="shadow" x="-12%" y="-35%" width="124%" height="180%">
+    <feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#66585f" flood-opacity=".22"/>
+  </filter>
+  <filter id="fabric" x="-12%" y="-30%" width="124%" height="165%">
+    <feTurbulence type="fractalNoise" baseFrequency=".075 .035" numOctaves="2" seed="17" result="noise"/>
+    <feComposite in="noise" in2="SourceAlpha" operator="in" result="tex"/>
+    <feColorMatrix in="tex" type="matrix" values=".7 0 0 0 .2  0 .7 0 0 .18  0 0 .7 0 .18  0 0 0 .10 0" result="grain"/>
+    <feBlend in="SourceGraphic" in2="grain" mode="multiply"/>
+  </filter>
+  <g id="flower">
+    <ellipse rx="7.5" ry="16.5" fill="#fffdf9" stroke="#d7cdca" stroke-width="1.2"/>
+    <ellipse rx="7.5" ry="16.5" transform="rotate(60)" fill="#fffdf9" stroke="#d7cdca" stroke-width="1.2"/>
+    <ellipse rx="7.5" ry="16.5" transform="rotate(120)" fill="#fffdf9" stroke="#d7cdca" stroke-width="1.2"/>
+    <circle r="5.5" fill="#eadfdd" stroke="#d1c6c4" stroke-width="1"/>
+    <circle cx="-1.5" cy="-2" r="1.8" fill="#fff"/>
+  </g>
 </defs>
 
-<g filter="url(#s)">
-  <rect x="12" y="35" width="576" height="67" rx="17" fill="url(#organza)" opacity=".58"/>
-  <path d="M18 42H582M18 95H582" fill="none" stroke="#fff" stroke-width="3" opacity=".88"/>
-  <path d="M18 48H582M18 89H582" fill="none" stroke="url(#stitch)" stroke-width="1.7" stroke-dasharray="3 7" opacity=".92"/>
-  <path d="M18 51l30 35 30-35 30 35 30-35 30 35 30-35 30 35 30-35 30 35 30-35 30 35 30-35 30 35 30-35 30 35 30-35 30 35 30-35" fill="none" stroke="url(#thread)" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" opacity=".88"/>
-  <path d="M18 86l30-35 30 35 30-35 30 35 30-35 30 35 30-35 30 35 30-35 30 35 30-35 30 35 30-35 30 35 30-35 30 35 30-35 30 35" fill="none" stroke="url(#thread)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity=".62"/>
-  <path d="M10 99Q28 137 46 99T82 99T118 99T154 99T190 99T226 99T262 99T298 99T334 99T370 99T406 99T442 99T478 99T514 99T550 99T586 99" fill="rgba(255,255,255,.18)" stroke="url(#thread)" stroke-width="6.5"/>
-  <path d="M10 37Q28 11 46 37T82 37T118 37T154 37T190 37T226 37T262 37T298 37T334 37T370 37T406 37T442 37T478 37T514 37T550 37T586 37" fill="rgba(255,255,255,.10)" stroke="url(#thread)" stroke-width="4"/>
-</g>
+<g filter="url(#shadow)">
+  <g filter="url(#fabric)">
+    <rect x="10" y="32" width="580" height="72" rx="17" fill="url(#cloth)" opacity=".78"/>
+    <path d="M14 40H586M14 96H586" stroke="#fff" stroke-width="2.5" opacity=".82"/>
+    <path d="M18 48C42 61 42 77 66 89C90 77 90 61 114 48C138 61 138 77 162 89C186 77 186 61 210 48C234 61 234 77 258 89C282 77 282 61 306 48C330 61 330 77 354 89C378 77 378 61 402 48C426 61 426 77 450 89C474 77 474 61 498 48C522 61 522 77 546 89C560 82 571 73 582 62" fill="none" stroke="url(#thread)" stroke-width="2.4" opacity=".74"/>
+    <path d="M13 102Q31 137 49 102T85 102T121 102T157 102T193 102T229 102T265 102T301 102T337 102T373 102T409 102T445 102T481 102T517 102T553 102T589 102" fill="#fff" fill-opacity=".30" stroke="url(#thread)" stroke-width="5.4"/>
+    <path d="M13 34Q31 10 49 34T85 34T121 34T157 34T193 34T229 34T265 34T301 34T337 34T373 34T409 34T445 34T481 34T517 34T553 34T589 34" fill="#fff" fill-opacity=".22" stroke="url(#thread)" stroke-width="3.6"/>
+    <path d="M22 54H578M22 84H578" stroke="#d8cdca" stroke-width="1.4" stroke-dasharray="2 6" opacity=".72"/>
+  </g>
 
-<g fill="#fffdf9" stroke="#d9cecc" stroke-width="1.5" filter="url(#s)">
-  <g transform="translate(48 69)"><ellipse rx="8" ry="18"/><ellipse rx="8" ry="18" transform="rotate(60)"/><ellipse rx="8" ry="18" transform="rotate(120)"/><circle r="6.5" fill="#f5ecea"/></g>
-  <g transform="translate(120 69)"><ellipse rx="8" ry="18"/><ellipse rx="8" ry="18" transform="rotate(60)"/><ellipse rx="8" ry="18" transform="rotate(120)"/><circle r="6.5" fill="#f5ecea"/></g>
-  <g transform="translate(192 69)"><ellipse rx="8" ry="18"/><ellipse rx="8" ry="18" transform="rotate(60)"/><ellipse rx="8" ry="18" transform="rotate(120)"/><circle r="6.5" fill="#f5ecea"/></g>
-  <g transform="translate(264 69)"><ellipse rx="8" ry="18"/><ellipse rx="8" ry="18" transform="rotate(60)"/><ellipse rx="8" ry="18" transform="rotate(120)"/><circle r="6.5" fill="#f5ecea"/></g>
-  <g transform="translate(336 69)"><ellipse rx="8" ry="18"/><ellipse rx="8" ry="18" transform="rotate(60)"/><ellipse rx="8" ry="18" transform="rotate(120)"/><circle r="6.5" fill="#f5ecea"/></g>
-  <g transform="translate(408 69)"><ellipse rx="8" ry="18"/><ellipse rx="8" ry="18" transform="rotate(60)"/><ellipse rx="8" ry="18" transform="rotate(120)"/><circle r="6.5" fill="#f5ecea"/></g>
-  <g transform="translate(480 69)"><ellipse rx="8" ry="18"/><ellipse rx="8" ry="18" transform="rotate(60)"/><ellipse rx="8" ry="18" transform="rotate(120)"/><circle r="6.5" fill="#f5ecea"/></g>
-  <g transform="translate(552 69)"><ellipse rx="8" ry="18"/><ellipse rx="8" ry="18" transform="rotate(60)"/><ellipse rx="8" ry="18" transform="rotate(120)"/><circle r="6.5" fill="#f5ecea"/></g>
+  <g opacity=".97">
+    <g transform="translate(49 69)"><use href="#flower"/></g>
+    <g transform="translate(121 69)"><use href="#flower"/></g>
+    <g transform="translate(193 69)"><use href="#flower"/></g>
+    <g transform="translate(265 69)"><use href="#flower"/></g>
+    <g transform="translate(337 69)"><use href="#flower"/></g>
+    <g transform="translate(409 69)"><use href="#flower"/></g>
+    <g transform="translate(481 69)"><use href="#flower"/></g>
+    <g transform="translate(553 69)"><use href="#flower"/></g>
+  </g>
 </g>
-<g fill="#fff" opacity=".86"><circle cx="48" cy="66" r="2.7"/><circle cx="120" cy="66" r="2.7"/><circle cx="192" cy="66" r="2.7"/><circle cx="264" cy="66" r="2.7"/><circle cx="336" cy="66" r="2.7"/><circle cx="408" cy="66" r="2.7"/><circle cx="480" cy="66" r="2.7"/><circle cx="552" cy="66" r="2.7"/></g>
 </svg>

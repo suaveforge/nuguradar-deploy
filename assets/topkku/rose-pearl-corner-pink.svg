@@ -10,20 +10,22 @@
   <filter id="fabric" x="-25%" y="-25%" width="150%" height="150%">
     <feTurbulence type="fractalNoise" baseFrequency=".055" numOctaves="2" seed="19" result="noise"/>
     <feComposite in="noise" in2="SourceAlpha" operator="in" result="tex"/>
-    <feColorMatrix in="tex" type="matrix" values=".7 0 0 0 .18  0 .6 0 0 .14  0 0 .6 0 .18  0 0 0 .16 0" result="grain"/>
+    <feColorMatrix in="tex" type="matrix" values=".7 0 0 0 .18  0 .6 0 0 .14  0 0 .6 0 .18  0 0 0 .24 0" result="grain"/>
     <feBlend in="SourceGraphic" in2="grain" mode="soft-light"/>
   </filter>
   <g id="rose">
-    <path d="M0-61C22-69 44-55 43-33C66-36 80-14 66 5C81 24 67 48 45 48C35 70 7 74-8 57C-28 73-55 61-57 39C-79 30-80 3-62-10C-71-33-51-54-29-48C-20-61-10-64 0-61Z" fill="url(#outer)" stroke="#a84b72" stroke-width="3"/>
-    <path d="M-7-39C12-50 35-40 35-21C52-15 53 8 38 18C39 38 16 50 0 38C-18 51-40 38-37 18C-54 5-46-18-28-21C-28-34-18-42-7-39Z" fill="url(#mid)" stroke="#9d4168" stroke-width="2.4"/>
-    <path d="M-17-15C-6-31 19-30 25-12C34 5 20 25 2 24C-13 28-28 15-24 0C-23-7-21-11-17-15Z" fill="url(#core)" stroke="#8d345a" stroke-width="2"/>
+    <path d="M0-61C22-69 44-55 43-33C66-36 80-14 66 5C81 24 67 48 45 48C35 70 7 74-8 57C-28 73-55 61-57 39C-79 30-80 3-62-10C-71-33-51-54-29-48C-20-61-10-64 0-61Z" fill="url(#outer)" stroke="#9d486c" stroke-width="1.5"/>
+    <path d="M-7-39C12-50 35-40 35-21C52-15 53 8 38 18C39 38 16 50 0 38C-18 51-40 38-37 18C-54 5-46-18-28-21C-28-34-18-42-7-39Z" fill="url(#mid)" stroke="#8f3b5f" stroke-width="1.2"/>
+    <path d="M-17-15C-6-31 19-30 25-12C34 5 20 25 2 24C-13 28-28 15-24 0C-23-7-21-11-17-15Z" fill="url(#core)" stroke="#803052" stroke-width="1"/>
     <path d="M-9-12C-1-19 12-17 15-8C18 2 8 11-2 9C-10 7-14-2-9-12Z" fill="#f2a4be" opacity=".72"/>
-    <path d="M-35-37C-10-53 17-50 38-32M-47 15C-17 36 18 37 47 15" fill="none" stroke="#ffd7e5" stroke-width="3" opacity=".34"/>
+    <path d="M-35-37C-10-53 17-50 38-32M-47 15C-17 36 18 37 47 15" fill="none" stroke="#ffe5ed" stroke-width="2.2" opacity=".30"/>
+    <path d="M-52-8C-31-20-18-20-4-8C11-24 30-23 47-8M-32 34C-11 22 10 22 33 34" fill="none" stroke="#7f3556" stroke-width="2" opacity=".22"/>
+    <path d="M-26-45C-12-37-4-28-1-16M30-39C16-31 9-22 6-11M-42 4C-26 7-15 12-7 22M40 5C24 8 14 13 7 23" fill="none" stroke="#fff4f8" stroke-width="2.3" opacity=".26"/>
   </g>
 </defs>
 
 <path d="M38 352C153 310 222 235 320 256c91 20 163-9 259-116" fill="none" stroke="url(#stem)" stroke-width="10" stroke-linecap="round"/>
-<path d="M84 330c-31-27-60 2-34 32 19 21 47 14 59 1-5-13-12-23-25-33ZM192 279c-39-24-70 13-34 44 26 22 58 12 70-5-8-15-19-28-36-39ZM391 247c34-32 69-5 43 32-18 26-50 25-67 13 4-17 11-30 24-45Z" fill="#7d9961" stroke="#536b41" stroke-width="3"/>
+<path d="M84 330c-31-27-60 2-34 32 19 21 47 14 59 1-5-13-12-23-25-33ZM192 279c-39-24-70 13-34 44 26 22 58 12 70-5-8-15-19-28-36-39ZM391 247c34-32 69-5 43 32-18 26-50 25-67 13 4-17 11-30 24-45Z" fill="#748f59" stroke="#50673f" stroke-width="1.6"/>
 
 <g filter="url(#shadow)">
   <g transform="translate(96 304) rotate(-9) scale(.76)" filter="url(#fabric)"><use href="#rose"/></g>
@@ -32,7 +34,7 @@
 </g>
 
 <g transform="translate(426 267) rotate(14)" filter="url(#shadow)">
-  <path d="M0 18c-2-29 18-48 42-43 19 4 27 26 13 42-12 14-36 16-55 1Z" fill="url(#outer)" stroke="#a64a72" stroke-width="3"/>
+  <path d="M0 18c-2-29 18-48 42-43 19 4 27 26 13 42-12 14-36 16-55 1Z" fill="url(#outer)" stroke="#984466" stroke-width="1.5"/>
   <path d="M12 9c6-14 19-22 33-19-5 15-17 23-33 19Z" fill="#f5aec5" opacity=".55"/>
   <path d="M4 21c-3 21-16 39-35 54" fill="none" stroke="url(#stem)" stroke-width="6" stroke-linecap="round"/>
 </g>
