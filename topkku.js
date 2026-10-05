@@ -486,15 +486,16 @@
     const additions=[
       // Couture base: lace first, then pearl/film, then the two hero clusters.
       // Every item is a registered engine part; no precomposed master overlay is used.
-      P('lace-strip-white',null,{x:360,y:146,size:420,rotation:.004}),
-      P('lace-strip-white',null,{x:112,y:520,size:398,rotation:Math.PI/2}),
-      P('lace-strip-white',null,{x:622,y:405,size:255,rotation:-Math.PI/2}),
-      P('lace-strip-white',null,{x:360,y:900,size:422,rotation:-.010}),
-      P('pearl-garland','crystal-heart-chain-pink',{x:392,y:822,size:404,rotation:-.050}),
-      P('crystal-heart-chain-pink','pearl-garland',{x:586,y:338,size:286,rotation:1.40}),
-      P('pink-film-butterfly-corner','film-frame-empty',{x:585,y:646,size:326,rotation:.028}),
-      P('rose-pearl-corner-pink','rose-vine-pink',{x:166,y:834,size:376,rotation:-.085}),
-      P('satin-bow-pearl-pink','big-ribbon-pink',{x:126,y:166,size:294,rotation:-.078}),
+      P('lace-strip-white',null,{x:360,y:144,size:430,rotation:.004}),
+      P('lace-strip-white',null,{x:106,y:510,size:410,rotation:Math.PI/2}),
+      P('lace-strip-white',null,{x:620,y:430,size:330,rotation:-Math.PI/2}),
+      P('lace-strip-white',null,{x:360,y:902,size:430,rotation:-.010}),
+      P('pearl-garland','crystal-heart-chain-pink',{x:412,y:132,size:344,rotation:.016}),
+      P('pearl-garland','crystal-heart-chain-pink',{x:400,y:820,size:430,rotation:-.050}),
+      P('crystal-heart-chain-pink','pearl-garland',{x:592,y:350,size:318,rotation:1.40}),
+      P('pink-film-butterfly-corner','film-frame-empty',{x:574,y:630,size:372,rotation:.018}),
+      P('rose-pearl-corner-pink','rose-vine-pink',{x:158,y:830,size:424,rotation:-.082}),
+      P('satin-bow-pearl-pink','big-ribbon-pink',{x:118,y:158,size:326,rotation:-.074}),
       P('captured-date-tag','date-strip',{x:510,y:940,size:50,rotation:.012,value:capturedDateLabel()})
     ].filter(Boolean);
     const retained=retainUserElements();
@@ -503,7 +504,7 @@
     shellState={loaderId:'clear',frameId:'none',backingId:'cream',packageId:'opp-flap',sealId:'none'};
     elements=[...retained,...additions];theme='pink';selected=-1;
     renderShellControls();$$('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme==='pink'));
-    guide('Pink Lace v13 · 새틴 리본 + 4면 레이스 + 크리스털 체인 + 로즈 펄 + 필름 나비 군집 ♡');
+    guide('Pink Lace v16 · 대형 새틴 리본 + 상단 진주 드레이프 + 연결 레이스 + 로즈/필름 나비 군집 ♡');
     draw();
   }
   async function buildMidnightRoseTopkku(){
