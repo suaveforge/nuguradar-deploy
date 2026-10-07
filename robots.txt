@@ -176,6 +176,7 @@ Disallow: /tracks/qid-q124362218/milky-way/
 Disallow: /tracks/qid-q124362218/track-7zwy64qy65wfiouzhouvhq/
 Disallow: /tracks/qid-q60577989/don/
 Disallow: /tracks/qid-q57584225/track-7jye6rg47iqk/
+Disallow: /tracks/qid-q119600781/fade/
 Disallow: /tracks/qid-q97191757/9-to-6/
 Disallow: /tracks/qid-q476119/why-so-lonely/
 Disallow: /tracks/qid-q94615987/summer/
