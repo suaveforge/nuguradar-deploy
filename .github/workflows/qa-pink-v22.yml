@@ -1,0 +1,80 @@
+name: QA Pink v22 actual engine
+
+on:
+  push:
+    branches: [qa-topkku-v22-local]
+    paths:
+      - 'topkku.js'
+      - 'topkku-stickers.js'
+      - 'assets/topkku/**'
+      - '.github/workflows/qa-pink-v22.yml'
+      - 'QA_TRIGGER.txt'
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: qa-topkku-v22-local
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright core
+        run: npm install --no-save --ignore-scripts playwright-core
+      - name: Render actual Topkku engine
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          CHROME="$(command -v google-chrome-stable || command -v google-chrome || command -v chromium || true)"
+          test -n "$CHROME"
+          python3 -m http.server 18797 --bind 127.0.0.1 >/tmp/qa-pink-v22-http.log 2>&1 &
+          PID=$!
+          trap 'kill "$PID" >/dev/null 2>&1 || true' EXIT
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:18797/topkku.html >/dev/null && break; sleep .5; done
+          CHROMIUM_PATH="$CHROME" node --input-type=module - <<'NODE'
+          import { chromium } from 'playwright-core';
+          const browser=await chromium.launch({headless:true,executablePath:process.env.CHROMIUM_PATH,args:['--no-sandbox','--disable-setuid-sandbox']});
+          const page=await browser.newPage({viewport:{width:1180,height:1100},deviceScaleFactor:1});
+          await page.addInitScript(()=>{
+            const c=document.createElement('canvas'); c.width=720; c.height=1080;
+            const x=c.getContext('2d');
+            const g=x.createLinearGradient(0,0,720,1080);
+            g.addColorStop(0,'#817578'); g.addColorStop(1,'#211e25');
+            x.fillStyle=g; x.fillRect(0,0,720,1080);
+            x.fillStyle='#17151b'; x.fillRect(80,80,560,920);
+            x.fillStyle='#e4dbd7'; x.beginPath(); x.ellipse(360,355,152,188,0,0,Math.PI*2); x.fill();
+            x.fillStyle='#232027'; x.beginPath(); x.ellipse(360,280,172,126,0,0,Math.PI*2); x.fill();
+            x.fillStyle='#c69e9a'; x.fillRect(302,400,116,27);
+            x.fillStyle='#eee8e4'; x.beginPath(); x.moveTo(168,950); x.quadraticCurveTo(360,548,552,950); x.closePath(); x.fill();
+            x.strokeStyle='rgba(185,160,165,.7)'; x.lineWidth=4; x.beginPath(); x.moveTo(250,660); x.lineTo(465,865); x.stroke();
+            sessionStorage.setItem('nuguTopkkuIncoming',JSON.stringify({
+              image:c.toDataURL('image/png'),source:'qa',artist:'MY PICK',artistSlug:'my-pick',capturedAt:'2024-10-26T12:00:00.000Z'
+            }));
+          });
+          try{
+            await page.goto('http://127.0.0.1:18797/topkku.html?qa=v22',{waitUntil:'domcontentloaded',timeout:30000});
+            await page.locator('#topkkuCanvas').waitFor({state:'visible',timeout:15000});
+            await page.waitForTimeout(1000);
+            await page.locator('#buildPinkLace').click();
+            await page.waitForTimeout(2200);
+            await page.locator('#topkkuCanvas').screenshot({path:'pink-v22-actual-engine.png'});
+          } finally { await browser.close(); }
+          NODE
+          test -s pink-v22-actual-engine.png
+      - name: Commit capture
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p qa-output
+          mv pink-v22-actual-engine.png qa-output/pink-v22-actual-engine.png
+          git config user.name suaveforge-qa
+          git config user.email actions@users.noreply.github.com
+          git add qa-output/pink-v22-actual-engine.png
+          git diff --cached --quiet && exit 0
+          git commit -m "qa: Pink v22 actual engine capture [skip ci]"
+          git push origin HEAD:qa-topkku-v22-local

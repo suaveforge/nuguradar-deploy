@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 900">
+<defs>
+  <linearGradient id="lace" x1="0" y1="0" x2="1" y2="1">
+    <stop stop-color="#fffefc"/><stop offset=".28" stop-color="#f7eeec"/><stop offset=".55" stop-color="#fff"/>
+    <stop offset=".78" stop-color="#e9dcda"/><stop offset="1" stop-color="#fffaf7"/>
+  </linearGradient>
+  <radialGradient id="pearl"><stop offset="0" stop-color="#fff"/><stop offset=".35" stop-color="#fffaf8"/><stop offset=".76" stop-color="#e4d7d5"/><stop offset="1" stop-color="#ad9da2"/></radialGradient>
+  <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#7a7e89"/><stop offset=".25" stop-color="#fff"/><stop offset=".48" stop-color="#aeb2bc"/><stop offset=".74" stop-color="#fff"/><stop offset="1" stop-color="#6f737e"/></linearGradient>
+  <radialGradient id="gem"><stop offset="0" stop-color="#fff"/><stop offset=".22" stop-color="#ffeaf4"/><stop offset=".58" stop-color="#f3b2cd"/><stop offset="1" stop-color="#b36b8c"/></radialGradient>
+  <filter id="cloth" x="-20%" y="-20%" width="140%" height="140%">
+    <feTurbulence type="fractalNoise" baseFrequency=".045 .075" numOctaves="2" seed="42" result="noise"/>
+    <feComposite in="noise" in2="SourceAlpha" operator="in" result="tex"/>
+    <feColorMatrix in="tex" type="matrix" values=".7 0 0 0 .18 0 .7 0 0 .16 0 0 .7 0 .16 0 0 0 .12 0" result="grain"/>
+    <feBlend in="SourceGraphic" in2="grain" mode="multiply"/>
+    <feDropShadow dx="0" dy="5" stdDeviation="4.5" flood-color="#705a64" flood-opacity=".22"/>
+  </filter>
+  <pattern id="mesh" width="22" height="22" patternUnits="userSpaceOnUse">
+    <path d="M0 11L11 0M11 22L22 11M0 11L11 22M11 0L22 11" fill="none" stroke="#d8ccca" stroke-width="1.25" opacity=".78"/>
+    <circle cx="11" cy="11" r="1.35" fill="#fff"/>
+  </pattern>
+  <g id="flower">
+    <g fill="#fffefc" stroke="#d5c8c6" stroke-width="1">
+      <ellipse rx="5.4" ry="15"/><ellipse rx="5.4" ry="15" transform="rotate(45)"/>
+      <ellipse rx="5.4" ry="15" transform="rotate(90)"/><ellipse rx="5.4" ry="15" transform="rotate(135)"/>
+    </g>
+    <circle r="5.2" fill="#eadfdd" stroke="#cdbfbd"/><circle cx="-1.5" cy="-1.7" r="1.6" fill="#fff"/>
+  </g>
+  <g id="tinyflower"><use href="#flower" transform="scale(.7)"/></g>
+  <g id="star"><path d="M0-13L3.7-4L13 0L3.7 4L0 13L-3.7 4L-13 0L-3.7-4Z" fill="url(#metal)" stroke="#777b86" stroke-width="1.2"/></g>
+  <g id="heart"><path d="M0 8C-15-2-18-15-8-21C-2-24 4-20 7-15C10-20 16-24 22-21C32-15 29-2 14 8L7 14Z" transform="translate(-7 0) scale(.7)" fill="url(#gem)" stroke="#aa6685" stroke-width="1.6"/></g>
+</defs>
+
+<g filter="url(#cloth)">
+  <!-- heavier continuous crochet body -->
+  <path d="M38 56H562V844H38Z M118 136H482V764H118Z" fill="url(#lace)" fill-rule="evenodd" opacity=".96"/>
+  <path d="M55 74H545V826H55Z M106 124H494V776H106Z" fill="url(#mesh)" fill-rule="evenodd" opacity=".92"/>
+
+  <!-- inner and outer scallops -->
+  <g fill="none" stroke="url(#lace)" stroke-linecap="round" opacity=".98">
+    <path d="M74 92Q94 64 114 92T154 92T194 92T234 92T274 92T314 92T354 92T394 92T434 92T474 92T514 92T554 92" stroke-width="8"/>
+    <path d="M74 808Q94 836 114 808T154 808T194 808T234 808T274 808T314 808T354 808T394 808T434 808T474 808T514 808T554 808" stroke-width="8"/>
+    <path d="M82 128Q52 150 82 172T82 216T82 260T82 304T82 348T82 392T82 436T82 480T82 524T82 568T82 612T82 656T82 700T82 744" stroke-width="8"/>
+    <path d="M518 128Q548 150 518 172T518 216T518 260T518 304T518 348T518 392T518 436T518 480T518 524T518 568T518 612T518 656T518 700T518 744" stroke-width="8"/>
+  </g>
+
+  <!-- dense floral clusters along all edges -->
+  <g opacity=".99">
+    <g transform="translate(110 108)"><use href="#flower"/></g><g transform="translate(160 102)"><use href="#tinyflower"/></g>
+    <g transform="translate(210 109)"><use href="#flower"/></g><g transform="translate(260 101)"><use href="#tinyflower"/></g>
+    <g transform="translate(310 108)"><use href="#flower"/></g><g transform="translate(360 101)"><use href="#tinyflower"/></g>
+    <g transform="translate(410 108)"><use href="#flower"/></g><g transform="translate(460 102)"><use href="#tinyflower"/></g>
+    <g transform="translate(510 108)"><use href="#flower"/></g>
+
+    <g transform="translate(110 792)"><use href="#flower"/></g><g transform="translate(160 798)"><use href="#tinyflower"/></g>
+    <g transform="translate(210 791)"><use href="#flower"/></g><g transform="translate(260 799)"><use href="#tinyflower"/></g>
+    <g transform="translate(310 792)"><use href="#flower"/></g><g transform="translate(360 799)"><use href="#tinyflower"/></g>
+    <g transform="translate(410 791)"><use href="#flower"/></g><g transform="translate(460 798)"><use href="#tinyflower"/></g>
+    <g transform="translate(510 792)"><use href="#flower"/></g>
+
+    <g transform="translate(92 170) rotate(90)"><use href="#flower"/></g><g transform="translate(89 230) rotate(90)"><use href="#tinyflower"/></g>
+    <g transform="translate(92 290) rotate(90)"><use href="#flower"/></g><g transform="translate(89 350) rotate(90)"><use href="#tinyflower"/></g>
+    <g transform="translate(92 410) rotate(90)"><use href="#flower"/></g><g transform="translate(89 470) rotate(90)"><use href="#tinyflower"/></g>
+    <g transform="translate(92 530) rotate(90)"><use href="#flower"/></g><g transform="translate(89 590) rotate(90)"><use href="#tinyflower"/></g>
+    <g transform="translate(92 650) rotate(90)"><use href="#flower"/></g><g transform="translate(89 710) rotate(90)"><use href="#tinyflower"/></g>
+
+    <g transform="translate(508 170) rotate(90)"><use href="#flower"/></g><g transform="translate(511 230) rotate(90)"><use href="#tinyflower"/></g>
+    <g transform="translate(508 290) rotate(90)"><use href="#flower"/></g><g transform="translate(511 350) rotate(90)"><use href="#tinyflower"/></g>
+    <g transform="translate(508 410) rotate(90)"><use href="#flower"/></g><g transform="translate(511 470) rotate(90)"><use href="#tinyflower"/></g>
+    <g transform="translate(508 530) rotate(90)"><use href="#flower"/></g><g transform="translate(511 590) rotate(90)"><use href="#tinyflower"/></g>
+    <g transform="translate(508 650) rotate(90)"><use href="#flower"/></g><g transform="translate(511 710) rotate(90)"><use href="#tinyflower"/></g>
+  </g>
+
+  <!-- pearl drape hugging left and lower frame -->
+  <path d="M120 148C92 232 86 350 94 470C100 579 144 684 242 748C310 793 392 796 474 742" fill="none" stroke="#b7a8ac" stroke-width="2.5"/>
+  <g fill="url(#pearl)" stroke="#b2a1a6" stroke-width="1">
+    <circle cx="120" cy="148" r="8.5"/><circle cx="110" cy="184" r="8.3"/><circle cx="102" cy="221" r="8.2"/>
+    <circle cx="96" cy="259" r="8.1"/><circle cx="92" cy="299" r="8"/><circle cx="91" cy="340" r="8"/>
+    <circle cx="92" cy="381" r="8"/><circle cx="94" cy="422" r="8"/><circle cx="98" cy="463" r="8"/>
+    <circle cx="105" cy="505" r="8"/><circle cx="117" cy="547" r="8"/><circle cx="135" cy="589" r="8"/>
+    <circle cx="158" cy="629" r="8"/><circle cx="188" cy="668" r="8"/><circle cx="224" cy="705" r="8"/>
+    <circle cx="266" cy="740" r="8"/><circle cx="310" cy="766" r="8"/><circle cx="356" cy="776" r="8"/>
+    <circle cx="402" cy="771" r="8"/><circle cx="444" cy="755" r="8"/><circle cx="474" cy="734" r="8"/>
+  </g>
+
+  <!-- right silver chain + scattered charms -->
+  <path d="M500 178C528 242 529 320 518 382C508 440 514 512 528 585" fill="none" stroke="url(#metal)" stroke-width="5.2" stroke-dasharray="6 9"/>
+  <g transform="translate(496 212)"><use href="#star"/></g>
+  <g transform="translate(514 356) scale(.82)"><use href="#star"/></g>
+  <g transform="translate(500 506) scale(.94)"><use href="#star"/></g>
+  <g transform="translate(112 564) scale(1.15)"><use href="#heart"/></g>
+  <g transform="translate(478 152) scale(.88)"><use href="#heart"/></g>
+  <g transform="translate(454 742) scale(.82)"><use href="#star"/></g>
+</g>
+</svg>

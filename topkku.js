@@ -484,27 +484,21 @@
     const artistLabel=String(selectedArtist?.name||sourceMeta?.artist||'MY PICK').trim().slice(0,18)||'MY PICK';
     const P=(id,fallback,props={})=>presetSticker(id,fallback,{...props,preset:'pink-lace'});
     const additions=[
-      // Couture base: lace first, then pearl/film, then the two hero clusters.
-      // Every item is a registered engine part; no precomposed master overlay is used.
-      P('lace-strip-white',null,{x:360,y:144,size:430,rotation:.004}),
-      P('lace-strip-white',null,{x:106,y:510,size:410,rotation:Math.PI/2}),
-      P('lace-strip-white',null,{x:620,y:430,size:330,rotation:-Math.PI/2}),
-      P('lace-strip-white',null,{x:360,y:902,size:430,rotation:-.010}),
-      P('pearl-garland','crystal-heart-chain-pink',{x:412,y:132,size:344,rotation:.016}),
-      P('pearl-garland','crystal-heart-chain-pink',{x:400,y:820,size:430,rotation:-.050}),
-      P('crystal-heart-chain-pink','pearl-garland',{x:592,y:350,size:318,rotation:1.40}),
-      P('pink-film-butterfly-corner','film-frame-empty',{x:574,y:630,size:372,rotation:.018}),
-      P('rose-pearl-corner-pink','rose-vine-pink',{x:158,y:830,size:424,rotation:-.082}),
-      P('satin-bow-pearl-pink','big-ribbon-pink',{x:118,y:158,size:326,rotation:-.074}),
-      P('captured-date-tag','date-strip',{x:510,y:940,size:50,rotation:.012,value:capturedDateLabel()})
+      P('pink-couture-frame-cluster',null,{x:360,y:522,size:590,rotation:0}),
+      P('pink-film-butterfly-corner','film-frame-empty',{x:566,y:555,size:232,rotation:.012}),
+      P('pink-crystal-butterflies',null,{x:520,y:718,size:158,rotation:-.08}),
+      P('rose-pearl-corner-pink','rose-vine-pink',{x:180,y:816,size:214,rotation:-.055}),
+      P('satin-bow-pearl-pink','big-ribbon-pink',{x:168,y:174,size:208,rotation:-.055}),
+      P('artist-tag','note-paper',{x:338,y:838,size:82,rotation:-.025,value:artistLabel.toUpperCase()}),
+      P('captured-date-tag','date-strip',{x:456,y:886,size:55,rotation:.012,value:capturedDateLabel()})
     ].filter(Boolean);
     const retained=retainUserElements();
     if(retained.length+additions.length>limits.totalObjects){guide('현재 붙어 있는 꾸미기가 많아서 핑크 레이스 시안을 더 붙일 수 없어요.');return}
     saveHistory();
-    shellState={loaderId:'clear',frameId:'none',backingId:'cream',packageId:'opp-flap',sealId:'none'};
+    shellState={loaderId:'clear',frameId:'none',backingId:'pink',packageId:'opp-flap',sealId:'heart'};
     elements=[...retained,...additions];theme='pink';selected=-1;
     renderShellControls();$$('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme==='pink'));
-    guide('Pink Lace v16 · 대형 새틴 리본 + 상단 진주 드레이프 + 연결 레이스 + 로즈/필름 나비 군집 ♡');
+    guide('Pink Lace v22 · 핑크 백카드 + 하트 씰 + 연속 쿠튀르 레이스·진주·나비 프레임 ♡');
     draw();
   }
   async function buildMidnightRoseTopkku(){
