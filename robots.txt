@@ -139,6 +139,7 @@ Disallow: /tracks/qid-q23936742/track-6rkb7j-b7j20/
 Disallow: /tracks/qid-q60994549/to-you/
 Disallow: /tracks/qid-q98096705/truth-or-dare/
 Disallow: /tracks/qid-q119025962/flame-feat-milet/
+Disallow: /tracks/qid-q119025962/star-trace/
 Disallow: /tracks/qid-q26265886/track-64skioupi-umgouhna/
 Disallow: /tracks/qid-q26265886/get-it/
 Disallow: /tracks/qid-q97780109/breath/
