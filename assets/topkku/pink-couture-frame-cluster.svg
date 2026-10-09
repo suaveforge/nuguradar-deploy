@@ -1,0 +1,166 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 900">
+<defs>
+  <linearGradient id="lace" x1="0" y1="0" x2="1" y2="1">
+    <stop stop-color="#fffefc"/><stop offset=".28" stop-color="#f7eeec"/><stop offset=".55" stop-color="#fff"/>
+    <stop offset=".78" stop-color="#e9dcda"/><stop offset="1" stop-color="#fffaf7"/>
+  </linearGradient>
+  <radialGradient id="pearl"><stop offset="0" stop-color="#fff"/><stop offset=".35" stop-color="#fffaf8"/><stop offset=".76" stop-color="#e4d7d5"/><stop offset="1" stop-color="#ad9da2"/></radialGradient>
+  <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#7a7e89"/><stop offset=".25" stop-color="#fff"/><stop offset=".48" stop-color="#aeb2bc"/><stop offset=".74" stop-color="#fff"/><stop offset="1" stop-color="#6f737e"/></linearGradient>
+  <radialGradient id="gem"><stop offset="0" stop-color="#fff"/><stop offset=".22" stop-color="#ffeaf4"/><stop offset=".58" stop-color="#f3b2cd"/><stop offset="1" stop-color="#b36b8c"/></radialGradient>
+  <filter id="cloth" x="-20%" y="-20%" width="140%" height="140%">
+    <feTurbulence type="fractalNoise" baseFrequency=".045 .075" numOctaves="2" seed="42" result="noise"/>
+    <feComposite in="noise" in2="SourceAlpha" operator="in" result="tex"/>
+    <feColorMatrix in="tex" type="matrix" values=".7 0 0 0 .18 0 .7 0 0 .16 0 0 .7 0 .16 0 0 0 .12 0" result="grain"/>
+    <feBlend in="SourceGraphic" in2="grain" mode="multiply" result="basecloth"/>
+    <feTurbulence type="fractalNoise" baseFrequency=".22 .27" numOctaves="2" seed="19" result="fiberNoise"/>
+    <feDisplacementMap in="basecloth" in2="fiberNoise" scale="1.75" xChannelSelector="R" yChannelSelector="G" result="texturedCloth"/>
+    <feDropShadow in="texturedCloth" dx="0" dy="5.5" stdDeviation="3.8" flood-color="#705a64" flood-opacity=".34"/>
+  </filter>
+  
+  <pattern id="crochet" width="46" height="51" patternUnits="userSpaceOnUse" patternTransform="rotate(-3)">
+    <!-- Thread mesh and open eyelets, with no opaque repeating flower tiles. -->
+    <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M1 3Q11 12 13 25T1 49M45 2Q33 13 34 25T45 49
+               M2 25Q15 8 23 25T44 25M2 26Q16 42 23 26T45 26
+               M13 1Q18 14 23 23Q30 16 33 1M13 50Q18 37 23 27Q29 38 34 50"
+            stroke="#f5f0ed" stroke-width="1.7" stroke-opacity=".93"/>
+      <path d="M0 7L9 14M0 43L9 36M46 8L38 15M46 43L38 36
+               M9 0Q23 13 37 0M10 51Q23 39 36 51
+               M4 23Q23 11 42 23M4 29Q23 42 42 29"
+            stroke="#d9cecc" stroke-width=".75" stroke-opacity=".65"/>
+      <path d="M23 13C8 12 11 29 23 27C36 28 38 12 23 13Z
+               M23 17C15 17 17 24 23 23C30 24 31 17 23 17Z"
+            stroke="#f4ece9" stroke-width="1.25" stroke-opacity=".85"/>
+      <path d="M1 3Q10 10 12 18M45 2Q37 12 35 19"
+            stroke="#b7a7a8" stroke-width=".65" stroke-opacity=".53"/>
+    </g>
+    <circle cx="23" cy="25.5" r="2.3" fill="#fffdf9" stroke="#cabdba" stroke-width=".6"/>
+  </pattern>
+  <g id="flower">
+    <!-- Open embroidered thread, rather than solid flat ellipse petals. -->
+    <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M0-3C-9-12-7-23 0-24C8-23 10-12 0-3
+               M0-3C9-13 21-9 21-1C18 7 8 6 0-3
+               M0-3C10 5 10 20 2 21C-7 19-9 8 0-3
+               M0-3C-10 7-23 7-24-1C-22-10-9-13 0-3Z"
+            stroke="#f4eeeb" stroke-width="3.15"/>
+      <path d="M0-6C-5-13-4-20 0-20C5-20 6-12 0-6
+               M3-2C11-8 17-5 17-1C16 4 10 3 3-2
+               M2 1C8 9 7 15 2 16C-3 14-4 7 2 1
+               M-2-1C-10 5-18 4-18-1C-17-6-10-8-2-1Z"
+            stroke="#c5b7b7" stroke-width=".9" stroke-opacity=".9"/>
+      <path d="M-8-18L-4-14M7-19L5-14M15-8L10-5M16 7L11 4
+               M-8 14L-5 10M8 15L6 9M-17 6L-11 3M-17-8L-12-6"
+            stroke="#f5eeeb" stroke-width=".9"/>
+    </g>
+    <circle r="4.6" fill="#f4eeee" stroke="#c9b8b7" stroke-width="1.05"/>
+    <circle cx="-1.5" cy="-1.5" r="1.3" fill="#ffffff"/>
+  </g>
+  <g id="tinyflower"><use href="#flower" transform="scale(.72) rotate(23)"/></g>
+  <g id="star"><path d="M0-13L3.7-4L13 0L3.7 4L0 13L-3.7 4L-13 0L-3.7-4Z" fill="url(#metal)" stroke="#777b86" stroke-width="1.2"/></g>
+  <g id="heart"><path d="M0 8C-15-2-18-15-8-21C-2-24 4-20 7-15C10-20 16-24 22-21C32-15 29-2 14 8L7 14Z" transform="translate(-7 0) scale(.7)" fill="url(#gem)" stroke="#aa6685" stroke-width="1.6"/></g>
+</defs>
+
+<g filter="url(#cloth)">
+  <!-- heavier continuous crochet body -->
+  <path d="M38 56H562V844H38Z M118 136H482V764H118Z" fill="url(#lace)" fill-rule="evenodd" opacity=".52"/>
+  <path d="M53 72H547V828H53Z M106 124H494V776H106Z" fill="url(#crochet)" fill-rule="evenodd" opacity=".64"/>
+
+  <!-- inner and outer scallops -->
+  <g fill="none" stroke="url(#lace)" stroke-linecap="round" opacity=".55">
+    <path d="M74 92Q94 64 114 92T154 92T194 92T234 92T274 92T314 92T354 92T394 92T434 92T474 92T514 92T554 92" stroke-width="8"/>
+    <path d="M74 808Q94 836 114 808T154 808T194 808T234 808T274 808T314 808T354 808T394 808T434 808T474 808T514 808T554 808" stroke-width="8"/>
+    <path d="M82 128Q52 150 82 172T82 216T82 260T82 304T82 348T82 392T82 436T82 480T82 524T82 568T82 612T82 656T82 700T82 744" stroke-width="8"/>
+    <path d="M518 128Q548 150 518 172T518 216T518 260T518 304T518 348T518 392T518 436T518 480T518 524T518 568T518 612T518 656T518 700T518 744" stroke-width="8"/>
+  </g>
+
+  <!-- dense floral clusters along all edges -->
+  <g opacity=".71">
+    <g transform="translate(109 107) rotate(-7) scale(1.08)"><use href="#flower"/></g><g transform="translate(160 102)"><use href="#tinyflower"/></g>
+    <g transform="translate(211 109) rotate(9) scale(.94)"><use href="#flower"/></g><g transform="translate(260 101)"><use href="#tinyflower"/></g>
+    <g transform="translate(309 110) rotate(-13) scale(1.1)"><use href="#flower"/></g><g transform="translate(360 101)"><use href="#tinyflower"/></g>
+    <g transform="translate(412 107) rotate(6) scale(.9)"><use href="#flower"/></g><g transform="translate(460 102)"><use href="#tinyflower"/></g>
+    <g transform="translate(510 109) rotate(-8) scale(1.08)"><use href="#flower"/></g>
+
+    <g transform="translate(111 793) rotate(11) scale(1.02)"><use href="#flower"/></g><g transform="translate(160 798)"><use href="#tinyflower"/></g>
+    <g transform="translate(211 789) rotate(-9) scale(1.12)"><use href="#flower"/></g><g transform="translate(260 799)"><use href="#tinyflower"/></g>
+    <g transform="translate(309 795) rotate(6) scale(.91)"><use href="#flower"/></g><g transform="translate(360 799)"><use href="#tinyflower"/></g>
+    <g transform="translate(412 792) rotate(12) scale(1.07)"><use href="#flower"/></g><g transform="translate(460 798)"><use href="#tinyflower"/></g>
+    <g transform="translate(510 792)"><use href="#flower"/></g>
+
+    <g transform="translate(92 170) rotate(90)"><use href="#flower"/></g><g transform="translate(89 230) rotate(90)"><use href="#tinyflower"/></g>
+    <g transform="translate(92 290) rotate(90)"><use href="#flower"/></g><g transform="translate(89 350) rotate(90)"><use href="#tinyflower"/></g>
+    <g transform="translate(92 410) rotate(90)"><use href="#flower"/></g><g transform="translate(89 470) rotate(90)"><use href="#tinyflower"/></g>
+    <g transform="translate(92 530) rotate(90)"><use href="#flower"/></g><g transform="translate(89 590) rotate(90)"><use href="#tinyflower"/></g>
+    <g transform="translate(92 650) rotate(90)"><use href="#flower"/></g><g transform="translate(89 710) rotate(90)"><use href="#tinyflower"/></g>
+
+    <g transform="translate(508 170) rotate(90)"><use href="#flower"/></g><g transform="translate(511 230) rotate(90)"><use href="#tinyflower"/></g>
+    <g transform="translate(508 290) rotate(90)"><use href="#flower"/></g><g transform="translate(511 350) rotate(90)"><use href="#tinyflower"/></g>
+    <g transform="translate(508 410) rotate(90)"><use href="#flower"/></g><g transform="translate(511 470) rotate(90)"><use href="#tinyflower"/></g>
+    <g transform="translate(508 530) rotate(90)"><use href="#flower"/></g><g transform="translate(511 590) rotate(90)"><use href="#tinyflower"/></g>
+    <g transform="translate(508 650) rotate(90)"><use href="#flower"/></g><g transform="translate(511 710) rotate(90)"><use href="#tinyflower"/></g>
+  </g>
+
+  <!-- sewn draped connectors: pearl, silver and lace share the same stitched path -->
+  <g opacity=".94">
+    <path d="M155 122C227 104 318 111 390 122C445 126 470 142 495 176"
+      fill="none" stroke="#99787d" stroke-opacity=".6" stroke-width="2.2"/>
+    <path d="M159 125C235 111 327 118 398 131C455 142 478 170 500 222"
+      fill="none" stroke="url(#metal)" stroke-width="3" stroke-dasharray="3 7"/>
+    <g fill="url(#pearl)" stroke="#b9a4a5" stroke-width="1.1">
+      <circle cx="160" cy="123" r="10"/><circle cx="185" cy="118" r="9"/>
+      <circle cx="212" cy="116" r="10"/><circle cx="240" cy="114" r="8.5"/>
+      <circle cx="270" cy="115" r="9.2"/><circle cx="300" cy="116" r="10"/>
+      <circle cx="329" cy="118" r="9"/><circle cx="358" cy="120" r="9.4"/>
+      <circle cx="386" cy="124" r="9"/><circle cx="411" cy="130" r="9.6"/>
+      <circle cx="434" cy="140" r="8.5"/><circle cx="455" cy="150" r="9.2"/>
+      <circle cx="474" cy="165" r="8.5"/><circle cx="489" cy="182" r="8.2"/>
+      <circle cx="500" cy="203" r="8.4"/>
+    </g>
+    <g stroke="#c1aeb1" stroke-width="1" fill="none">
+      <path d="M170 121q5-8 10 0M225 116q5-6 10 0M340 118q5-8 10 0M425 139q6-6 9 0"/>
+    </g>
+    <path d="M490 400C509 475 515 560 501 642C494 699 461 742 404 775C359 800 309 811 274 806"
+      fill="none" stroke="#a78b92" stroke-width="2.3"/>
+    <path d="M494 399C515 475 522 565 507 652C499 712 454 760 394 791"
+      fill="none" stroke="url(#metal)" stroke-width="2.6" stroke-dasharray="5 7" opacity=".78"/>
+    <g fill="url(#pearl)" stroke="#b7a3a9" stroke-width=".9">
+      <circle cx="492" cy="418" r="8"/><circle cx="500" cy="448" r="8.4"/>
+      <circle cx="506" cy="480" r="8.3"/><circle cx="510" cy="513" r="9"/>
+      <circle cx="512" cy="547" r="8.8"/><circle cx="511" cy="579" r="9.4"/>
+      <circle cx="507" cy="614" r="8.8"/><circle cx="501" cy="646" r="9.3"/>
+      <circle cx="492" cy="680" r="9"/><circle cx="475" cy="710" r="9.2"/>
+      <circle cx="454" cy="737" r="9"/><circle cx="426" cy="759" r="9.7"/>
+      <circle cx="397" cy="777" r="8.7"/><circle cx="366" cy="791" r="9.2"/>
+      <circle cx="333" cy="799" r="9.2"/><circle cx="301" cy="805" r="8.9"/>
+      <circle cx="274" cy="806" r="8.3"/>
+    </g>
+  </g>
+  <!-- soft stitched folds; never cover the center portrait -->
+  <g fill="none" stroke="#fff8f7" stroke-opacity=".68" stroke-width="2.5">
+    <path d="M66 168Q87 210 67 248Q88 293 71 336Q92 378 73 427"/>
+    <path d="M533 262Q514 305 532 342Q517 385 533 420"/>
+    <path d="M158 823Q228 809 296 827Q375 811 443 826"/>
+  </g>
+  <!-- pearl drape hugging left and lower frame -->
+  <path d="M120 148C92 232 86 350 94 470C100 579 144 684 242 748C310 793 392 796 474 742" fill="none" stroke="#b7a8ac" stroke-width="2.5"/>
+  <g fill="url(#pearl)" stroke="#b2a1a6" stroke-width="1">
+    <circle cx="120" cy="148" r="8.5"/><circle cx="110" cy="184" r="8.3"/><circle cx="102" cy="221" r="8.2"/>
+    <circle cx="96" cy="259" r="8.1"/><circle cx="92" cy="299" r="8"/><circle cx="91" cy="340" r="8"/>
+    <circle cx="92" cy="381" r="8"/><circle cx="94" cy="422" r="8"/><circle cx="98" cy="463" r="8"/>
+    <circle cx="105" cy="505" r="8"/><circle cx="117" cy="547" r="8"/><circle cx="135" cy="589" r="8"/>
+    <circle cx="158" cy="629" r="8"/><circle cx="188" cy="668" r="8"/><circle cx="224" cy="705" r="8"/>
+    <circle cx="266" cy="740" r="8"/><circle cx="310" cy="766" r="8"/><circle cx="356" cy="776" r="8"/>
+    <circle cx="402" cy="771" r="8"/><circle cx="444" cy="755" r="8"/><circle cx="474" cy="734" r="8"/>
+  </g>
+
+  <!-- right silver chain + scattered charms -->
+  <path d="M500 178C528 242 529 320 518 382C508 440 514 512 528 585" fill="none" stroke="url(#metal)" stroke-width="5.2" stroke-dasharray="6 9"/>
+  <g transform="translate(496 212)"><use href="#star"/></g>
+  <g transform="translate(514 356) scale(.82)"><use href="#star"/></g>
+  <g transform="translate(500 506) scale(.94)"><use href="#star"/></g>
+  <g transform="translate(112 564) scale(1.15)"><use href="#heart"/></g>
+  <g transform="translate(478 152) scale(.88)"><use href="#heart"/></g>
+  <g transform="translate(454 742) scale(.82)"><use href="#star"/></g>
+</g>
+</svg>

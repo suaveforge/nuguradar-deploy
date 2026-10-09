@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 190">
+<defs>
+  <linearGradient id="cloth" x1="0" y1="0" x2="0" y2="1">
+    <stop stop-color="#fff" stop-opacity=".96"/>
+    <stop offset=".42" stop-color="#fffaf8" stop-opacity=".82"/>
+    <stop offset=".72" stop-color="#efe4e2" stop-opacity=".70"/>
+    <stop offset="1" stop-color="#d7cac8" stop-opacity=".86"/>
+  </linearGradient>
+  <linearGradient id="thread" x1="0" y1="0" x2="1" y2="0">
+    <stop stop-color="#cfc1bf"/><stop offset=".14" stop-color="#fff"/>
+    <stop offset=".34" stop-color="#e7dad8"/><stop offset=".52" stop-color="#fff"/>
+    <stop offset=".78" stop-color="#d7c9c7"/><stop offset=".92" stop-color="#fff"/><stop offset="1" stop-color="#c9bbb9"/>
+  </linearGradient>
+  <pattern id="mesh" width="24" height="24" patternUnits="userSpaceOnUse">
+    <path d="M0 12L12 0M12 24L24 12M0 12L12 24M12 0L24 12" fill="none" stroke="#d9cdca" stroke-width="1.15" opacity=".72"/>
+    <circle cx="12" cy="12" r="1.35" fill="#fff" stroke="#d0c4c1" stroke-width=".7"/>
+  </pattern>
+  <filter id="fabric" x="-10%" y="-35%" width="120%" height="185%">
+    <feTurbulence type="fractalNoise" baseFrequency=".055 .09" numOctaves="2" seed="31" result="n"/>
+    <feComposite in="n" in2="SourceAlpha" operator="in" result="tex"/>
+    <feColorMatrix in="tex" type="matrix" values=".6 0 0 0 .28  0 .6 0 0 .24  0 0 .6 0 .24  0 0 0 .12 0" result="grain"/>
+    <feBlend in="SourceGraphic" in2="grain" mode="multiply"/>
+    <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#6f5d64" flood-opacity=".20"/>
+  </filter>
+  <g id="rosette">
+    <circle r="16" fill="#fffdfb" stroke="#d7cac8" stroke-width="1.2"/>
+    <g fill="#fff" fill-opacity=".92" stroke="#d7cac8" stroke-width="1.05">
+      <ellipse rx="5.2" ry="13.5"/><ellipse rx="5.2" ry="13.5" transform="rotate(45)"/>
+      <ellipse rx="5.2" ry="13.5" transform="rotate(90)"/><ellipse rx="5.2" ry="13.5" transform="rotate(135)"/>
+    </g>
+    <circle r="5.2" fill="#eadfdd" stroke="#cfc0be"/>
+    <circle cx="-1.5" cy="-1.7" r="1.8" fill="#fff"/>
+  </g>
+</defs>
+<g filter="url(#fabric)">
+  <path d="M18 48C72 34 124 40 180 48C240 57 292 35 352 45C418 56 470 36 582 50L582 140C500 151 444 132 384 141C316 151 252 133 190 142C126 151 74 136 18 142Z" fill="url(#cloth)" opacity=".72"/>
+  <path d="M26 55H574V136H26Z" fill="url(#mesh)" opacity=".86"/>
+  <path d="M20 57Q38 23 56 57T92 57T128 57T164 57T200 57T236 57T272 57T308 57T344 57T380 57T416 57T452 57T488 57T524 57T560 57T596 57" fill="none" stroke="url(#thread)" stroke-width="5.4" opacity=".95"/>
+  <path d="M20 138Q38 174 56 138T92 138T128 138T164 138T200 138T236 138T272 138T308 138T344 138T380 138T416 138T452 138T488 138T524 138T560 138T596 138" fill="none" stroke="url(#thread)" stroke-width="6.4" opacity=".97"/>
+  <path d="M28 72C78 94 108 90 150 70C196 48 240 99 286 75C334 50 370 98 418 72C462 49 514 100 572 75" fill="none" stroke="#fff" stroke-width="3.2" opacity=".86"/>
+  <path d="M28 119C78 97 108 101 150 121C196 143 240 92 286 116C334 141 370 93 418 119C462 142 514 91 572 116" fill="none" stroke="#d6c8c6" stroke-width="2.2" opacity=".82"/>
+  <g opacity=".98">
+    <g transform="translate(58 96) rotate(-7)"><use href="#rosette"/></g>
+    <g transform="translate(116 90) rotate(9) scale(.86)"><use href="#rosette"/></g>
+    <g transform="translate(176 100) rotate(-11)"><use href="#rosette"/></g>
+    <g transform="translate(238 89) rotate(6) scale(.88)"><use href="#rosette"/></g>
+    <g transform="translate(300 98) rotate(-4)"><use href="#rosette"/></g>
+    <g transform="translate(362 89) rotate(10) scale(.88)"><use href="#rosette"/></g>
+    <g transform="translate(424 100) rotate(-8)"><use href="#rosette"/></g>
+    <g transform="translate(486 90) rotate(7) scale(.86)"><use href="#rosette"/></g>
+    <g transform="translate(548 98) rotate(-5)"><use href="#rosette"/></g>
+  </g>
+</g>
+</svg>

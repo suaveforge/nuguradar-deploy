@@ -121,20 +121,60 @@
   function addStickerItem(item){const check=canAddItem(item);if(!check.ok){guide(check.msg);return}saveHistory();const size=Number(item.defaultSize||0)||(item.kind==='frame'?100:item.kind==='tape'?90:item.kind==='lace'?86:76);const y=item.kind==='frame'?photoBox.y+photoBox.h/2:H/2;const value=item.dynamic==='artist'?String(selectedArtist?.name||sourceMeta?.artist||'MY PICK').slice(0,18):item.dynamic==='date'?capturedDateLabel():item.value||'';elements.push({type:'sticker',stickerId:item.id,value,x:W/2,y,size,rotation:0});selected=elements.length-1;guide(`${item.label} 붙였어 ♡`);draw()}
   function addText(value,textStyle='default'){const text=String(value||'').trim();if(!text)return;if(elements.length>=limits.totalObjects){guide(`한 작품에는 최대 ${limits.totalObjects}개 오브젝트까지 붙일 수 있어요.`);return}saveHistory();elements.push({type:'text',value:text,textStyle,x:W/2,y:H-112,size:textStyle==='handwritten'?38:34,rotation:0});selected=elements.length-1;draw();$('#textInput').value=''}
   function elementRadius(e){if(e.type==='scene-filmstrip')return e.size*1.42;if(e.type==='scene-polaroid')return e.size*1.08;if(e.type==='scene-crop')return e.size*.92;if(e.type==='scene-scrap-note')return e.size*1.48;if(e.type==='scene-ticket')return e.size*1.55;if(e.type==='scene-paper-scrap')return e.size*1.15;if(e.type==='scene-tape')return e.size*.95;if(e.type==='scene-chrome')return e.size*.62;if(e.type==='scene-clip')return e.size*.70;if(e.type!=='sticker')return Math.max(e.size*1.1,String(e.value||'').length*e.size*.27);const item=itemById(e.stickerId);if(item?.kind==='frame'&&!item?.asset)return Math.max(photoBox.w,photoBox.h)*.48;return e.size*.75*Number(item?.assetScale||1)}
-  function drawBackdrop(t){ctx.fillStyle=t.bg;ctx.fillRect(0,0,W,H);const g=ctx.createRadialGradient(W*.18,H*.12,20,W*.18,H*.12,420);g.addColorStop(0,t.accent+'55');g.addColorStop(1,t.bg+'00');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.save();ctx.globalAlpha=.22;ctx.strokeStyle=t.frame;ctx.lineWidth=2;for(let y=30;y<H;y+=46){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y-18);ctx.stroke()}ctx.restore()}
+  function isPinkPhysical(){return theme==='pink'&&elements.some(e=>e.type==='sticker'&&(e.stickerId==='pink-couture-frame-cluster'||e.preset==='pink-corner'))}
+  function isPinkCornerDemo(){return elements.some(e=>e.preset==='pink-corner')}
+  function drawBackdrop(t){
+    if(isPinkPhysical()){
+      const bg=ctx.createLinearGradient(0,0,W,H);
+      bg.addColorStop(0,'#f8f0ed');bg.addColorStop(.48,'#f8e8ec');bg.addColorStop(1,'#eee0df');
+      ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+      const g=ctx.createRadialGradient(W*.70,H*.30,50,W*.50,H*.52,640);
+      g.addColorStop(0,'rgba(255,255,255,.34)');g.addColorStop(1,'rgba(255,247,248,0)');
+      ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+      return;
+    }
+    ctx.fillStyle=t.bg;ctx.fillRect(0,0,W,H);const g=ctx.createRadialGradient(W*.18,H*.12,20,W*.18,H*.12,420);g.addColorStop(0,t.accent+'55');g.addColorStop(1,t.bg+'00');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.save();ctx.globalAlpha=.22;ctx.strokeStyle=t.frame;ctx.lineWidth=2;for(let y=30;y<H;y+=46){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y-18);ctx.stroke()}ctx.restore()
+  }
   function drawBackingLayer(){
     const item=shellItem('backings',shellState.backingId);if(!item||item.id==='none'||!item.color)return;
+    if(isPinkPhysical()){
+      // A printed backing card lives beneath the clear holder, not a second UI frame.
+      const x=photoBox.x-23,y=photoBox.y-30,w=photoBox.w+46,h=photoBox.h+61;
+      ctx.save();ctx.translate(W/2,H/2);ctx.rotate(-.012);ctx.translate(-W/2,-H/2);
+      ctx.shadowColor='rgba(71,57,68,.17)';ctx.shadowBlur=19;ctx.shadowOffsetY=10;
+      roundedPath(x,y,w,h,18);ctx.fillStyle=isPinkCornerDemo()?'#fdfbf9':'#f9e8ec';ctx.fill();
+      ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+      roundedPath(x+2,y+2,w-4,h-4,17);ctx.strokeStyle='rgba(255,251,251,.60)';ctx.lineWidth=1.5;ctx.stroke();
+      ctx.restore();return;
+    }
     const x=photoBox.x-42,y=photoBox.y-60,w=photoBox.w+84,h=photoBox.h+120;
     ctx.save();ctx.translate(W/2,H/2);ctx.rotate(-.025);ctx.translate(-W/2,-H/2);
     ctx.shadowColor='rgba(22,24,34,.18)';ctx.shadowBlur=24;ctx.shadowOffsetY=14;roundedPath(x,y,w,h,26);ctx.fillStyle=item.color;ctx.fill();
-    ctx.shadowBlur=0;ctx.globalAlpha=.11;ctx.strokeStyle=item.id==='black'?'#fff':'#765f77';ctx.lineWidth=1.2;
-    for(let yy=y+24;yy<y+h-18;yy+=34){ctx.beginPath();ctx.moveTo(x+18,yy);ctx.lineTo(x+w-18,yy-8);ctx.stroke()}
+    ctx.shadowBlur=0;ctx.globalAlpha=isPinkPhysical() ? .055 : .11;ctx.strokeStyle=item.id==='black'?'#fff':'#765f77';ctx.lineWidth=1.2;
+    if(!isPinkPhysical())for(let yy=y+24;yy<y+h-18;yy+=34){ctx.beginPath();ctx.moveTo(x+18,yy);ctx.lineTo(x+w-18,yy-8);ctx.stroke()}
     ctx.restore();
   }
   function drawLoaderBase(){
     const item=shellItem('loaders',shellState.loaderId)||{tone:'clear'};
     const tones={clear:['rgba(255,255,255,.12)','rgba(225,236,255,.65)'],frost:['rgba(247,249,255,.34)','rgba(221,227,239,.82)'],pink:['rgba(255,213,229,.22)','rgba(242,151,185,.72)'],blue:['rgba(203,226,255,.22)','rgba(123,176,231,.74)'],black:['rgba(35,38,47,.24)','rgba(72,76,89,.84)']};
     const [fill,stroke]=tones[item.tone]||tones.clear,x=photoBox.x-34,y=photoBox.y-48,w=photoBox.w+68,h=photoBox.h+96;
+    if(isPinkPhysical()){
+      ctx.save();
+      // One acrylic shell: depth comes from a restrained cast shadow and edge glints.
+      ctx.shadowColor='rgba(73,57,65,.20)';ctx.shadowBlur=18;ctx.shadowOffsetY=10;
+      roundedPath(x,y,w,h,24);ctx.fillStyle='rgba(255,255,255,.035)';ctx.fill();
+      ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+      roundedPath(x,y,w,h,24);ctx.strokeStyle='rgba(154,148,159,.43)';ctx.lineWidth=3.2;ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x+22,y+4);ctx.quadraticCurveTo(x+w*.5,y-1,x+w-24,y+4);
+      ctx.moveTo(x+3,y+34);ctx.lineTo(x+3,y+h-60);
+      ctx.strokeStyle='rgba(255,255,255,.89)';ctx.lineWidth=3.2;ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x+w-5,y+54);ctx.lineTo(x+w-5,y+h-48);
+      ctx.moveTo(x+28,y+h-5);ctx.lineTo(x+w-35,y+h-5);
+      ctx.strokeStyle='rgba(71,63,79,.12)';ctx.lineWidth=1.5;ctx.stroke();
+      ctx.restore();return;
+    }
     ctx.save();ctx.shadowColor='rgba(18,25,42,.22)';ctx.shadowBlur=26;ctx.shadowOffsetY=16;roundedPath(x,y,w,h,32);ctx.fillStyle=fill;ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle=stroke;ctx.lineWidth=9;ctx.stroke();
     ctx.globalAlpha=.55;ctx.strokeStyle='rgba(255,255,255,.92)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x+24,y+14);ctx.lineTo(x+w-24,y+14);ctx.stroke();
     ctx.globalAlpha=.32;ctx.beginPath();ctx.moveTo(x+14,y+28);ctx.lineTo(x+14,y+h-28);ctx.stroke();ctx.restore();
@@ -231,6 +271,42 @@
   function drawPackageOverlay(){
     const item=shellItem('packages',shellState.packageId);if(!item||item.style==='none')return;
     const x=photoBox.x-55,y=photoBox.y-82,w=photoBox.w+110,h=photoBox.h+144;
+    if(isPinkPhysical()){
+      ctx.save();
+      // Thin, slightly asymmetric OPP sleeve: no concentric digital rounded rectangles.
+      ctx.beginPath();
+      ctx.moveTo(x+25,y+7);ctx.lineTo(x+w-37,y-3);
+      ctx.lineTo(x+w-3,y+33);ctx.lineTo(x+w+5,y+h-37);
+      ctx.lineTo(x+w-26,y+h+5);ctx.lineTo(x+20,y+h-1);
+      ctx.lineTo(x-5,y+h-37);ctx.lineTo(x+1,y+41);ctx.closePath();
+      ctx.fillStyle='rgba(255,255,255,.012)';ctx.fill();
+      ctx.strokeStyle='rgba(255,255,255,.18)';ctx.lineWidth=1.25;ctx.stroke();
+      const crease=(points,opacity,width)=>{
+        ctx.beginPath();ctx.moveTo(points[0][0],points[0][1]);
+        for(let i=1;i<points.length;i++)ctx.lineTo(points[i][0],points[i][1]);
+        ctx.strokeStyle='rgba(255,255,255,'+opacity+')';ctx.lineWidth=width;ctx.stroke();
+      };
+      crease([[x+1,y+41],[x+37,y+27],[x+59,y+5],[x+136,y+20]],.56,2.3);
+      crease([[x+w-37,y-3],[x+w-63,y+29],[x+w-3,y+33]],.61,2.2);
+      crease([[x+w+5,y+h-37],[x+w-54,y+h-31],[x+w-26,y+h+5]],.57,2.3);
+      crease([[x-5,y+h-37],[x+31,y+h-47],[x+20,y+h-1]],.53,2.0);
+      crease([[x+83,y+5],[x+w-103,y+2]],.43,1.5);
+      // Light refracts along small irregular folds, not an opaque digital outline.
+      ctx.beginPath();
+      ctx.moveTo(x+35,y+47);
+      ctx.bezierCurveTo(x+21,y+92,x+33,y+127,x+20,y+158);
+      ctx.moveTo(x+w-23,y+71);
+      ctx.bezierCurveTo(x+w-40,y+124,x+w-27,y+171,x+w-34,y+197);
+      ctx.moveTo(x+61,y+h-48);
+      ctx.bezierCurveTo(x+133,y+h-57,x+161,y+h-36,x+225,y+h-45);
+      ctx.strokeStyle='rgba(255,255,255,.28)';ctx.lineWidth=1.6;ctx.stroke();
+      ctx.strokeStyle='rgba(135,129,142,.20)';ctx.lineWidth=.9;
+      ctx.beginPath();ctx.moveTo(x+14,y+80);ctx.lineTo(x+39,y+32);
+      ctx.moveTo(x+w-8,y+95);ctx.lineTo(x+w-46,y+42);
+      ctx.moveTo(x+w-72,y+h-15);ctx.lineTo(x+w-38,y+h-39);
+      ctx.stroke();
+      ctx.restore();return;
+    }
     ctx.save();roundedPath(x,y,w,h,30);ctx.fillStyle='rgba(255,255,255,.055)';ctx.fill();ctx.strokeStyle='rgba(255,255,255,.78)';ctx.lineWidth=4;ctx.stroke();
     ctx.globalAlpha=.38;const g=ctx.createLinearGradient(x,y,x+w,y+h);g.addColorStop(0,'rgba(255,255,255,.05)');g.addColorStop(.34,'rgba(255,255,255,.62)');g.addColorStop(.42,'rgba(255,255,255,.08)');g.addColorStop(.72,'rgba(255,255,255,.34)');g.addColorStop(1,'rgba(255,255,255,.03)');ctx.fillStyle=g;roundedPath(x+7,y+7,w-14,h-14,25);ctx.fill();ctx.globalAlpha=.65;ctx.strokeStyle='rgba(209,218,232,.8)';ctx.lineWidth=2;ctx.stroke();
     if(item.style==='opp-flap'){ctx.globalAlpha=.60;ctx.fillStyle='rgba(255,255,255,.24)';ctx.beginPath();ctx.moveTo(x+20,y+18);ctx.lineTo(x+w-20,y+18);ctx.lineTo(x+w-68,y+66);ctx.lineTo(x+68,y+66);ctx.closePath();ctx.fill();ctx.strokeStyle='rgba(255,255,255,.62)';ctx.stroke()}
@@ -240,7 +316,32 @@
     const item=shellItem('seals',shellState.sealId);if(!item||item.style==='none')return;
     const packageOn=shellState.packageId!=='none',cx=packageOn?photoBox.x+photoBox.w/2:photoBox.x+photoBox.w-20,cy=packageOn?Math.max(42,photoBox.y-48):Math.max(44,photoBox.y-26);
     ctx.save();ctx.translate(cx,cy);ctx.shadowColor='rgba(0,0,0,.18)';ctx.shadowBlur=8;ctx.shadowOffsetY=4;
-    if(item.style==='heart'){ctx.fillStyle=item.color;heartPath(74);ctx.fill();ctx.strokeStyle='rgba(255,255,255,.82)';ctx.lineWidth=4;ctx.stroke()}
+    if(item.style==='heart'&&isPinkPhysical()){
+      const resinHeart=(size)=>{
+        ctx.beginPath();ctx.moveTo(0,size*.44);
+        ctx.bezierCurveTo(-size*.17,size*.30,-size*.52,-size*.03,-size*.46,-size*.27);
+        ctx.bezierCurveTo(-size*.40,-size*.53,-size*.12,-size*.53,0,-size*.32);
+        ctx.bezierCurveTo(size*.12,-size*.53,size*.40,-size*.53,size*.46,-size*.27);
+        ctx.bezierCurveTo(size*.52,-size*.03,size*.17,size*.30,0,size*.44);
+        ctx.closePath();
+      };
+      // Translucent resin seal: keep it editable as the physical shell's seal layer.
+      ctx.shadowColor='rgba(121,64,91,.31)';ctx.shadowBlur=12;ctx.shadowOffsetY=5;
+      resinHeart(94);
+      const resin=ctx.createLinearGradient(-28,-35,28,38);
+      resin.addColorStop(0,'rgba(255,251,254,.90)');
+      resin.addColorStop(.28,'rgba(255,208,231,.57)');
+      resin.addColorStop(.58,'rgba(242,128,179,.46)');
+      resin.addColorStop(1,'rgba(155,65,110,.30)');
+      ctx.fillStyle=resin;ctx.fill();
+      ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+      resinHeart(94);ctx.strokeStyle='rgba(241,171,202,.89)';ctx.lineWidth=5.2;ctx.stroke();
+      resinHeart(82);ctx.strokeStyle='rgba(255,255,255,.80)';ctx.lineWidth=2;ctx.stroke();
+      ctx.beginPath();ctx.ellipse(-18,-16,16,5,-.50,0,Math.PI*2);
+      ctx.fillStyle='rgba(255,255,255,.73)';ctx.fill();
+      ctx.beginPath();ctx.ellipse(11,15,13,4,-.55,0,Math.PI*2);
+      ctx.fillStyle='rgba(255,253,255,.32)';ctx.fill();
+    }else if(item.style==='heart'){ctx.fillStyle=item.color;heartPath(74);ctx.fill();ctx.strokeStyle='rgba(255,255,255,.82)';ctx.lineWidth=4;ctx.stroke()}
     else if(item.style==='star'){ctx.fillStyle=item.color;starPath(74);ctx.fill();ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=3;ctx.stroke()}
     else if(item.style==='circle'){ctx.globalAlpha=.38;ctx.fillStyle=item.color;ctx.beginPath();ctx.arc(0,0,24,0,Math.PI*2);ctx.fill();ctx.globalAlpha=.58;ctx.strokeStyle='rgba(255,255,255,.72)';ctx.lineWidth=2;ctx.stroke()}
     else if(item.style==='label'){ctx.fillStyle='#fffaf1';roundedPath(-62,-25,124,50,9);ctx.fill();ctx.strokeStyle='#d9c9bf';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#5f4a55';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='700 18px "Segoe Print","Bradley Hand",cursive';ctx.fillText(item.text||'For you ♡',0,1)}
@@ -272,7 +373,7 @@
     for(let i=0;i<26;i++){const px=x+stageNoise(seed*71+i*4.7)*w,py=y+stageNoise(seed*83+i*6.1)*h,r=.45+stageNoise(seed*97+i)*1.45;ctx.beginPath();ctx.arc(px,py,r,0,Math.PI*2);ctx.fill()}
     ctx.restore();ctx.globalAlpha=1;ctx.restore();
   }
-  function drawFrame(t){const physicalPink=theme==='pink'&&shellState.frameId==='none'&&shellState.loaderId==='clear';ctx.save();ctx.shadowColor='rgba(0,0,0,.20)';ctx.shadowBlur=28;ctx.shadowOffsetY=18;roundedPath(photoBox.x-24,photoBox.y-24,photoBox.w+48,photoBox.h+48,46);ctx.fillStyle=t.paper;ctx.fill();ctx.restore();ctx.save();roundedPath(photoBox.x,photoBox.y,photoBox.w,photoBox.h,photoBox.r);ctx.clip();if(photo)drawPhoto(photo,photoBox.x,photoBox.y,photoBox.w,photoBox.h);else{ctx.fillStyle=theme==='midnight'?'#313044':'#f4f1f7';ctx.fillRect(photoBox.x,photoBox.y,photoBox.w,photoBox.h);ctx.fillStyle=theme==='midnight'?'#aba5c6':'#90899b';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='700 28px system-ui,sans-serif';ctx.fillText('최애 사진을 올려주세요 ♡',W/2,H/2-8);ctx.font='500 17px system-ui,sans-serif';ctx.fillText('사진은 이 브라우저 밖으로 나가지 않아요',W/2,H/2+34)}ctx.restore();ctx.save();roundedPath(photoBox.x-11,photoBox.y-11,photoBox.w+22,photoBox.h+22,38);ctx.strokeStyle=physicalPink?'rgba(255,252,253,.78)':t.frame;ctx.lineWidth=physicalPink?5:12;ctx.stroke();if(physicalPink){roundedPath(photoBox.x-7,photoBox.y-7,photoBox.w+14,photoBox.h+14,35);ctx.strokeStyle='rgba(211,126,161,.20)';ctx.lineWidth=1.5;ctx.stroke()}ctx.restore()}
+  function drawFrame(t){const physicalPink=isPinkPhysical()&&shellState.frameId==='none'&&shellState.loaderId==='clear';if(physicalPink&&photo){ctx.save();ctx.shadowColor='rgba(53,38,47,.27)';ctx.shadowBlur=18;ctx.shadowOffsetY=9;roundedPath(photoBox.x,photoBox.y,photoBox.w,photoBox.h,photoBox.r);ctx.fillStyle='#fffaf9';ctx.fill();ctx.restore()}if(!physicalPink){ctx.save();ctx.shadowColor='rgba(0,0,0,.20)';ctx.shadowBlur=28;ctx.shadowOffsetY=18;roundedPath(photoBox.x-24,photoBox.y-24,photoBox.w+48,photoBox.h+48,46);ctx.fillStyle=t.paper;ctx.fill();ctx.restore()}ctx.save();roundedPath(photoBox.x,photoBox.y,photoBox.w,photoBox.h,photoBox.r);ctx.clip();if(photo&&!isPinkCornerDemo())drawPhoto(photo,photoBox.x,photoBox.y,photoBox.w,photoBox.h);else{ctx.fillStyle=isPinkCornerDemo()?'#fffdfb':theme==='midnight'?'#313044':'#f4f1f7';ctx.fillRect(photoBox.x,photoBox.y,photoBox.w,photoBox.h);ctx.fillStyle=theme==='midnight'?'#aba5c6':'#90899b';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='700 28px system-ui,sans-serif';if(!isPinkCornerDemo()){ctx.fillText('최애 사진을 올려주세요 ♡',W/2,H/2-8);ctx.font='500 17px system-ui,sans-serif';ctx.fillText('사진은 이 브라우저 밖으로 나가지 않아요',W/2,H/2+34)}}ctx.restore();if(!physicalPink){ctx.save();roundedPath(photoBox.x-11,photoBox.y-11,photoBox.w+22,photoBox.h+22,38);ctx.strokeStyle=t.frame;ctx.lineWidth=12;ctx.stroke();ctx.restore()}}
   function drawStaticCover(img,x,y,w,h){if(!img?.naturalWidth||!img?.naturalHeight)return;const scale=Math.max(w/img.naturalWidth,h/img.naturalHeight),dw=img.naturalWidth*scale,dh=img.naturalHeight*scale;ctx.drawImage(img,x+(w-dw)/2,y+(h-dh)/2,dw,dh)}
   function drawStaticCoverFocus(img,x,y,w,h,focusX=.5,focusY=.5,zoom=1){
     if(!img?.naturalWidth||!img?.naturalHeight)return;
@@ -364,7 +465,7 @@
     if(item.asset){
       const img=assetImages.get(item.asset);
       if(img?.complete&&img.naturalWidth){
-        const scale=Number(item.assetScale||1),ratio=img.naturalHeight/img.naturalWidth;
+        const scale=Number(item.assetScale||1),ratio=Array.isArray(item.atlasRect)?item.atlasRect[3]/item.atlasRect[2]:img.naturalHeight/img.naturalWidth;
         let w=s*scale,h=w*ratio;
         const maxH=s*1.65;if(h>maxH){const k=maxH/h;h*=k;w*=k}
         ctx.save();
@@ -375,7 +476,24 @@
           ctx.shadowColor=item.motion==='sparkle'?'rgba(255,185,230,.65)':'rgba(220,210,255,.45)';
           ctx.shadowBlur=8;
         }
-        ctx.drawImage(img,-w/2,-h/2,w,h);
+        // Each physically layered textile/metal part casts its own shadow.
+        // Preserve the independent sticker transform and export pipeline.
+        if(isPinkPhysical()&&String(e.preset||'')==='pink-lace'){
+          const physicalMaterial={
+            'pink-couture-frame-cluster':[4,2,.21],
+            'satin-bow-pearl-pink':[15,9,.36],
+            'rose-pearl-corner-pink':[15,9,.34],
+            'pink-film-butterfly-corner':[11,7,.29]
+          }[item.id];
+          if(physicalMaterial){
+            ctx.shadowColor='rgba(62,34,49,'+physicalMaterial[2]+')';
+            ctx.shadowBlur=physicalMaterial[0];
+            ctx.shadowOffsetX=2;
+            ctx.shadowOffsetY=physicalMaterial[1];
+          }
+        }
+        if(Array.isArray(item.atlasRect)){const [sx,sy,sw,sh]=item.atlasRect;ctx.drawImage(img,sx,sy,sw,sh,-w/2,-h/2,w,h)}
+        else ctx.drawImage(img,-w/2,-h/2,w,h);
         ctx.restore();
         return;
       }
@@ -384,6 +502,23 @@
     if(item.kind==='emoji'){ctx.font=`${s}px "Apple Color Emoji","Segoe UI Emoji",sans-serif`;ctx.fillText(item.value,0,0);return}
     if(item.kind==='tape'){const w=s*1.65,h=s*.48;ctx.globalAlpha=.88;const fill=item.variant==='pink'?'#ffb7d5':item.variant==='lilac'?'#d9c5ff':item.variant==='blue'?'#4f78b5':item.variant==='black'?'#161a22':item.variant==='beige'?'#d9c5a5':null;ctx.fillStyle=fill||gradient([[0,'#ffc1df'],[.2,'#bfe8ff'],[.45,'#d7c3ff'],[.7,'#fff0ae'],[1,'#ffc7ec']],-w/2,0,w/2,0);ctx.fillRect(-w/2,-h/2,w,h);ctx.globalAlpha=item.variant==='black'?.18:.34;ctx.strokeStyle='#fff';ctx.lineWidth=3;for(let x=-w/2;x<w/2;x+=18){ctx.beginPath();ctx.moveTo(x,-h/2);ctx.lineTo(x+18,h/2);ctx.stroke()}ctx.globalAlpha=1;return}
     if(item.kind==='paper'){const date=item.variant==='date',w=s*(date?1.9:1.5),h=s*(date?0.48:1.05);ctx.shadowColor='rgba(50,35,65,.18)';ctx.shadowBlur=8;ctx.fillStyle=item.variant==='ticket'?'#fff0d7':date?'#e5ecfb':'#fffaf0';roundedPath(-w/2,-h/2,w,h,date?3:8);ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle='rgba(99,75,120,.22)';ctx.lineWidth=2;ctx.stroke();if(item.variant==='ticket'){ctx.setLineDash([6,5]);ctx.beginPath();ctx.moveTo(-w*.28,-h*.35);ctx.lineTo(-w*.28,h*.35);ctx.stroke();ctx.setLineDash([])}if(date){ctx.fillStyle='#304b78';ctx.font=`700 ${Math.max(10,s*.16)}px ui-monospace,monospace`;ctx.fillText(String(e.value||'DATE').slice(0,24),0,0)}return}
+    if(item.kind==='label'&&String(e.preset||'')==='pink-lace'){
+      // Both labels are real editable engine objects, styled like paper tags, not a baked overlay.
+      const artist=item.variant==='artist';
+      const w=s*(artist ? 2.25 : 2.13),h=s*(artist ? .68 : .50);
+      ctx.save();
+      ctx.rotate(-.008);
+      tornPaperPath(-w/2,-h/2,w,h,artist?311:319,13,artist?5:3);
+      ctx.shadowColor='rgba(75,43,57,.22)';ctx.shadowBlur=5;ctx.shadowOffsetY=3;
+      ctx.fillStyle=artist?'#e9d4cc':'#e5b9ba';ctx.fill();ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+      ctx.lineWidth=1;ctx.strokeStyle=artist?'rgba(123,88,91,.44)':'rgba(139,79,99,.38)';ctx.stroke();
+      ctx.beginPath();ctx.moveTo(-w*.38,-h*.31);ctx.lineTo(w*.37,-h*.31);
+      ctx.strokeStyle='rgba(255,253,248,.62)';ctx.stroke();
+      ctx.fillStyle=artist?'#74575b':'#805666';
+      ctx.font=artist?`500 ${Math.max(16,s*.29)}px Georgia,"Times New Roman",serif`:`500 ${Math.max(12,s*.26)}px Georgia,"Times New Roman",serif`;
+      ctx.fillText(String(e.value||'').slice(0,24),0,artist?1:0);
+      ctx.restore();return;
+    }
     if(item.kind==='label'){
       const artist=item.variant==='artist',w=s*(artist?2.35:2.05),h=s*.72,preset=String(e.preset||''),midnight=preset==='midnight-rose',blue=preset==='blue-jewel';
       const paper=midnight?(artist?'#171820':'#202635'):blue?(artist?'#f3faff':'#e5f2ff'):(artist?'#f7f3e9':'#edf3fc');
@@ -402,7 +537,40 @@
   }
   function drawElement(e,i,t,now){ctx.save();ctx.translate(e.x,e.y);ctx.rotate(e.rotation);ctx.textAlign='center';ctx.textBaseline='middle';if(e.type==='sticker'){const item=itemById(e.stickerId);if(item)drawMaterial(e,item,now)}else if(e.type==='scene-filmstrip')drawFilmStrip(e);else if(e.type==='scene-polaroid')drawPolaroid(e);else if(e.type==='scene-crop')drawSceneCrop(e);else if(e.type==='scene-scrap-note')drawScrapNote(e);else if(e.type==='scene-ticket')drawSceneTicket(e);else if(e.type==='scene-paper-scrap')drawScenePaperScrap(e);else if(e.type==='scene-tape')drawSceneTape(e);else if(e.type==='scene-chrome')drawSceneChrome(e);else if(e.type==='scene-clip')drawSceneClip(e);else if(e.textStyle==='date-label'){const label=String(e.value||'').slice(0,24),w=Math.max(150,label.length*12+34),h=40;ctx.shadowColor='rgba(37,54,84,.16)';ctx.shadowBlur=7;ctx.fillStyle='#edf3fc';roundedPath(-w/2,-h/2,w,h,4);ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle='rgba(62,86,126,.18)';ctx.lineWidth=1.5;ctx.stroke();ctx.fillStyle='#304b78';ctx.font=`700 ${Math.max(13,e.size)}px ui-monospace,monospace`;ctx.fillText(label,0,1)}else{ctx.font=e.textStyle==='handwritten'?`600 ${e.size}px "Segoe Print","Bradley Hand","Comic Sans MS",cursive`:`800 ${e.size}px system-ui,-apple-system,"Segoe UI",sans-serif`;if(theme==='stageblue'&&e.textStyle==='handwritten'){ctx.fillStyle='#173d80';const lines=String(e.value||'').split('\\n');const step=Math.max(18,e.size*1.05);lines.forEach((line,idx)=>ctx.fillText(line,0,(idx-(lines.length-1)/2)*step))}else{ctx.lineWidth=Math.max(3,e.size*(e.textStyle==='handwritten'?0.10:0.16));ctx.strokeStyle=theme==='midnight'?'#171724':'#fffdf8';ctx.strokeText(e.value,0,0);ctx.fillStyle=t.ink;ctx.fillText(e.value,0,0)}}if(i===selected){const r=elementRadius(e);ctx.strokeStyle='#7ff6c2';ctx.lineWidth=3;ctx.setLineDash([9,7]);ctx.strokeRect(-r,-r*.58,r*2,r*1.16);ctx.setLineDash([])}ctx.restore()}
   function statusText(){if(selected>=0)return`선택됨 · ${elements.length}/${limits.totalObjects}개 · 드래그해서 옮겨요`;if(photo&&sourceMeta?.source==='watch'){const who=sourceMeta.artist?`${sourceMeta.artist} · `:'';const when=Number.isFinite(Number(sourceMeta.time))?`${timeLabel(sourceMeta.time)} 장면`:'영상 장면';return`${who}${when}을 가져왔어요 ✨`}if(photo)return`꾸미는 중 · ${elements.length}/${limits.totalObjects}개`;return'사진을 먼저 골라주세요'}
-  function draw(now=performance.now()){const t=themes[theme];ctx.clearRect(0,0,W,H);drawBackdrop(t);drawBackingLayer();drawLoaderBase();drawFrame(t);drawDecorativeFrame();elements.forEach((e,i)=>drawElement(e,i,t,now));drawPackageOverlay();drawSealOverlay();$('#selectionState').textContent=statusText()}
+  function drawPinkPhysicalSurface(){
+    if(!isPinkPhysical()||shellState.loaderId!=='clear')return;
+    const x=photoBox.x-34,y=photoBox.y-48,w=photoBox.w+68,h=photoBox.h+96;
+    ctx.save();
+    roundedPath(x+5,y+5,w-10,h-10,22);
+    ctx.clip();
+    // Very weak transmitted reflections across the artwork, not a white photograph overlay.
+    const sheet=ctx.createLinearGradient(x+30,y+20,x+w-20,y+h);
+    sheet.addColorStop(0,'rgba(255,255,255,0)');
+    sheet.addColorStop(.12,'rgba(255,255,255,.018)');
+    sheet.addColorStop(.18,'rgba(255,255,255,.084)');
+    sheet.addColorStop(.245,'rgba(255,255,255,.012)');
+    sheet.addColorStop(.43,'rgba(255,255,255,0)');
+    sheet.addColorStop(.73,'rgba(255,246,251,.043)');
+    sheet.addColorStop(.79,'rgba(255,255,255,.012)');
+    sheet.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.fillStyle=sheet;ctx.fillRect(x,y,w,h);
+    ctx.beginPath();
+    ctx.moveTo(x+20,y+60);
+    ctx.bezierCurveTo(x+67,y+41,x+86,y+42,x+125,y+39);
+    ctx.moveTo(x+w-17,y+95);
+    ctx.bezierCurveTo(x+w-37,y+175,x+w-22,y+265,x+w-36,y+327);
+    ctx.strokeStyle='rgba(255,255,255,.19)';ctx.lineWidth=2.1;ctx.stroke();
+    ctx.restore();
+    // Specular seams at two corners make the clear acrylic thickness legible.
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(x+13,y+56);ctx.quadraticCurveTo(x+12,y+13,x+58,y+11);
+    ctx.moveTo(x+w-51,y+h-12);
+    ctx.quadraticCurveTo(x+w-10,y+h-13,x+w-11,y+h-64);
+    ctx.strokeStyle='rgba(255,255,255,.50)';ctx.lineWidth=2.2;ctx.stroke();
+    ctx.restore();
+  }
+  function draw(now=performance.now()){const t=themes[theme];ctx.clearRect(0,0,W,H);drawBackdrop(t);drawBackingLayer();drawLoaderBase();drawFrame(t);drawDecorativeFrame();elements.forEach((e,i)=>drawElement(e,i,t,now));drawPinkPhysicalSurface();drawPackageOverlay();drawSealOverlay();$('#selectionState').textContent=statusText()}
   function animationLoop(now){if(!reducedMotion&&document.visibilityState==='visible'&&elements.some(e=>e.type==='sticker'&&itemById(e.stickerId)?.motion))draw(now);requestAnimationFrame(animationLoop)}
   function canvasPoint(ev){const r=canvas.getBoundingClientRect();return{x:(ev.clientX-r.left)*W/r.width,y:(ev.clientY-r.top)*H/r.height}}
   function hitTest(p){for(let i=elements.length-1;i>=0;i--){const e=elements[i],r=elementRadius(e);if(Math.hypot(p.x-e.x,p.y-e.y)<=r*1.05)return i}return-1}
@@ -422,13 +590,17 @@
   function leafMark(profile){const g=profile?.growth||{},phase=Math.max(1,Math.min(5,Number(g.leafPhase||1)));return `<span class="growth-leaf-mark band-${Number(g.bandIndex||1)}" aria-label="${esc(g.title||'성장 중')}">${[1,2,3,4,5].map(i=>`<i class="${i<=phase?'grown':''}">❧</i>`).join('')}</span>`}
   function previewGlyph(item){if(item.kind==='emoji')return item.value;return{tape:'▰',paper:'▤',scrap:'▱',framepiece:'▣',label:'TAG',metal:'⌇',doodle:'☺',pearl:'○',gem:'◆',chrome:item.variant==='heart'?'♡':'★',jelly:'♥',lace:'⌜',acrylic:'◉',frame:'▣',sparkle:'✦'}[item.kind]||'✦'}
   function renderStickerProfile(){const root=$('#stickerProfile');if(!root)return;const identity=window.NUGU_AUTH?.getIdentitySync?.();if(!identity?.authenticated){root.innerHTML='<b>기본 꾸미기는 바로 가능 ♡</b><span>로그인하면 놀았던 방식대로 잎과 덕질 결이 자라요.</span>';return}const p=styleState?.profile;if(!p){root.innerHTML='<b>꾸미기 서랍 불러오는 중…</b><span>지금까지의 덕질 기록을 살펴보고 있어요.</span>';return}const trait=p.traits?.primary?.label||'둘러보는 중',secondary=(p.traits?.secondary||[]).map(x=>x.label).join(' · ');root.innerHTML=`<div class="growth-profile-line">${leafMark(p)}<div><b>${esc(p.growth?.title||'반가운 새잎')} · ${esc(trait)}</b><span>${secondary?esc(secondary)+' · ':''}사용 가능한 활동포인트 ${Number(p.points?.balance||0)}P</span></div></div>`}
-  function renderStickerGrid(){const root=$('#stickerGrid');if(!root)return;const rows=catalog.items.filter(item=>{const a=accessFor(item);return a.visible&&(activeStickerPack==='all'||item.pack===activeStickerPack)});root.innerHTML=rows.length?rows.map(item=>{const a=accessFor(item),motion=item.motion&&!reducedMotion,visual=item.asset?`<img src="${esc(item.asset)}" alt="" loading="lazy" draggable="false">`:esc(previewGlyph(item));return `<button type="button" class="material-sticker ${a.unlocked?'':'locked'} ${a.gifted?'gifted-item':''} ${motion?'motion-item':''}" data-sticker-id="${esc(item.id)}" title="${esc(item.label)}"><span class="sticker-swatch kind-${esc(item.kind)} variant-${esc(item.variant||'base')} ${item.asset?'has-asset':''}">${visual}</span><b>${esc(item.label)}</b><small>${a.unlocked?(a.gifted?'🎁 선물받음':motion?'LIVE ✦':'사용 가능'):`🔒 ${esc(a.label)}`}</small></button>`}).join(''):'<div class="sticker-empty-band">지금 이 서랍에서 꺼낼 수 있는 꾸미기는 여기까지예요. ♡</div>';root.querySelectorAll('[data-sticker-id]').forEach(b=>b.onclick=()=>handleStickerClick(b.dataset.stickerId))}
+  function renderStickerGrid(){const root=$('#stickerGrid');if(!root)return;const rows=catalog.items.filter(item=>{const a=accessFor(item);return a.visible&&(activeStickerPack==='all'||item.pack===activeStickerPack)});root.innerHTML=rows.length?rows.map(item=>{const a=accessFor(item),motion=item.motion&&!reducedMotion,visual=Array.isArray(item.atlasRect)?(()=>{
+ const [sx,sy,sw,sh]=item.atlasRect,z=Math.min(62/sw,62/sh);
+ const offsetX=32-(sx+sw/2)*z,offsetY=32-(sy+sh/2)*z;
+ return `<span aria-hidden="true" style="display:block;width:64px;height:64px;background-image:url('${esc(item.asset)}');background-repeat:no-repeat;background-size:${(910*z).toFixed(2)}px ${(600*z).toFixed(2)}px;background-position:${offsetX.toFixed(2)}px ${offsetY.toFixed(2)}px"></span>`;
+})():item.asset?`<img src="${esc(item.asset)}" alt="" loading="lazy" draggable="false">`:esc(previewGlyph(item));return `<button type="button" class="material-sticker ${a.unlocked?'':'locked'} ${a.gifted?'gifted-item':''} ${motion?'motion-item':''}" data-sticker-id="${esc(item.id)}" title="${esc(item.label)}"><span class="sticker-swatch kind-${esc(item.kind)} variant-${esc(item.variant||'base')} ${item.asset?'has-asset':''}">${visual}</span><b>${esc(item.label)}</b><small>${a.unlocked?(a.gifted?'🎁 선물받음':motion?'LIVE ✦':'사용 가능'):`🔒 ${esc(a.label)}`}</small></button>`}).join(''):'<div class="sticker-empty-band">지금 이 서랍에서 꺼낼 수 있는 꾸미기는 여기까지예요. ♡</div>';root.querySelectorAll('[data-sticker-id]').forEach(b=>b.onclick=()=>handleStickerClick(b.dataset.stickerId))}
   async function signedIdentity(message='이 기능은 로그인 후 사용할 수 있어요.'){let identity=null;try{identity=await window.NUGU_AUTH?.getIdentity?.()}catch{}if(identity?.authenticated&&identity.accessToken)return identity;const state=$('#webSaveState');if(state)state.textContent=message;window.NUGU_AUTH_UI?.signIn?.(location.href);return null}
   async function unlockSticker(item){const identity=await signedIdentity('희귀 스티커는 로그인 후 영구 해금할 수 있어요.');if(!identity)return;const balance=Number(styleState?.profile?.points?.balance||0);if(balance<Number(item.unlockCost||0)){guide(`${item.label}은 ${item.unlockCost}P가 필요해요. 지금은 ${balance}P 있어요.`);return}guide(`${item.label} 영구 해금 중…`);try{const r=await fetch(`${apiBase()}/api/v1/community/style/unlock/${encodeURIComponent(item.id)}`,{method:'POST',headers:{Accept:'application/json','Content-Type':'application/json',...(window.NUGU_AUTH?.authHeaders?.(identity)||{})},body:JSON.stringify({visitorId:identity.visitorId})});const data=await r.json().catch(()=>({}));if(!r.ok)throw Object.assign(new Error(data.error||'unlock_failed'),{code:data.error});styleState={profile:data.profile,items:data.items};renderStickerProfile();renderStickerGrid();emitStyleState();guide(`${item.label} 영구 해금 완료 ♡ 이제 횟수 차감 없이 계속 쓸 수 있어요.`)}catch(e){guide(e.code==='insufficient_style_points'?'포인트가 조금 부족해요. 덕질하다 보면 자연스럽게 쌓여요.':'지금은 해금하지 못했어요.')}}
   async function handleStickerClick(id){const item=itemById(id);if(!item)return;const access=accessFor(item);if(!access.unlocked){if(item.access==='points'){await unlockSticker(item);return}const identity=window.NUGU_AUTH?.getIdentitySync?.();if(!identity?.authenticated){await signedIdentity('꾸미기 서랍은 로그인 후 덕질 기록과 연결돼요.');return}guide('조금 더 놀다 보면 다음 꾸미기 서랍이 편지와 함께 열려요. ♡');return}if(item.asset){try{await ensureAsset(item)}catch{guide(`${item.label} 벡터 장식을 불러오지 못했어요. 다시 눌러줘.`);return}}addStickerItem(item)}
   async function loadStyleState(){const sync=window.NUGU_AUTH?.getIdentitySync?.();if(!sync?.authenticated){styleState=null;renderStickerProfile();renderStickerGrid();emitStyleState();return}try{const identity=await window.NUGU_AUTH.getIdentity();if(!identity?.authenticated)return;const r=await fetch(`${apiBase()}/api/v1/community/style/me?visitorId=${encodeURIComponent(identity.visitorId)}`,{headers:{Accept:'application/json',...(window.NUGU_AUTH?.authHeaders?.(identity)||{})},cache:'no-store'});const data=await r.json();if(!r.ok)throw new Error(data.error||'style_failed');styleState=data}catch(e){console.warn('style state',e);styleState=null}renderStickerProfile();renderStickerGrid();emitStyleState()}
   function renderSceneCutAvailability(){for(const id of ['buildBlueStage','buildPinkLace','buildMidnightRose','buildBlueJewel']){const b=$('#'+id);if(b){b.disabled=!photo;b.title=photo?'베이스이미지 1장 위에 등록된 실제 파츠만 배치합니다.':'베이스이미지를 먼저 골라주세요.'}}}
-  const STYLE_PRESET_TAGS=new Set(['blue-stage','pink-lace','midnight-rose','blue-jewel']);
+  const STYLE_PRESET_TAGS=new Set(['blue-stage','pink-lace','midnight-rose','blue-jewel','pink-corner']);
   const retainUserElements=()=>elements.filter(e=>!STYLE_PRESET_TAGS.has(e.preset));
   function presetSticker(id,fallbackId,props={}){
     const candidates=[id,fallbackId].filter(Boolean);
@@ -479,32 +651,50 @@
     guide('베이스이미지 1장 + 실제 꾸미기스티커만으로 스크랩북 시안을 배치했어 ♡');
     draw();
   }
+  function buildPinkCornerTopkku(){
+    // 13 physically independent sticker objects, not one precomposed image.
+    const P=(id,props)=>presetSticker(id,null,{...props,preset:'pink-corner'});
+    const additions=[
+      P('corner-flower-cluster',{x:548,y:874,size:276,rotation:-0.174533}),
+      P('corner-flower-coral',{x:486,y:693,size:141,rotation:-0.244346}),
+      P('corner-bow-pink',{x:563,y:649,size:128,rotation:0.226893}),
+      P('corner-heart-pink',{x:590,y:749,size:105,rotation:0.104720}),
+      P('corner-heart-berry',{x:595,y:817,size:64,rotation:-0.296706}),
+      P('corner-leaf-lime',{x:454,y:932,size:49,rotation:0.296706}),
+      P('corner-sparkle-gold',{x:438,y:789,size:43,rotation:0.209440}),
+      P('corner-star-blue',{x:459,y:833,size:33,rotation:-0.209440}),
+      P('corner-heart-lime',{x:469,y:875,size:28,rotation:0.279253}),
+      P('corner-bead-lilac',{x:424,y:849,size:20,rotation:0.000000}),
+      P('corner-bead-blue',{x:430,y:900,size:23,rotation:0.000000}),
+      P('corner-bead-pink',{x:447,y:966,size:23,rotation:0.000000}),
+      P('corner-heart-purple',{x:469,y:1005,size:27,rotation:0.122173})
+    ].filter(Boolean);
+    if(additions.length!==13){guide('스티커 리소스를 모두 불러오지 못했어요.');return}
+    const retained=retainUserElements();if(retained.length+additions.length>limits.totalObjects){guide('스티커 수량 한도 초과');return}
+    saveHistory();elements=[...retained,...additions];selected=-1;theme='pink';
+    shellState={loaderId:'clear',frameId:'none',backingId:'cream',packageId:'none',sealId:'none'};
+    renderShellControls();$$('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme==='pink'));
+    guide('Pink Corner · 13개 스티커를 독립 배치했습니다.');draw();
+  }
   async function buildPinkLaceTopkku(){
     if(!photo){guide('베이스이미지를 먼저 골라줘 ♡');return}
     const artistLabel=String(selectedArtist?.name||sourceMeta?.artist||'MY PICK').trim().slice(0,18)||'MY PICK';
     const P=(id,fallback,props={})=>presetSticker(id,fallback,{...props,preset:'pink-lace'});
     const additions=[
-      // Couture base: lace first, then pearl/film, then the two hero clusters.
-      // Every item is a registered engine part; no precomposed master overlay is used.
-      P('lace-strip-white',null,{x:360,y:144,size:430,rotation:.004}),
-      P('lace-strip-white',null,{x:106,y:510,size:410,rotation:Math.PI/2}),
-      P('lace-strip-white',null,{x:620,y:430,size:330,rotation:-Math.PI/2}),
-      P('lace-strip-white',null,{x:360,y:902,size:430,rotation:-.010}),
-      P('pearl-garland','crystal-heart-chain-pink',{x:412,y:132,size:344,rotation:.016}),
-      P('pearl-garland','crystal-heart-chain-pink',{x:400,y:820,size:430,rotation:-.050}),
-      P('crystal-heart-chain-pink','pearl-garland',{x:592,y:350,size:318,rotation:1.40}),
-      P('pink-film-butterfly-corner','film-frame-empty',{x:574,y:630,size:372,rotation:.018}),
-      P('rose-pearl-corner-pink','rose-vine-pink',{x:158,y:830,size:424,rotation:-.082}),
-      P('satin-bow-pearl-pink','big-ribbon-pink',{x:118,y:158,size:326,rotation:-.074}),
-      P('captured-date-tag','date-strip',{x:510,y:940,size:50,rotation:.012,value:capturedDateLabel()})
+      P('pink-couture-frame-cluster',null,{x:360,y:522,size:590,rotation:0}),
+      P('pink-film-butterfly-corner','film-frame-empty',{x:560,y:570,size:214,rotation:.010}),
+      P('rose-pearl-corner-pink','rose-vine-pink',{x:180,y:816,size:214,rotation:-.055}),
+      P('satin-bow-pearl-pink','big-ribbon-pink',{x:168,y:174,size:208,rotation:-.055}),
+      P('artist-tag','note-paper',{x:360,y:858,size:82,rotation:-.045,value:artistLabel.toUpperCase()}),
+      P('captured-date-tag','date-strip',{x:468,y:925,size:52,rotation:.014,value:capturedDateLabel()})
     ].filter(Boolean);
     const retained=retainUserElements();
     if(retained.length+additions.length>limits.totalObjects){guide('현재 붙어 있는 꾸미기가 많아서 핑크 레이스 시안을 더 붙일 수 없어요.');return}
     saveHistory();
-    shellState={loaderId:'clear',frameId:'none',backingId:'cream',packageId:'opp-flap',sealId:'none'};
+    shellState={loaderId:'clear',frameId:'none',backingId:'pink',packageId:'opp-flap',sealId:'heart'};
     elements=[...retained,...additions];theme='pink';selected=-1;
     renderShellControls();$$('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme==='pink'));
-    guide('Pink Lace v16 · 대형 새틴 리본 + 상단 진주 드레이프 + 연결 레이스 + 로즈/필름 나비 군집 ♡');
+    guide('Pink Lace v34 · 투명 아크릴 표면·코너 반사 보정 ♡');
     draw();
   }
   async function buildMidnightRoseTopkku(){
@@ -566,9 +756,9 @@
   $$('#stickerPackTabs [data-sticker-pack]').forEach(b=>b.addEventListener('click',()=>{activeStickerPack=b.dataset.stickerPack;$$('#stickerPackTabs [data-sticker-pack]').forEach(x=>x.classList.toggle('active',x===b));renderStickerGrid()}));
   $('#addText').addEventListener('click',()=>addText($('#textInput').value));$('#textInput').addEventListener('keydown',e=>{if(e.key==='Enter')addText(e.currentTarget.value)});
   $$('.quick-copy [data-copy]').forEach(b=>b.addEventListener('click',()=>addText(b.dataset.copy,b.dataset.textStyle||'default')));
-  $('#buildBlueStage')?.addEventListener('click',()=>buildBlueStageReconstruction());$('#buildPinkLace')?.addEventListener('click',()=>buildPinkLaceTopkku());$('#buildMidnightRose')?.addEventListener('click',()=>buildMidnightRoseTopkku());$('#buildBlueJewel')?.addEventListener('click',()=>buildBlueJewelTopkku());
+  $('#buildBlueStage')?.addEventListener('click',()=>buildBlueStageReconstruction());$('#buildPinkLace')?.addEventListener('click',()=>buildPinkLaceTopkku());$('#buildPinkCorner')?.addEventListener('click',()=>buildPinkCornerTopkku());$('#buildMidnightRose')?.addEventListener('click',()=>buildMidnightRoseTopkku());$('#buildBlueJewel')?.addEventListener('click',()=>buildBlueJewelTopkku());
   function editSelected(fn){if(selected<0)return;saveHistory();fn(elements[selected]);draw()}
-  const maxElementSize=e=>e?.type==='sticker'&&itemById(e.stickerId)?.kind==='signature'?420:180;
+  const maxElementSize=e=>e?.type==='sticker'&&['signature','sprite'].includes(itemById(e.stickerId)?.kind)?420:180;
   $('#smaller').onclick=()=>editSelected(e=>e.size=clamp(e.size*.88,18,maxElementSize(e)));$('#bigger').onclick=()=>editSelected(e=>e.size=clamp(e.size*1.12,18,maxElementSize(e)));$('#rotateLeft').onclick=()=>editSelected(e=>e.rotation-=Math.PI/18);$('#rotateRight').onclick=()=>editSelected(e=>e.rotation+=Math.PI/18);$('#deleteElement').onclick=()=>{if(selected<0)return;saveHistory();elements.splice(selected,1);selected=-1;draw()};
   $('#undoBtn').onclick=()=>restore(history.pop());
   $('#resetBtn').onclick=()=>{if(!photo&&!elements.length&&theme==='lavender'&&JSON.stringify(shellState)===JSON.stringify(shellCatalog.defaults))return;saveHistory();photo=null;photoView=defaultPhotoView();sourceMeta=null;resetPhotoBox();compositionEventKey='';elements=[];selected=-1;theme='lavender';shellState={...shellCatalog.defaults};currentSavedId=null;currentSavedPublished=false;lastSavedEventKey='';setArtist(null);renderSceneCutAvailability();renderShellControls();$$('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme==='lavender'));$('#photoInput').value='';draw();renderSaveState()};
@@ -643,5 +833,5 @@
   };
   window.__NUGU_TOPKKU_FRAME_STATE__=()=>({photoBox:{...photoBox},source:sourceMeta?.source||'',sourceSize:photo?{width:photo.naturalWidth,height:photo.naturalHeight}:null,zoom:photoView.zoom,shell:{...shellState},elementCount:elements.length,presetTags:[...new Set(elements.map(e=>e.preset).filter(Boolean))]});
   window.addEventListener('nugu-auth-changed',()=>{loadStyleState();loadVault()});
-  window.NUGU_TOPKKU_LOAD_VAULT=loadVault;window.NUGU_TOPKKU_LOAD_STYLE=loadStyleState;window.NUGU_TOPKKU_API_BASE=apiBase;$('#versionLabel').textContent=(window.NUGU_CONFIG||{}).build||'Updated 2026.09.12';preloadStickerAssets();setArtist(null);loadReferenceSource();renderStickerProfile();renderStickerGrid();renderShellControls();renderSaveState();renderSceneCutAvailability();draw();requestAnimationFrame(animationLoop);const incoming=loadIncoming();if(!incoming)loadArtistFromQuery();loadStyleState();loadVault();
+  window.NUGU_TOPKKU_LOAD_VAULT=loadVault;window.NUGU_TOPKKU_LOAD_STYLE=loadStyleState;window.NUGU_TOPKKU_API_BASE=apiBase;$('#versionLabel').textContent=(window.NUGU_CONFIG||{}).build||'Updated 2026.09.12';preloadStickerAssets();setArtist(null);loadReferenceSource();renderStickerProfile();renderStickerGrid();renderShellControls();renderSaveState();renderSceneCutAvailability();draw();if(new URLSearchParams(location.search).get('preset')==='pink-corner')buildPinkCornerTopkku();requestAnimationFrame(animationLoop);const incoming=loadIncoming();if(!incoming)loadArtistFromQuery();loadStyleState();loadVault();
 })();

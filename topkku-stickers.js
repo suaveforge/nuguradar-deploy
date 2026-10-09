@@ -22,7 +22,7 @@
     {id:'paper-scrap-white',label:'화이트 찢어진 종이',pack:'스크랩북',access:'free',minBand:1,kind:'scrap',asset:'assets/topkku/torn-paper-white.svg',assetScale:1.65,defaultSize:100},
     {id:'paper-scrap-blue',label:'블루 찢어진 종이',pack:'스크랩북',access:'free',minBand:1,kind:'scrap',asset:'assets/topkku/torn-paper-blue.svg',assetScale:1.65,defaultSize:100},
     {id:'film-frame-empty',label:'빈 필름 프레임',pack:'스크랩북',access:'free',minBand:1,kind:'framepiece',asset:'assets/topkku/film-frame-empty.svg',assetScale:1.28,defaultSize:92},
-    {id:'pink-film-butterfly-corner',label:'핑크 필름 나비 주얼 코너',pack:'찐 탑꾸',access:'free',minBand:1,kind:'signature',asset:'assets/topkku/pink-film-butterfly-corner.svg',assetScale:1.12,defaultSize:210,maxPerCanvas:2},
+    {id:'pink-film-butterfly-corner',label:'핑크 필름 나비 주얼 코너',pack:'찐 탑꾸',access:'free',minBand:1,kind:'signature',asset:'assets/topkku/physical-film-butterfly-pink.svg',assetScale:1.12,defaultSize:210,maxPerCanvas:2},
     {id:'polaroid-empty',label:'빈 폴라로이드 프레임',pack:'스크랩북',access:'free',minBand:1,kind:'framepiece',asset:'assets/topkku/polaroid-empty.svg',assetScale:1.0,defaultSize:112},
     {id:'artist-tag',label:'그룹명 라벨',pack:'스크랩북',access:'free',minBand:1,kind:'label',variant:'artist',dynamic:'artist',defaultSize:96},
     {id:'captured-date-tag',label:'날짜 라벨',pack:'스크랩북',access:'free',minBand:1,kind:'label',variant:'date',dynamic:'date',defaultSize:84},
@@ -30,16 +30,19 @@
     {id:'paper-scrap-grid',label:'그리드 찢어진 종이',pack:'스크랩북',access:'activity',minBand:2,kind:'scrap',asset:'assets/topkku/grid-paper.svg',assetScale:1.36,defaultSize:94},
     {id:'paperclip-silver',label:'실버 페이퍼클립',pack:'스크랩북',access:'activity',minBand:2,kind:'metal',asset:'assets/topkku/paperclip-silver.svg',assetScale:.72,defaultSize:82},
     {id:'big-ribbon-pink',label:'빅 핑크 리본',pack:'시그니처',access:'free',minBand:1,kind:'signature',asset:'assets/topkku/big-ribbon-pink.svg',assetScale:1.0,defaultSize:180,maxPerCanvas:2},
-    {id:'satin-bow-pearl-pink',label:'새틴 리본 진주 참',pack:'시그니처',access:'free',minBand:1,kind:'signature',asset:'assets/topkku/satin-bow-pearl-pink.svg',assetScale:1.0,defaultSize:190,maxPerCanvas:2},
+    {id:'satin-bow-pearl-pink',label:'새틴 리본 진주 참',pack:'시그니처',access:'free',minBand:1,kind:'signature',asset:'assets/topkku/physical-bow-pink.svg',assetScale:1.0,defaultSize:190,maxPerCanvas:2},
     {id:'satin-bow-black-silver',label:'블랙 새틴 실버 리본',pack:'시그니처',access:'free',minBand:1,kind:'signature',asset:'assets/topkku/satin-bow-black-silver.svg',assetScale:1.0,defaultSize:190,maxPerCanvas:2},
     {id:'satin-bow-pearl-blue',label:'블루 새틴 진주 리본',pack:'시그니처',access:'free',minBand:1,kind:'signature',asset:'assets/topkku/satin-bow-pearl-blue.svg',assetScale:1.0,defaultSize:190,maxPerCanvas:2},
     {id:'crystal-heart-chain-blue',label:'블루 크리스탈 하트 체인',pack:'시그니처',access:'activity',minBand:2,kind:'signature',asset:'assets/topkku/crystal-heart-chain-blue.svg',assetScale:1.0,defaultSize:210,maxPerCanvas:3},
     {id:'crystal-heart-chain-pink',label:'크리스탈 하트 체인',pack:'시그니처',access:'free',minBand:1,kind:'signature',asset:'assets/topkku/crystal-heart-chain-pink.svg',assetScale:1.0,defaultSize:210,maxPerCanvas:3},
     {id:'lace-strip-white',label:'화이트 레이스 스트립',pack:'시그니처',access:'free',minBand:1,kind:'signature',asset:'assets/topkku/lace-strip-white.svg',assetScale:1.0,defaultSize:220,maxPerCanvas:4},
+    {id:'lace-couture-pink',label:'핑크 쿠튀르 레이스',pack:'시그니처',access:'activity',minBand:2,kind:'signature',asset:'assets/topkku/lace-couture-pink.svg',assetScale:1.0,defaultSize:250,maxPerCanvas:4},
+    {id:'pink-couture-frame-cluster',label:'핑크 쿠튀르 프레임 클러스터',pack:'시그니처',access:'free',minBand:1,kind:'signature',asset:'assets/topkku/pink-couture-frame-cluster.svg',assetScale:1.0,defaultSize:580,maxPerCanvas:1},
+    {id:'pink-crystal-butterflies',label:'핑크 크리스털 나비',pack:'시그니처',access:'free',minBand:1,kind:'signature',asset:'assets/topkku/pink-crystal-butterflies.svg',assetScale:1.0,defaultSize:150,maxPerCanvas:2},
     {id:'pearl-garland',label:'진주 가랜드',pack:'시그니처',access:'free',minBand:1,kind:'signature',asset:'assets/topkku/pearl-garland.svg',assetScale:1.0,defaultSize:220,maxPerCanvas:4},
     {id:'metal-chain-long',label:'메탈 체인',pack:'시그니처',access:'activity',minBand:2,kind:'signature',asset:'assets/topkku/metal-chain.svg',assetScale:1.0,defaultSize:220,maxPerCanvas:4},
     {id:'rose-vine-pink',label:'핑크 장미 덩굴',pack:'시그니처',access:'free',minBand:2,kind:'signature',asset:'assets/topkku/rose-vine-pink.svg',assetScale:1.0,defaultSize:210,maxPerCanvas:3},
-    {id:'rose-pearl-corner-pink',label:'로즈 펄 코너',pack:'시그니처',access:'free',minBand:1,kind:'signature',asset:'assets/topkku/rose-pearl-corner-pink.svg',assetScale:1.0,defaultSize:230,maxPerCanvas:2},
+    {id:'rose-pearl-corner-pink',label:'로즈 펄 코너',pack:'시그니처',access:'free',minBand:1,kind:'signature',asset:'assets/topkku/physical-rose-corner-pink.svg',assetScale:1.0,defaultSize:230,maxPerCanvas:2},
     {id:'rose-vine-black',label:'블랙 장미 덩굴',pack:'시그니처',access:'activity',minBand:2,kind:'signature',asset:'assets/topkku/rose-vine-black.svg',assetScale:1.0,defaultSize:210,maxPerCanvas:3},
     {id:'gothic-rose-chain-corner',label:'고딕 로즈 체인 코너',pack:'시그니처',access:'free',minBand:1,kind:'signature',asset:'assets/topkku/gothic-rose-chain-corner.svg',assetScale:1.0,defaultSize:230,maxPerCanvas:2},
     {id:'blue-crystal-butterfly-corner',label:'블루 크리스탈 버터플라이 코너',pack:'시그니처',access:'free',minBand:1,kind:'signature',asset:'assets/topkku/blue-crystal-butterfly-corner.svg',assetScale:1.0,defaultSize:230,maxPerCanvas:2},
@@ -64,5 +67,21 @@
     {id:'holo-frame',label:'홀로그램 포토 참',pack:'희귀',access:'points',minBand:5,unlockCost:90,kind:'frame',variant:'holo',asset:'assets/topkku/photo-frame.svg',assetScale:1.35,motion:'specular',maxPerCanvas:1},
     {id:'aurora-sparkle',label:'오로라 스파클',pack:'희귀',access:'points',minBand:5,unlockCost:120,kind:'sparkle',variant:'aurora',asset:'assets/topkku/sparkles.svg',motion:'sparkle',maxPerCanvas:3}
   ];
+  // Physical corner: 13 independent crop/position/rotation-capable sticker objects.
+  items.push(
+    {id:'corner-flower-coral',label:'flower-coral',pack:'실물스티커',access:'free',minBand:1,kind:'sprite',asset:'assets/topkku/corner-flower-coral.webp',maxPerCanvas:8},
+    {id:'corner-bow-pink',label:'bow-pink',pack:'실물스티커',access:'free',minBand:1,kind:'sprite',asset:'assets/topkku/corner-bow-pink.webp',maxPerCanvas:8},
+    {id:'corner-heart-pink',label:'heart-pink',pack:'실물스티커',access:'free',minBand:1,kind:'sprite',asset:'assets/topkku/corner-heart-pink.webp',maxPerCanvas:8},
+    {id:'corner-heart-berry',label:'heart-berry',pack:'실물스티커',access:'free',minBand:1,kind:'sprite',asset:'assets/topkku/corner-heart-berry.webp',maxPerCanvas:8},
+    {id:'corner-flower-cluster',label:'flower-cluster',pack:'실물스티커',access:'free',minBand:1,kind:'sprite',asset:'assets/topkku/corner-flower-cluster.webp',maxPerCanvas:8},
+    {id:'corner-sparkle-gold',label:'sparkle-gold',pack:'실물스티커',access:'free',minBand:1,kind:'sprite',asset:'assets/topkku/corner-sparkle-gold.webp',maxPerCanvas:8},
+    {id:'corner-star-blue',label:'star-blue',pack:'실물스티커',access:'free',minBand:1,kind:'sprite',asset:'assets/topkku/corner-star-blue.webp',maxPerCanvas:8},
+    {id:'corner-heart-lime',label:'heart-lime',pack:'실물스티커',access:'free',minBand:1,kind:'sprite',asset:'assets/topkku/corner-heart-lime.webp',maxPerCanvas:8},
+    {id:'corner-bead-lilac',label:'bead-lilac',pack:'실물스티커',access:'free',minBand:1,kind:'sprite',asset:'assets/topkku/corner-bead-lilac.webp',maxPerCanvas:8},
+    {id:'corner-bead-blue',label:'bead-blue',pack:'실물스티커',access:'free',minBand:1,kind:'sprite',asset:'assets/topkku/corner-bead-blue.webp',maxPerCanvas:8},
+    {id:'corner-leaf-lime',label:'leaf-lime',pack:'실물스티커',access:'free',minBand:1,kind:'sprite',asset:'assets/topkku/corner-leaf-lime.webp',maxPerCanvas:8},
+    {id:'corner-heart-purple',label:'heart-purple',pack:'실물스티커',access:'free',minBand:1,kind:'sprite',asset:'assets/topkku/corner-heart-purple.webp',maxPerCanvas:8},
+    {id:'corner-bead-pink',label:'bead-pink',pack:'실물스티커',access:'free',minBand:1,kind:'sprite',asset:'assets/topkku/corner-bead-pink.webp',maxPerCanvas:8}
+  );
   window.NUGU_TOPKKU_STICKERS={items,byId:new Map(items.map(x=>[x.id,x])),limits:{totalObjects:90,motionObjects:6,privateSavesPerDay:30,publicPostsPerDay:10,giftsPerDay:3}};
 })();
