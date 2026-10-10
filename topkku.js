@@ -373,7 +373,7 @@
     for(let i=0;i<26;i++){const px=x+stageNoise(seed*71+i*4.7)*w,py=y+stageNoise(seed*83+i*6.1)*h,r=.45+stageNoise(seed*97+i)*1.45;ctx.beginPath();ctx.arc(px,py,r,0,Math.PI*2);ctx.fill()}
     ctx.restore();ctx.globalAlpha=1;ctx.restore();
   }
-  function drawFrame(t){const physicalPink=isPinkPhysical()&&shellState.frameId==='none'&&shellState.loaderId==='clear';if(physicalPink&&photo){ctx.save();ctx.shadowColor='rgba(53,38,47,.27)';ctx.shadowBlur=18;ctx.shadowOffsetY=9;roundedPath(photoBox.x,photoBox.y,photoBox.w,photoBox.h,photoBox.r);ctx.fillStyle='#fffaf9';ctx.fill();ctx.restore()}if(!physicalPink){ctx.save();ctx.shadowColor='rgba(0,0,0,.20)';ctx.shadowBlur=28;ctx.shadowOffsetY=18;roundedPath(photoBox.x-24,photoBox.y-24,photoBox.w+48,photoBox.h+48,46);ctx.fillStyle=t.paper;ctx.fill();ctx.restore()}ctx.save();roundedPath(photoBox.x,photoBox.y,photoBox.w,photoBox.h,photoBox.r);ctx.clip();if(photo&&!isPinkCornerDemo())drawPhoto(photo,photoBox.x,photoBox.y,photoBox.w,photoBox.h);else{ctx.fillStyle=isPinkCornerDemo()?'#fffdfb':theme==='midnight'?'#313044':'#f4f1f7';ctx.fillRect(photoBox.x,photoBox.y,photoBox.w,photoBox.h);ctx.fillStyle=theme==='midnight'?'#aba5c6':'#90899b';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='700 28px system-ui,sans-serif';if(!isPinkCornerDemo()){ctx.fillText('최애 사진을 올려주세요 ♡',W/2,H/2-8);ctx.font='500 17px system-ui,sans-serif';ctx.fillText('사진은 이 브라우저 밖으로 나가지 않아요',W/2,H/2+34)}}ctx.restore();if(!physicalPink){ctx.save();roundedPath(photoBox.x-11,photoBox.y-11,photoBox.w+22,photoBox.h+22,38);ctx.strokeStyle=t.frame;ctx.lineWidth=12;ctx.stroke();ctx.restore()}}
+  function drawFrame(t){const physicalPink=isPinkPhysical()&&shellState.frameId==='none'&&shellState.loaderId==='clear';if(physicalPink&&photo){ctx.save();ctx.shadowColor='rgba(53,38,47,.27)';ctx.shadowBlur=18;ctx.shadowOffsetY=9;roundedPath(photoBox.x,photoBox.y,photoBox.w,photoBox.h,photoBox.r);ctx.fillStyle='#fffaf9';ctx.fill();ctx.restore()}if(!physicalPink){ctx.save();ctx.shadowColor='rgba(0,0,0,.20)';ctx.shadowBlur=28;ctx.shadowOffsetY=18;roundedPath(photoBox.x-24,photoBox.y-24,photoBox.w+48,photoBox.h+48,46);ctx.fillStyle=t.paper;ctx.fill();ctx.restore()}ctx.save();roundedPath(photoBox.x,photoBox.y,photoBox.w,photoBox.h,photoBox.r);ctx.clip();if(photo)drawPhoto(photo,photoBox.x,photoBox.y,photoBox.w,photoBox.h);else{ctx.fillStyle=isPinkCornerDemo()?'#fffdfb':theme==='midnight'?'#313044':'#f4f1f7';ctx.fillRect(photoBox.x,photoBox.y,photoBox.w,photoBox.h);ctx.fillStyle=theme==='midnight'?'#aba5c6':'#90899b';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='700 28px system-ui,sans-serif';if(!isPinkCornerDemo()){ctx.fillText('최애 사진을 올려주세요 ♡',W/2,H/2-8);ctx.font='500 17px system-ui,sans-serif';ctx.fillText('사진은 이 브라우저 밖으로 나가지 않아요',W/2,H/2+34)}}ctx.restore();if(!physicalPink){ctx.save();roundedPath(photoBox.x-11,photoBox.y-11,photoBox.w+22,photoBox.h+22,38);ctx.strokeStyle=t.frame;ctx.lineWidth=12;ctx.stroke();ctx.restore()}}
   function drawStaticCover(img,x,y,w,h){if(!img?.naturalWidth||!img?.naturalHeight)return;const scale=Math.max(w/img.naturalWidth,h/img.naturalHeight),dw=img.naturalWidth*scale,dh=img.naturalHeight*scale;ctx.drawImage(img,x+(w-dw)/2,y+(h-dh)/2,dw,dh)}
   function drawStaticCoverFocus(img,x,y,w,h,focusX=.5,focusY=.5,zoom=1){
     if(!img?.naturalWidth||!img?.naturalHeight)return;
@@ -470,6 +470,22 @@
         const maxH=s*1.65;if(h>maxH){const k=maxH/h;h*=k;w*=k}
         ctx.save();
         if(item.assetTone==='chrome')ctx.filter='grayscale(1) contrast(1.28) brightness(1.16)';
+        if(isPinkCornerDemo()&&e.preset==='pink-corner'){
+          // Real sticker sheets are translucent/matte, not thick glossy enamel.
+          // Only affect the independent Pink Corner sprite; other themes stay untouched.
+          const tone={
+            'corner-flower-cluster':['saturate(.66) contrast(.87) brightness(1.07)',.89],
+            'corner-flower-coral':['saturate(.72) contrast(.85) brightness(1.06)',.87],
+            'corner-bow-pink':['saturate(.77) contrast(.88) brightness(1.04)',.81],
+            'corner-heart-pink':['saturate(.72) contrast(.82) brightness(1.11)',.61],
+            'corner-heart-berry':['saturate(.76) contrast(.88) brightness(1.04)',.89]
+          }[item.id];
+          if(tone){ctx.filter=tone[0];ctx.globalAlpha*=tone[1]}
+          else {ctx.filter='saturate(.86) contrast(.94) brightness(1.02)';ctx.globalAlpha*=.92}
+          ctx.shadowColor='rgba(92,57,74,.10)';
+          ctx.shadowBlur=3;
+          ctx.shadowOffsetY=2;
+        }
         if(item.motion&&!reducedMotion){
           const pulse=.98+.035*Math.sin(t*3.2);ctx.scale(pulse,pulse);
           ctx.globalAlpha=.9+.1*Math.sin(t*2.4);
@@ -657,13 +673,13 @@
     // Canvas rotation is clockwise; Pillow source rotations were counter-clockwise.
     const P=(id,props)=>presetSticker(id,null,{...props,preset:'pink-corner'});
     const additions=[
-      P('corner-flower-cluster',{x:191,y:839,size:301,rotation:7*Math.PI/180}),
-      P('corner-bow-pink',{x:160,y:653,size:131,rotation:-21*Math.PI/180}),
-      P('corner-heart-pink',{x:207,y:731,size:128,rotation:13*Math.PI/180}),
-      P('corner-flower-coral',{x:137,y:603,size:116,rotation:5*Math.PI/180}),
-      P('corner-heart-berry',{x:166,y:778,size:82,rotation:-8*Math.PI/180}),
-      P('corner-sparkle-gold',{x:89,y:717,size:43,rotation:12*Math.PI/180}),
-      P('corner-star-blue',{x:115,y:790,size:33,rotation:-9*Math.PI/180}),
+      P('corner-flower-cluster',{x:185,y:849,size:275,rotation:7*Math.PI/180}),
+      P('corner-bow-pink',{x:154,y:655,size:124,rotation:-21*Math.PI/180}),
+      P('corner-heart-pink',{x:198,y:723,size:88,rotation:13*Math.PI/180}),
+      P('corner-flower-coral',{x:137,y:613,size:103,rotation:5*Math.PI/180}),
+      P('corner-heart-berry',{x:167,y:736,size:69,rotation:-8*Math.PI/180}),
+      P('corner-sparkle-gold',{x:103,y:734,size:34,rotation:12*Math.PI/180}),
+      P('corner-star-blue',{x:120,y:799,size:27,rotation:-9*Math.PI/180}),
       P('corner-heart-lime',{x:89,y:849,size:31,rotation:16*Math.PI/180}),
       P('corner-bead-lilac',{x:110,y:880,size:22,rotation:0})
     ].filter(Boolean);
@@ -672,8 +688,8 @@
     if(retained.length+additions.length>limits.totalObjects){guide('스티커 수량 한도 초과');return}
     saveHistory();elements=[...retained,...additions];selected=-1;theme='pink';
     shellState={loaderId:'clear',frameId:'none',backingId:'cream',packageId:'none',sealId:'none'};
-    renderShellControls();$$('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme==='pink'));
-    guide('Pink Corner · 13개 중 원본 배치 9개를 왼쪽 아래에 붙였어요.');draw();
+    renderShellControls();$('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme==='pink'));
+    guide('Pink Corner · 원본 배치 9개 · 크기·투명도 보정 완료.');draw();
   }
   async function buildPinkLaceTopkku(){
     if(!photo){guide('베이스이미지를 먼저 골라줘 ♡');return}
