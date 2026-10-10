@@ -652,29 +652,28 @@
     draw();
   }
   function buildPinkCornerTopkku(){
-    // 13 physically independent sticker objects, not one precomposed image.
+    // Physical sticker layout from the approved 720x1080 independent-PNG mockup.
+    // 13 assets remain selectable; only the nine visible stickers are placed.
+    // Canvas rotation is clockwise; Pillow source rotations were counter-clockwise.
     const P=(id,props)=>presetSticker(id,null,{...props,preset:'pink-corner'});
     const additions=[
-      P('corner-flower-cluster',{x:548,y:874,size:276,rotation:-0.174533}),
-      P('corner-flower-coral',{x:486,y:693,size:141,rotation:-0.244346}),
-      P('corner-bow-pink',{x:563,y:649,size:128,rotation:0.226893}),
-      P('corner-heart-pink',{x:590,y:749,size:105,rotation:0.104720}),
-      P('corner-heart-berry',{x:595,y:817,size:64,rotation:-0.296706}),
-      P('corner-leaf-lime',{x:454,y:932,size:49,rotation:0.296706}),
-      P('corner-sparkle-gold',{x:438,y:789,size:43,rotation:0.209440}),
-      P('corner-star-blue',{x:459,y:833,size:33,rotation:-0.209440}),
-      P('corner-heart-lime',{x:469,y:875,size:28,rotation:0.279253}),
-      P('corner-bead-lilac',{x:424,y:849,size:20,rotation:0.000000}),
-      P('corner-bead-blue',{x:430,y:900,size:23,rotation:0.000000}),
-      P('corner-bead-pink',{x:447,y:966,size:23,rotation:0.000000}),
-      P('corner-heart-purple',{x:469,y:1005,size:27,rotation:0.122173})
+      P('corner-flower-cluster',{x:191,y:839,size:301,rotation:7*Math.PI/180}),
+      P('corner-bow-pink',{x:160,y:653,size:131,rotation:-21*Math.PI/180}),
+      P('corner-heart-pink',{x:207,y:731,size:128,rotation:13*Math.PI/180}),
+      P('corner-flower-coral',{x:137,y:603,size:116,rotation:5*Math.PI/180}),
+      P('corner-heart-berry',{x:166,y:778,size:82,rotation:-8*Math.PI/180}),
+      P('corner-sparkle-gold',{x:89,y:717,size:43,rotation:12*Math.PI/180}),
+      P('corner-star-blue',{x:115,y:790,size:33,rotation:-9*Math.PI/180}),
+      P('corner-heart-lime',{x:89,y:849,size:31,rotation:16*Math.PI/180}),
+      P('corner-bead-lilac',{x:110,y:880,size:22,rotation:0})
     ].filter(Boolean);
-    if(additions.length!==13){guide('스티커 리소스를 모두 불러오지 못했어요.');return}
-    const retained=retainUserElements();if(retained.length+additions.length>limits.totalObjects){guide('스티커 수량 한도 초과');return}
+    if(additions.length!==9){guide('스티커 리소스를 모두 불러오지 못했어요.');return}
+    const retained=retainUserElements();
+    if(retained.length+additions.length>limits.totalObjects){guide('스티커 수량 한도 초과');return}
     saveHistory();elements=[...retained,...additions];selected=-1;theme='pink';
     shellState={loaderId:'clear',frameId:'none',backingId:'cream',packageId:'none',sealId:'none'};
     renderShellControls();$$('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme==='pink'));
-    guide('Pink Corner · 13개 스티커를 독립 배치했습니다.');draw();
+    guide('Pink Corner · 13개 중 원본 배치 9개를 왼쪽 아래에 붙였어요.');draw();
   }
   async function buildPinkLaceTopkku(){
     if(!photo){guide('베이스이미지를 먼저 골라줘 ♡');return}
