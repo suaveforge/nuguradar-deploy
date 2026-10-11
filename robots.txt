@@ -100,6 +100,7 @@ Disallow: /tracks/qid-q127162707/supercrush/
 Disallow: /tracks/qid-q127162707/illusion/
 Disallow: /tracks/qid-q27989963/s-now-here-ep-3/
 Disallow: /tracks/qid-q109077000/legend/
+Disallow: /tracks/qid-q131722593/kick-off-the-wall-feat-iann-dior/
 Disallow: /tracks/qid-q131722593/kickdoongs/
 Disallow: /tracks/qid-q131722593/puzzle-piece/
 Disallow: /tracks/qid-q132526762/candy-pink-magic-hole-flip-phone/
@@ -141,6 +142,7 @@ Disallow: /tracks/qid-q60994549/to-you/
 Disallow: /tracks/qid-q98096705/truth-or-dare/
 Disallow: /tracks/qid-q119025962/flame-feat-milet/
 Disallow: /tracks/qid-q119025962/star-trace/
+Disallow: /tracks/qid-q122942333/love-again/
 Disallow: /tracks/qid-q26265886/track-64skioupi-umgouhna/
 Disallow: /tracks/qid-q26265886/get-it/
 Disallow: /tracks/qid-q97780109/breath/
