@@ -66,6 +66,7 @@ Disallow: /tracks/qid-q90628571/louder/
 Disallow: /tracks/qid-q307621/helicopter-o-c-remix/
 Disallow: /tracks/qid-q63137883/delicious/
 Disallow: /tracks/qid-q137883875/up/
+Disallow: /tracks/qid-q137883875/which-way/
 Disallow: /tracks/qid-q16097012/fire-eng-ver/
 Disallow: /tracks/qid-q16097012/idk-i-don/
 Disallow: /tracks/qid-q16097012/leggo/
@@ -121,6 +122,8 @@ Disallow: /tracks/qid-q119521803/to-the-moon/
 Disallow: /tracks/qid-q17278068/4-flowers/
 Disallow: /tracks/qid-q60161874/track-6re466a8/
 Disallow: /tracks/qid-q499183/emptiness/
+Disallow: /tracks/qid-q130084175/go-hard/
+Disallow: /tracks/qid-q130084175/indestructible/
 Disallow: /tracks/qid-q284740/born-to-be-wild/
 Disallow: /tracks/qid-q284740/hush/
 Disallow: /tracks/qid-q19855151/magic/
@@ -141,7 +144,10 @@ Disallow: /tracks/qid-q23936742/track-6rkb7j-b7j20/
 Disallow: /tracks/qid-q60994549/to-you/
 Disallow: /tracks/qid-q98096705/truth-or-dare/
 Disallow: /tracks/qid-q119025962/flame-feat-milet/
+Disallow: /tracks/qid-q119025962/rewind/
 Disallow: /tracks/qid-q119025962/star-trace/
+Disallow: /tracks/qid-q119025962/the-answer-is-yes/
+Disallow: /tracks/qid-q119025962/track-7zg466w4io2vmoukmoyxkcdri6jruyq/
 Disallow: /tracks/qid-q122942333/love-again/
 Disallow: /tracks/qid-q26265886/track-64skioupi-umgouhna/
 Disallow: /tracks/qid-q26265886/get-it/
