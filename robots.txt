@@ -84,6 +84,7 @@ Disallow: /tracks/qid-q110486181/stamp-on-it/
 Disallow: /tracks/qid-q20153/generation-hrs/
 Disallow: /tracks/qid-q20153/wish-to-wish/
 Disallow: /tracks/qid-q131746784/moonride/
+Disallow: /tracks/qid-q131746784/next-chapter/
 Disallow: /tracks/qid-q124518472/sunflower/
 Disallow: /tracks/qid-q124518472/telescope/
 Disallow: /tracks/qid-q124518472/unhero/
@@ -139,6 +140,7 @@ Disallow: /tracks/qid-q123865358/saucin/
 Disallow: /tracks/qid-q498385/remember/
 Disallow: /tracks/qid-q498385/track-7j207kec64ky7ja47kec64kyic0g64kyiouvjouk/
 Disallow: /tracks/qid-q225105/est-the-best-album/
+Disallow: /tracks/qid-q19794854/track-66-47jme7isx7j287kea64-e/
 Disallow: /tracks/qid-q60528927/say-yes/
 Disallow: /tracks/qid-q23936742/track-6rkb7j-b7j20/
 Disallow: /tracks/qid-q60994549/to-you/
