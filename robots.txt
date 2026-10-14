@@ -137,6 +137,7 @@ Disallow: /tracks/qid-q97338492/look/
 Disallow: /tracks/qid-q55624444/neo-city-the-redline/
 Disallow: /tracks/qid-q123865358/loco/
 Disallow: /tracks/qid-q123865358/saucin/
+Disallow: /tracks/qid-q123865358/upgrade/
 Disallow: /tracks/qid-q498385/remember/
 Disallow: /tracks/qid-q498385/track-7j207kec64ky7ja47kec64kyic0g64kyiouvjouk/
 Disallow: /tracks/qid-q225105/est-the-best-album/
