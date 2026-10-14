@@ -67,12 +67,18 @@
     {id:'holo-frame',label:'홀로그램 포토 참',pack:'희귀',access:'points',minBand:5,unlockCost:90,kind:'frame',variant:'holo',asset:'assets/topkku/photo-frame.svg',assetScale:1.35,motion:'specular',maxPerCanvas:1},
     {id:'aurora-sparkle',label:'오로라 스파클',pack:'희귀',access:'points',minBand:5,unlockCost:120,kind:'sparkle',variant:'aurora',asset:'assets/topkku/sparkles.svg',motion:'sparkle',maxPerCanvas:3}
   ];
-  // Physical corner: 13 independent crop/position/rotation-capable sticker objects.
+  // Physical corner: 19 sprite options including the original composite kept for saved designs.
   items.push(
     {id:'corner-flower-coral',label:'flower-coral',pack:'실물스티커',access:'free',minBand:1,kind:'sprite',asset:'assets/topkku/corner-flower-coral.webp',maxPerCanvas:8},
     {id:'corner-bow-pink',label:'bow-pink',pack:'실물스티커',access:'free',minBand:1,kind:'sprite',asset:'assets/topkku/corner-bow-pink.webp',maxPerCanvas:8},
     {id:'corner-heart-pink',label:'heart-pink',pack:'실물스티커',access:'free',minBand:1,kind:'sprite',asset:'assets/topkku/corner-heart-pink.webp',maxPerCanvas:8},
     {id:'corner-heart-berry',label:'heart-berry',pack:'실물스티커',access:'free',minBand:1,kind:'sprite',asset:'assets/topkku/corner-heart-berry.webp',maxPerCanvas:8},
+    {id:'corner-blossom-primary',label:'꽃 핑크 1',pack:'실물스티커',access:'free',minBand:1,kind:'sprite',asset:'assets/topkku/corner-blossom-primary.webp',maxPerCanvas:8},
+    {id:'corner-blossom-second',label:'꽃 핑크 2',pack:'실물스티커',access:'free',minBand:1,kind:'sprite',asset:'assets/topkku/corner-blossom-second.webp',maxPerCanvas:8},
+    {id:'corner-blossom-third',label:'꽃 핑크 3',pack:'실물스티커',access:'free',minBand:1,kind:'sprite',asset:'assets/topkku/corner-blossom-third.webp',maxPerCanvas:8},
+    {id:'corner-leaf-mint-a',label:'민트잎 1',pack:'실물스티커',access:'free',minBand:1,kind:'sprite',asset:'assets/topkku/corner-leaf-mint-a.webp',maxPerCanvas:8},
+    {id:'corner-leaf-mint-b',label:'민트잎 2',pack:'실물스티커',access:'free',minBand:1,kind:'sprite',asset:'assets/topkku/corner-leaf-mint-b.webp',maxPerCanvas:8},
+    {id:'corner-petal-fill',label:'핑크 보조 꽃잎',pack:'실물스티커',access:'free',minBand:1,kind:'sprite',asset:'assets/topkku/corner-petal-fill.webp',maxPerCanvas:8},
     {id:'corner-flower-cluster',label:'flower-cluster',pack:'실물스티커',access:'free',minBand:1,kind:'sprite',asset:'assets/topkku/corner-flower-cluster.webp',maxPerCanvas:8},
     {id:'corner-sparkle-gold',label:'sparkle-gold',pack:'실물스티커',access:'free',minBand:1,kind:'sprite',asset:'assets/topkku/corner-sparkle-gold.webp',maxPerCanvas:8},
     {id:'corner-star-blue',label:'star-blue',pack:'실물스티커',access:'free',minBand:1,kind:'sprite',asset:'assets/topkku/corner-star-blue.webp',maxPerCanvas:8},

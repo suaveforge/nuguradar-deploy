@@ -668,30 +668,33 @@
     draw();
   }
   function buildPinkCornerTopkku(){
-    // Physical sticker layout from the approved 720x1080 independent-PNG mockup.
-    // 13 assets remain selectable; only the nine visible stickers are placed.
-    // Canvas rotation is clockwise; Pillow source rotations were counter-clockwise.
+    // Six separate flower/leaf sprites replace the single merged floral sprite.
     const P=(id,props)=>presetSticker(id,null,{...props,preset:'pink-corner'});
     const additions=[
-      P('corner-flower-cluster',{x:185,y:849,size:275,rotation:7*Math.PI/180}),
+      P('corner-leaf-mint-a',{x:113,y:837,size:95,rotation:-.18}),
+      P('corner-leaf-mint-b',{x:243,y:917,size:96,rotation:.30}),
+      P('corner-petal-fill',{x:129,y:912,size:84,rotation:-.07}),
+      P('corner-blossom-third',{x:124,y:793,size:129,rotation:-.09}),
+      P('corner-blossom-primary',{x:171,y:850,size:162,rotation:.04}),
+      P('corner-blossom-second',{x:207,y:907,size:145,rotation:.12}),
+      P('corner-flower-coral',{x:137,y:613,size:103,rotation:5*Math.PI/180}),
       P('corner-bow-pink',{x:154,y:655,size:124,rotation:-21*Math.PI/180}),
       P('corner-heart-pink',{x:198,y:723,size:88,rotation:13*Math.PI/180}),
-      P('corner-flower-coral',{x:137,y:613,size:103,rotation:5*Math.PI/180}),
       P('corner-heart-berry',{x:167,y:736,size:69,rotation:-8*Math.PI/180}),
       P('corner-sparkle-gold',{x:103,y:734,size:34,rotation:12*Math.PI/180}),
       P('corner-star-blue',{x:120,y:799,size:27,rotation:-9*Math.PI/180}),
       P('corner-heart-lime',{x:89,y:849,size:31,rotation:16*Math.PI/180}),
       P('corner-bead-lilac',{x:110,y:880,size:22,rotation:0})
     ].filter(Boolean);
-    if(additions.length!==9){guide('스티커 리소스를 모두 불러오지 못했어요.');return}
+    if(additions.length!==14){guide('스티커 리소스를 모두 불러오지 못했어요.');return}
     const retained=retainUserElements();
     if(retained.length+additions.length>limits.totalObjects){guide('스티커 수량 한도 초과');return}
     saveHistory();elements=[...retained,...additions];selected=-1;theme='pink';
     shellState={loaderId:'clear',frameId:'none',backingId:'cream',packageId:'none',sealId:'none'};
-    renderShellControls();$('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme==='pink'));
-    guide('Pink Corner · 원본 배치 9개 · 크기·투명도 보정 완료.');draw();
+    renderShellControls();$$('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme==='pink'));
+    guide('Pink Corner · 꽃과 잎 6개를 분리한 독립 스티커 14개를 배치했어요.');draw();
   }
-  async function buildPinkLaceTopkku(){
+    async function buildPinkLaceTopkku(){
     if(!photo){guide('베이스이미지를 먼저 골라줘 ♡');return}
     const artistLabel=String(selectedArtist?.name||sourceMeta?.artist||'MY PICK').trim().slice(0,18)||'MY PICK';
     const P=(id,fallback,props={})=>presetSticker(id,fallback,{...props,preset:'pink-lace'});

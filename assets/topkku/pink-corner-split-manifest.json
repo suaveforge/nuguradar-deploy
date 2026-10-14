@@ -1,0 +1,46 @@
+{
+  "preset": "pink-corner",
+  "version": "2026-10-14-split",
+  "origin": "individually generated sticker images based on user reference, not original pixel extraction",
+  "oldComposite": "corner-flower-cluster (legacy catalogue only)",
+  "newSprites": [
+    {
+      "id": "corner-blossom-primary",
+      "name": "꽃 핑크 1",
+      "asset": "assets/topkku/corner-blossom-primary.webp"
+    },
+    {
+      "id": "corner-blossom-second",
+      "name": "꽃 핑크 2",
+      "asset": "assets/topkku/corner-blossom-second.webp"
+    },
+    {
+      "id": "corner-blossom-third",
+      "name": "꽃 핑크 3",
+      "asset": "assets/topkku/corner-blossom-third.webp"
+    },
+    {
+      "id": "corner-leaf-mint-a",
+      "name": "민트잎 1",
+      "asset": "assets/topkku/corner-leaf-mint-a.webp"
+    },
+    {
+      "id": "corner-leaf-mint-b",
+      "name": "민트잎 2",
+      "asset": "assets/topkku/corner-leaf-mint-b.webp"
+    },
+    {
+      "id": "corner-petal-fill",
+      "name": "핑크 보조 꽃잎",
+      "asset": "assets/topkku/corner-petal-fill.webp"
+    }
+  ],
+  "placedTotal": 14,
+  "editableProperties": [
+    "x",
+    "y",
+    "size",
+    "rotation",
+    "layer"
+  ]
+}
