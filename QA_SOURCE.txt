@@ -1,0 +1,2 @@
+source_sha=0a34c9e24b201d6277fff9ccff25dbb337b8316c
+qa=actual-topkku-photo-14-independent-stickers-real-png-download
