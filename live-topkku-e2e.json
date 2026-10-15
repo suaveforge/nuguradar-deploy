@@ -1,0 +1,39 @@
+{
+  "workflow": "live website only; no manual photo, injected storage, intercepted API, or mocked elements",
+  "startUrl": "https://idol.suaveforge.com/",
+  "steps": [
+    "home -> Watch via visible real mobile link: Watch new drops ↗",
+    "Watch real YouTube reel loaded: u-v7GNBrpx0",
+    "clicked real Watch reel Topkku button",
+    "actual captured video frame reached editor",
+    "applied 14 editable stickers using live editor preset",
+    "clicked actual PNG Download and verified 720x1080 file"
+  ],
+  "errors": [
+    "console: Failed to load resource: the server responded with a status of 404 ()",
+    "console: Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+  ],
+  "deployedSha": "3376c9e6ce1b733aa620bf59517ff33e5383f263",
+  "homeWatchLink": "Watch new drops ↗",
+  "videoId": "u-v7GNBrpx0",
+  "frameSource": "watch",
+  "frameSize": {
+    "width": 720,
+    "height": 1280
+  },
+  "individualElements": 14,
+  "shell": {
+    "loaderId": "clear",
+    "frameId": "none",
+    "backingId": "cream",
+    "packageId": "none",
+    "sealId": "none"
+  },
+  "pngBytes": 956683,
+  "outputDimensions": {
+    "width": 720,
+    "height": 1080
+  },
+  "downloadName": "nugu-radar-topkku-KickFlip-1792080238007.png",
+  "result": "PASS"
+}
