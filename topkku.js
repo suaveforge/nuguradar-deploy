@@ -668,23 +668,25 @@
     draw();
   }
   function buildPinkCornerTopkku(){
-    // Six separate flower/leaf sprites replace the single merged floral sprite.
+    // Original reference: a slim upper detail flowing into overlapping flowers along
+    // the LOWER-LEFT toploader edge. Each of the 14 objects is an editable sprite.
+    // Keep leaves underneath the blossoms and let only the smaller heart lead the eye.
     const P=(id,props)=>presetSticker(id,null,{...props,preset:'pink-corner'});
     const additions=[
-      P('corner-leaf-mint-a',{x:113,y:837,size:95,rotation:-.18}),
-      P('corner-leaf-mint-b',{x:243,y:917,size:96,rotation:.30}),
-      P('corner-petal-fill',{x:129,y:912,size:84,rotation:-.07}),
-      P('corner-blossom-third',{x:124,y:793,size:129,rotation:-.09}),
-      P('corner-blossom-primary',{x:171,y:850,size:162,rotation:.04}),
-      P('corner-blossom-second',{x:207,y:907,size:145,rotation:.12}),
-      P('corner-flower-coral',{x:137,y:613,size:103,rotation:5*Math.PI/180}),
-      P('corner-bow-pink',{x:154,y:655,size:124,rotation:-21*Math.PI/180}),
-      P('corner-heart-pink',{x:198,y:723,size:88,rotation:13*Math.PI/180}),
-      P('corner-heart-berry',{x:167,y:736,size:69,rotation:-8*Math.PI/180}),
-      P('corner-sparkle-gold',{x:103,y:734,size:34,rotation:12*Math.PI/180}),
-      P('corner-star-blue',{x:120,y:799,size:27,rotation:-9*Math.PI/180}),
-      P('corner-heart-lime',{x:89,y:849,size:31,rotation:16*Math.PI/180}),
-      P('corner-bead-lilac',{x:110,y:880,size:22,rotation:0})
+      P('corner-leaf-mint-a',{x:113,y:840,size:78,rotation:-.18}),
+      P('corner-leaf-mint-b',{x:250,y:948,size:88,rotation:.25}),
+      P('corner-petal-fill',{x:125,y:929,size:66,rotation:-.08}),
+      P('corner-blossom-third',{x:133,y:816,size:114,rotation:-.10}),
+      P('corner-blossom-primary',{x:146,y:895,size:150,rotation:.05}),
+      P('corner-blossom-second',{x:217,y:937,size:133,rotation:.12}),
+      P('corner-bow-pink',{x:135,y:710,size:72,rotation:-.24}),
+      P('corner-flower-coral',{x:114,y:641,size:94,rotation:.09}),
+      P('corner-heart-berry',{x:216,y:751,size:47,rotation:-.10}),
+      P('corner-heart-pink',{x:180,y:761,size:64,rotation:.12}),
+      P('corner-sparkle-gold',{x:93,y:779,size:26,rotation:.12}),
+      P('corner-star-blue',{x:236,y:853,size:23,rotation:-.14}),
+      P('corner-heart-lime',{x:89,y:886,size:25,rotation:.17}),
+      P('corner-bead-lilac',{x:108,y:944,size:17,rotation:0})
     ].filter(Boolean);
     if(additions.length!==14){guide('스티커 리소스를 모두 불러오지 못했어요.');return}
     const retained=retainUserElements();
@@ -692,9 +694,9 @@
     saveHistory();elements=[...retained,...additions];selected=-1;theme='pink';
     shellState={loaderId:'clear',frameId:'none',backingId:'cream',packageId:'none',sealId:'none'};
     renderShellControls();$$('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme==='pink'));
-    guide('Pink Corner · 꽃과 잎 6개를 분리한 독립 스티커 14개를 배치했어요.');draw();
+    guide('Pink Corner · 원본처럼 왼쪽 아래에 14개 스티커를 겹쳐 배치했어요.');draw();
   }
-    async function buildPinkLaceTopkku(){
+  async function buildPinkLaceTopkku(){
     if(!photo){guide('베이스이미지를 먼저 골라줘 ♡');return}
     const artistLabel=String(selectedArtist?.name||sourceMeta?.artist||'MY PICK').trim().slice(0,18)||'MY PICK';
     const P=(id,fallback,props={})=>presetSticker(id,fallback,{...props,preset:'pink-lace'});
