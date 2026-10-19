@@ -143,6 +143,7 @@ Disallow: /tracks/qid-q498385/track-7j207kec64ky7ja47kec64kyic0g64kyiouvjouk/
 Disallow: /tracks/qid-q225105/est-the-best-album/
 Disallow: /tracks/qid-q19794854/track-66-47jme7isx7j287kea64-e/
 Disallow: /tracks/qid-q60528927/say-yes/
+Disallow: /tracks/qid-q140681359/squeezy/
 Disallow: /tracks/qid-q23936742/track-6rkb7j-b7j20/
 Disallow: /tracks/qid-q60994549/to-you/
 Disallow: /tracks/qid-q98096705/truth-or-dare/
@@ -164,6 +165,7 @@ Disallow: /tracks/qid-q60588154/you/
 Disallow: /tracks/qid-q269836/make-it-hot/
 Disallow: /tracks/qid-q482620/kiss-me-like-that/
 Disallow: /tracks/qid-q108865419/bye-bye-bye/
+Disallow: /tracks/qid-q7335169/blue-sky/
 Disallow: /tracks/qid-q7335169/v10/
 Disallow: /tracks/qid-q66710876/we-do/
 Disallow: /tracks/qid-q307368/don/
@@ -178,6 +180,7 @@ Disallow: /tracks/qid-q15979639/generation-hrs/
 Disallow: /tracks/qid-q15979639/high-beam/
 Disallow: /tracks/qid-q15979639/i-spy/
 Disallow: /tracks/qid-q15979639/iconic-heart/
+Disallow: /tracks/qid-q15979639/iconic-heart-korean-ver/
 Disallow: /tracks/qid-q15979639/make-it-hot/
 Disallow: /tracks/qid-q15979639/pedazos/
 Disallow: /tracks/qid-q15979639/song-for-you/
