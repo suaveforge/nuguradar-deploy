@@ -96,6 +96,7 @@ Disallow: /tracks/qid-q51885404/i-like-you/
 Disallow: /tracks/qid-q51885404/stay/
 Disallow: /tracks/qid-q51885404/narr-84/
 Disallow: /tracks/qid-q109256946/j/
+Disallow: /tracks/qid-q109375061/looks-can-kill/
 Disallow: /tracks/qid-q127162707/dumb-hot/
 Disallow: /tracks/qid-q127162707/kissing-you/
 Disallow: /tracks/qid-q127162707/r-i-p/
@@ -120,6 +121,7 @@ Disallow: /tracks/qid-q114771282/welcome-to-my-sodom/
 Disallow: /tracks/qid-q114771282/never-again/
 Disallow: /tracks/qid-q114771282/scandalous-love-song/
 Disallow: /tracks/qid-q114771282/thursday-3a-m/
+Disallow: /tracks/qid-q114771282/magdalene/
 Disallow: /tracks/qid-q114771282/outside-of-eden/
 Disallow: /tracks/qid-q119521803/to-the-moon/
 Disallow: /tracks/qid-q17278068/4-flowers/
