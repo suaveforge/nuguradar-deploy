@@ -112,6 +112,7 @@ Disallow: /tracks/qid-q23022478/track-7j206rg0ioyasoumroydmcdqv4jsnbtsl4jrgpgg/
 Disallow: /tracks/qid-q23022478/first-time-back-then/
 Disallow: /tracks/qid-q13580493/track-7jeq64207j2yioupmeyqvq/
 Disallow: /tracks/qid-q111381707/made-my-night/
+Disallow: /tracks/qid-q107005985/doshite-kr-ver/
 Disallow: /tracks/qid-q114771282/he-ain/
 Disallow: /tracks/qid-q114771282/highway-to-heaven/
 Disallow: /tracks/qid-q114771282/love-wins/
