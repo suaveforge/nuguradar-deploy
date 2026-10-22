@@ -94,6 +94,7 @@ Disallow: /tracks/qid-q124518472/smile/
 Disallow: /tracks/qid-q65053641/got-it/
 Disallow: /tracks/qid-q51885404/i-like-you/
 Disallow: /tracks/qid-q51885404/stay/
+Disallow: /tracks/qid-q51885404/to-the-moon/
 Disallow: /tracks/qid-q51885404/narr-84/
 Disallow: /tracks/qid-q109256946/j/
 Disallow: /tracks/qid-q109375061/looks-can-kill/
@@ -198,6 +199,7 @@ Disallow: /tracks/qid-q115099831/andless/
 Disallow: /tracks/qid-q28418030/count-down/
 Disallow: /tracks/qid-q141030335/grls/
 Disallow: /tracks/qid-q141030335/sun-kiss/
+Disallow: /tracks/qid-q192983/all-of-my-life/
 Disallow: /tracks/qid-q124091148/soda-soda/
 Disallow: /tracks/qid-q124362218/milky-way/
 Disallow: /tracks/qid-q124362218/track-7zwy64qy65wfiouzhouvhq/
