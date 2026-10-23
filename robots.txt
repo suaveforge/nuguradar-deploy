@@ -35,8 +35,10 @@ Disallow: /tracks/qid-q16097465/track-64-m66as6rogioupjoumroqzoa/
 Disallow: /tracks/qid-q16097465/track-66mu7jwe66as/
 Disallow: /tracks/qid-q73795501/say-my-name/
 Disallow: /tracks/qid-q125200754/if-i-die-tomorrow/
+Disallow: /tracks/qid-q59793088/drip/
 Disallow: /tracks/qid-q59793088/enough/
 Disallow: /tracks/qid-q483751/d-day/
+Disallow: /tracks/qid-q115967938/deserve/
 Disallow: /tracks/qid-q18381082/weird/
 Disallow: /tracks/qid-q18381082/time-for-me/
 Disallow: /tracks/qid-q18381082/accio/
