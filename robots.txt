@@ -142,6 +142,7 @@ Disallow: /tracks/qid-q28415681/hands-on-me/
 Disallow: /tracks/qid-q15727149/still/
 Disallow: /tracks/qid-q97338492/look/
 Disallow: /tracks/qid-q55624444/neo-city-the-redline/
+Disallow: /tracks/qid-q47002841/the-sun/
 Disallow: /tracks/qid-q123865358/loco/
 Disallow: /tracks/qid-q123865358/saucin/
 Disallow: /tracks/qid-q123865358/upgrade/
