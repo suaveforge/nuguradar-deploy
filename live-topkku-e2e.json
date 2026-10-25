@@ -1,0 +1,43 @@
+{
+  "workflow": "production website only; no routes, intercepts, injected storage, API mocks or manual photos",
+  "startUrl": "https://idol.suaveforge.com/",
+  "steps": [
+    "home -> Watch via visible real mobile link: Watch new drops ↗",
+    "Watch real YouTube reel loaded: uwWTYn5RrJE",
+    "clicked real Watch reel Topkku button",
+    "actual captured video frame reached editor",
+    "applied 14 editable stickers using live editor preset",
+    "clicked actual PNG Download and verified 720x1080 file"
+  ],
+  "errors": [
+    "console: Failed to load resource: the server responded with a status of 404 ()",
+    "console: Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+  ],
+  "deployedSha": "0effcec05525f29335640841c7ec096b5df816aa",
+  "homeWatchLink": "Watch new drops ↗",
+  "videoId": "uwWTYn5RrJE",
+  "productionScriptBlobSha": "7562907c9ee79b2cc11f857f004e97cb9e4deab7",
+  "previewMode": "NONE; production HTML, scripts and API loaded unchanged from live website",
+  "previewSha": null,
+  "frameSource": "watch",
+  "frameSize": {
+    "width": 720,
+    "height": 1280
+  },
+  "individualElements": 14,
+  "shell": {
+    "loaderId": "clear",
+    "frameId": "none",
+    "backingId": "cream",
+    "packageId": "none",
+    "sealId": "none"
+  },
+  "presetGuide": "Pink Corner · 원본처럼 왼쪽 아래에 14개 스티커를 겹쳐 배치했어요.",
+  "pngBytes": 992023,
+  "outputDimensions": {
+    "width": 720,
+    "height": 1080
+  },
+  "downloadName": "nugu-radar-topkku-DAILY-DIRECTION-1792940004503.png",
+  "result": "PASS"
+}
