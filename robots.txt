@@ -88,6 +88,7 @@ Disallow: /tracks/qid-q20153/generation-hrs/
 Disallow: /tracks/qid-q20153/wish-to-wish/
 Disallow: /tracks/qid-q131746784/moonride/
 Disallow: /tracks/qid-q131746784/next-chapter/
+Disallow: /tracks/qid-q131746784/rise-and-shine-upper-east-siders-its-officially-fall/
 Disallow: /tracks/qid-q124518472/sunflower/
 Disallow: /tracks/qid-q124518472/telescope/
 Disallow: /tracks/qid-q124518472/unhero/
@@ -179,6 +180,7 @@ Disallow: /tracks/qid-q7335169/v10/
 Disallow: /tracks/qid-q66710876/we-do/
 Disallow: /tracks/qid-q307368/don/
 Disallow: /tracks/qid-q110920753/no-fear-feat-punchnello/
+Disallow: /tracks/qid-q111745890/die-another-day/
 Disallow: /tracks/qid-q118977203/that/
 Disallow: /tracks/qid-q86730786/iri-who/
 Disallow: /tracks/qid-q15979639/all-of-my-life/
