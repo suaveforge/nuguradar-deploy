@@ -1,0 +1,26 @@
+name: QA view saved real production Topkku PNG
+on:
+  push:
+    branches: [qa-topkku-live-v2-20261028]
+    paths: ['.github/workflows/topkku-v2-image-review.yml']
+permissions:
+  contents: read
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show actual saved editor image vs 2026-10-25 baseline (not a new render)
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 - <<'PY'
+          import base64,pathlib
+          for name,file in [('after','live-topkku-20261028-canvas.jpg'),('before','live-topkku-finished.jpg')]:
+            p=pathlib.Path(file); assert p.is_file()
+            b64=base64.b64encode(p.read_bytes()).decode()
+            print('SCREEN_BEGIN:'+name)
+            for i in range(0,len(b64),3000):print('SCREEN_DATA:'+b64[i:i+3000])
+            print('SCREEN_END:'+name)
+          PY
