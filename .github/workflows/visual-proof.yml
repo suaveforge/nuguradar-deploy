@@ -1,4 +1,4 @@
-name: QA visual proof reader (public hosted)
+name: QA Pink Corner exact-source editor comparison
 on:
   push:
     branches: [qa-topkku-visual-proof-20261028]
@@ -8,7 +8,7 @@ permissions:
 jobs:
   view:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 18
     steps:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
@@ -16,33 +16,72 @@ jobs:
           repository: suaveforge/nuguradar-deploy
           ref: main
           path: prod
-      - name: Read real proof pixels and existing sprite atlas
+      - name: Rebuild exact private PR #242 frontend blob on QA only
         shell: bash
         run: |
           set -Eeuo pipefail
-          python3 -m pip install -q --user pillow
+          (cd prod && git apply ../qa/pink-corner-preview.patch)
+          node --check prod/topkku.js
+          sha=$(git hash-object prod/topkku.js)
+          echo "PREVIEW_BLOB_SHA=$sha"
+          test "$sha" = 'f96c334e8b2ab5190ad8e9bc91ed6b2cd5ec983a'
+      - name: Install isolated hosted Chromium
+        run: |
+          npm install --no-save --ignore-scripts --no-audit --no-fund playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Real editor rendered by PR code (preview intercept, no photo)
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          node - <<'JS'
+          const {chromium}=require('playwright');
+          const fs=require('fs');
+          (async()=>{
+            const b=await chromium.launch({headless:true,args:['--no-sandbox']});
+            const page=await b.newPage({viewport:{width:390,height:844},deviceScaleFactor:1,locale:'ko-KR'});
+            let swapped=0;
+            await page.route('**/topkku.js*',async route=>{
+              swapped++;
+              await route.fulfill({status:200,contentType:'text/javascript',body:fs.readFileSync('prod/topkku.js','utf8')});
+            });
+            const url='https://idol.suaveforge.com/topkku.html?preset=pink-corner';
+            await page.goto(url,{waitUntil:'domcontentloaded',timeout:45000});
+            await page.waitForFunction(()=>window.__NUGU_TOPKKU_FRAME_STATE__?.().elementCount===14,null,{timeout:30000});
+            if(swapped!==1)throw Error('ONLY_EDITOR_JS_MUST_BE_ROUTED '+swapped);
+            await page.waitForTimeout(1600);
+            const state=await page.evaluate(()=>window.__NUGU_TOPKKU_FRAME_STATE__());
+            const canvas=page.locator('#topkkuCanvas');
+            await canvas.screenshot({path:'preview-canvas.png'});
+            const [download]=await Promise.all([page.waitForEvent('download',{timeout:25000}),page.locator('#downloadBtn').click()]);
+            await download.saveAs('preview-engine.png');
+            const img=fs.readFileSync('preview-engine.png');
+            if(img.subarray(0,8).toString('hex')!=='89504e470d0a1a0a'||img.readUInt32BE(16)!==720||img.readUInt32BE(20)!==1080)throw Error('PREVIEW_PNG_INVALID');
+            console.log('PREVIEW_REAL_ENGINE_PASS '+JSON.stringify({elements:state.elementCount,view:state.shell,intercept:swapped,pngBytes:img.length,source:'PR #242 pre-production preview, no photo'}));
+            await b.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
+      - name: Emit direct editor preview and original proof (labelled, no substitute)
+        shell: bash
+        run: |
+          python3 -m pip install --user -q pillow
           python3 - <<'PY'
           from PIL import Image
-          from pathlib import Path
           import base64,io
-          cases=[
-             ('detail',Path('live-topkku-finished.png'),(38,590,310,1045),None),
-             ('atlas',Path('prod/assets/topkku/pink-corner-atlas.webp'),None,(840,660)),
-             ('editor',Path('live-topkku-editor.jpg'),None,(440,850)),
-             ('flower-primary',Path('prod/assets/topkku/corner-blossom-primary.webp'),None,(360,360)),
-             ('flower-coral',Path('prod/assets/topkku/corner-flower-coral.webp'),None,(360,360)),
-             ('bow',Path('prod/assets/topkku/corner-bow-pink.webp'),None,(360,360)),
-          ]
-          for name,file,crop,limit in cases:
-             im=Image.open(file).convert('RGBA')
-             if crop:im=im.crop(crop)
-             if limit: im.thumbnail(limit,Image.Resampling.LANCZOS)
-             if im.mode=='RGBA':
-                bg=Image.new('RGBA',im.size,(249,243,242,255)); bg.alpha_composite(im); im=bg.convert('RGB')
-             out=io.BytesIO(); im.save(out,'JPEG',quality=84,optimize=True)
-             s=base64.b64encode(out.getvalue()).decode()
-             print(f'PIXEL_INFO:{name}:{im.width}x{im.height}')
-             print(f'PIXEL_BEGIN:{name}')
-             for i in range(0,len(s),3000):print('PIXEL_DATA:'+s[i:i+3000])
-             print(f'PIXEL_END:{name}')
+          files=[('new-no-photo','preview-engine.png'),('old-with-video','live-topkku-finished.jpg')]
+          for name,file in files:
+            im=Image.open(file).convert('RGB');im.thumbnail((480,720),Image.Resampling.LANCZOS)
+            out=io.BytesIO();im.save(out,'JPEG',quality=81,optimize=True)
+            s=base64.b64encode(out.getvalue()).decode()
+            print('PIXEL_BEGIN:'+name)
+            for i in range(0,len(s),3000):print('PIXEL_DATA:'+s[i:i+3000])
+            print('PIXEL_END:'+name)
           PY
+      - name: Upload preview evidence (QA only)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pink-corner-pr242-editor-preview
+          path: |
+            preview-engine.png
+            preview-canvas.png
+          retention-days: 14
