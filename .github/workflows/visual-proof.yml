@@ -1,0 +1,25 @@
+name: QA visual proof reader (public hosted)
+on:
+  push:
+    branches: [qa-topkku-visual-proof-20261028]
+    paths: ['.github/workflows/visual-proof.yml']
+permissions:
+  contents: read
+jobs:
+  view:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Emit existing QA JPG pixel evidence only (no production changes)
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import pathlib,base64
+          f=pathlib.Path('live-topkku-finished.jpg')
+          assert f.is_file()
+          b=base64.b64encode(f.read_bytes()).decode('ascii')
+          print('VISUAL_IMAGE_BEGIN:baseline')
+          for i in range(0,len(b),3000):print('VISUAL_IMAGE_DATA:'+b[i:i+3000])
+          print('VISUAL_IMAGE_END:baseline')
+          PY
