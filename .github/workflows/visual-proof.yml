@@ -11,15 +11,38 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Emit existing QA JPG pixel evidence only (no production changes)
+      - uses: actions/checkout@v4
+        with:
+          repository: suaveforge/nuguradar-deploy
+          ref: main
+          path: prod
+      - name: Read real proof pixels and existing sprite atlas
         shell: bash
         run: |
+          set -Eeuo pipefail
+          python3 -m pip install -q --user pillow
           python3 - <<'PY'
-          import pathlib,base64
-          f=pathlib.Path('live-topkku-finished.jpg')
-          assert f.is_file()
-          b=base64.b64encode(f.read_bytes()).decode('ascii')
-          print('VISUAL_IMAGE_BEGIN:baseline')
-          for i in range(0,len(b),3000):print('VISUAL_IMAGE_DATA:'+b[i:i+3000])
-          print('VISUAL_IMAGE_END:baseline')
+          from PIL import Image
+          from pathlib import Path
+          import base64,io
+          cases=[
+             ('detail',Path('live-topkku-finished.png'),(38,590,310,1045),None),
+             ('atlas',Path('prod/assets/topkku/pink-corner-atlas.webp'),None,(840,660)),
+             ('editor',Path('live-topkku-editor.jpg'),None,(440,850)),
+             ('flower-primary',Path('prod/assets/topkku/corner-blossom-primary.webp'),None,(360,360)),
+             ('flower-coral',Path('prod/assets/topkku/corner-flower-coral.webp'),None,(360,360)),
+             ('bow',Path('prod/assets/topkku/corner-bow-pink.webp'),None,(360,360)),
+          ]
+          for name,file,crop,limit in cases:
+             im=Image.open(file).convert('RGBA')
+             if crop:im=im.crop(crop)
+             if limit: im.thumbnail(limit,Image.Resampling.LANCZOS)
+             if im.mode=='RGBA':
+                bg=Image.new('RGBA',im.size,(249,243,242,255)); bg.alpha_composite(im); im=bg.convert('RGB')
+             out=io.BytesIO(); im.save(out,'JPEG',quality=84,optimize=True)
+             s=base64.b64encode(out.getvalue()).decode()
+             print(f'PIXEL_INFO:{name}:{im.width}x{im.height}')
+             print(f'PIXEL_BEGIN:{name}')
+             for i in range(0,len(s),3000):print('PIXEL_DATA:'+s[i:i+3000])
+             print(f'PIXEL_END:{name}')
           PY
