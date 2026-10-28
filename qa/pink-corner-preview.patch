@@ -1,0 +1,80 @@
+diff --git a/topkku.js b/topkku.js
+--- a/topkku.js
++++ b/topkku.js
+@@ -471,20 +471,27 @@
+         ctx.save();
+         if(item.assetTone==='chrome')ctx.filter='grayscale(1) contrast(1.28) brightness(1.16)';
+         if(isPinkCornerDemo()&&e.preset==='pink-corner'){
+-          // Real sticker sheets are translucent/matte, not thick glossy enamel.
+-          // Only affect the independent Pink Corner sprite; other themes stay untouched.
+-          const tone={
+-            'corner-flower-cluster':['saturate(.66) contrast(.87) brightness(1.07)',.89],
+-            'corner-flower-coral':['saturate(.72) contrast(.85) brightness(1.06)',.87],
+-            'corner-bow-pink':['saturate(.77) contrast(.88) brightness(1.04)',.81],
+-            'corner-heart-pink':['saturate(.72) contrast(.82) brightness(1.11)',.61],
+-            'corner-heart-berry':['saturate(.76) contrast(.88) brightness(1.04)',.89]
+-          }[item.id];
+-          if(tone){ctx.filter=tone[0];ctx.globalAlpha*=tone[1]}
+-          else {ctx.filter='saturate(.86) contrast(.94) brightness(1.02)';ctx.globalAlpha*=.92}
+-          ctx.shadowColor='rgba(92,57,74,.10)';
+-          ctx.shadowBlur=3;
+-          ctx.shadowOffsetY=2;
++          // Pink Corner only: retain translucent hologram while restoring
++          // the contours of 14 independently editable physical parts.
++          // The old blanket low-contrast filter blended flower boundaries.
++          const material={
++            'corner-blossom-primary':['saturate(1.02) contrast(1.11)',.97,6,3,.19],
++            'corner-blossom-second':['saturate(.98) contrast(1.10)',.96,5,3,.17],
++            'corner-blossom-third':['saturate(.96) contrast(1.09)',.94,5,3,.16],
++            'corner-petal-fill':['saturate(.93) contrast(1.06)',.88,3,2,.11],
++            'corner-leaf-mint-a':['saturate(.92) contrast(1.05)',.86,3,2,.12],
++            'corner-leaf-mint-b':['saturate(.92) contrast(1.05)',.87,3,2,.12],
++            'corner-flower-coral':['saturate(.94) contrast(1.06)',.94,4,2,.13],
++            'corner-bow-pink':['saturate(1.03) contrast(1.08)',.96,3,2,.12],
++            'corner-heart-pink':['saturate(.94) contrast(1.06)',.82,2,1,.09],
++            'corner-heart-berry':['saturate(1.04) contrast(1.06)',.95,2,1,.10]
++          }[item.id]||['saturate(1.02) contrast(1.06)',.96,2,1,.10];
++          ctx.filter=material[0];
++          ctx.globalAlpha*=material[1];
++          ctx.shadowColor='rgba(80,47,60,'+material[4]+')';
++          ctx.shadowBlur=material[2];
++          ctx.shadowOffsetX=1;
++          ctx.shadowOffsetY=material[3];
+         }
+         if(item.motion&&!reducedMotion){
+           const pulse=.98+.035*Math.sin(t*3.2);ctx.scale(pulse,pulse);
+@@ -673,20 +680,20 @@
+     // Keep leaves underneath the blossoms and let only the smaller heart lead the eye.
+     const P=(id,props)=>presetSticker(id,null,{...props,preset:'pink-corner'});
+     const additions=[
+-      P('corner-leaf-mint-a',{x:113,y:840,size:78,rotation:-.18}),
+-      P('corner-leaf-mint-b',{x:250,y:948,size:88,rotation:.25}),
+-      P('corner-petal-fill',{x:125,y:929,size:66,rotation:-.08}),
+-      P('corner-blossom-third',{x:133,y:816,size:114,rotation:-.10}),
+-      P('corner-blossom-primary',{x:146,y:895,size:150,rotation:.05}),
+-      P('corner-blossom-second',{x:217,y:937,size:133,rotation:.12}),
+-      P('corner-bow-pink',{x:135,y:710,size:72,rotation:-.24}),
+-      P('corner-flower-coral',{x:114,y:641,size:94,rotation:.09}),
+-      P('corner-heart-berry',{x:216,y:751,size:47,rotation:-.10}),
+-      P('corner-heart-pink',{x:180,y:761,size:64,rotation:.12}),
+-      P('corner-sparkle-gold',{x:93,y:779,size:26,rotation:.12}),
+-      P('corner-star-blue',{x:236,y:853,size:23,rotation:-.14}),
+-      P('corner-heart-lime',{x:89,y:886,size:25,rotation:.17}),
+-      P('corner-bead-lilac',{x:108,y:944,size:17,rotation:0})
++      P('corner-leaf-mint-a',{x:124,y:842,size:75,rotation:-.25}),
++      P('corner-leaf-mint-b',{x:225,y:952,size:79,rotation:.3}),
++      P('corner-petal-fill',{x:122,y:917,size:60,rotation:-.14}),
++      P('corner-blossom-third',{x:128,y:824,size:110,rotation:-.22}),
++      P('corner-blossom-primary',{x:151,y:895,size:152,rotation:.12}),
++      P('corner-blossom-second',{x:204,y:941,size:129,rotation:.29}),
++      P('corner-bow-pink',{x:134,y:717,size:63,rotation:-.21}),
++      P('corner-flower-coral',{x:112,y:654,size:75,rotation:.13}),
++      P('corner-heart-berry',{x:197,y:753,size:37,rotation:-.17}),
++      P('corner-heart-pink',{x:174,y:762,size:48,rotation:.16}),
++      P('corner-sparkle-gold',{x:94,y:778,size:24,rotation:.12}),
++      P('corner-star-blue',{x:230,y:854,size:21,rotation:-.14}),
++      P('corner-heart-lime',{x:90,y:882,size:24,rotation:.17}),
++      P('corner-bead-lilac',{x:104,y:942,size:16,rotation:0})
+     ].filter(Boolean);
+     if(additions.length!==14){guide('스티커 리소스를 모두 불러오지 못했어요.');return}
+     const retained=retainUserElements();
