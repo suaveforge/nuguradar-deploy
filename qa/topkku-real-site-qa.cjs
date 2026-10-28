@@ -1,0 +1,66 @@
+'use strict';
+const {chromium}=require('playwright');
+const fs=require('fs'),{createHash}=require('crypto');
+const URL='https://idol.suaveforge.com';
+const SOURCE_SHA='3b66747cf9644b0fdb038744a094283758d614d1';
+const SCRIPT_SHA='f96c334e8b2ab5190ad8e9bc91ed6b2cd5ec983a';
+const P='live-topkku-20261028-';
+(async()=>{
+ const browser=await chromium.launch({headless:true,args:['--no-sandbox','--disable-setuid-sandbox','--autoplay-policy=no-user-gesture-required']});
+ const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:1,isMobile:true,hasTouch:true,locale:'ko-KR',serviceWorkers:'block',acceptDownloads:true});
+ const page=await context.newPage();
+ const problems=[],report={mode:'real production without route interception or mock',url:URL+'/',sourceShaExpected:SOURCE_SHA,jsBlobShaExpected:SCRIPT_SHA,steps:[],errors:problems};
+ page.on('pageerror',e=>problems.push('pageerror: '+String(e.message).slice(0,240)));
+ page.on('console',m=>{if(m.type()==='error')problems.push('console: '+m.text().slice(0,240))});
+ try{
+   const dep=await page.request.get(URL+'/DEPLOY_SOURCE.txt?qa='+Date.now(),{timeout:30000});
+   if(!dep.ok())throw Error('DEPLOY_MARKER_HTTP '+dep.status());
+   const stamp=await dep.text(),sha=stamp.match(/^source_sha=(.+)$/m)?.[1]||'';
+   report.deployedSha=sha;if(sha!==SOURCE_SHA)throw Error('DEPLOY_SOURCE_SHA_MISMATCH '+sha);
+   const req=await page.request.get(URL+'/topkku.js?qa='+Date.now(),{timeout:30000});
+   if(!req.ok())throw Error('PRODUCTION_SCRIPT_HTTP '+req.status());
+   const body=Buffer.from(await req.body());
+   const blobSha=createHash('sha1').update(Buffer.from('blob '+body.length+'\\0')).update(body).digest('hex');
+   report.scriptBlobSha=blobSha;if(blobSha!==SCRIPT_SHA)throw Error('SCRIPT_SHA_MISMATCH '+blobSha);
+   await page.goto(URL+'/',{waitUntil:'domcontentloaded',timeout:45000});
+   const candidates=await page.locator('a[href="watch.html"]').all();
+   let watch=null;for(const c of candidates){if(await c.isVisible()){watch=c;break}}
+   if(!watch)throw Error('NO_VISIBLE_WATCH_LINK');
+   await watch.click();
+   await page.waitForURL(/watch\\.html/,{timeout:30000});
+   report.steps.push('home -> Watch');
+   await page.locator('#mobileReelsFeed .mobile-reel').first().waitFor({state:'visible',timeout:50000});
+   const reel=page.locator('#mobileReelsFeed .mobile-reel').first();
+   report.videoId=await reel.getAttribute('data-video-id');
+   if(!report.videoId)throw Error('NO_YOUTUBE_REEL_ID');
+   await page.waitForTimeout(2200);
+   await page.screenshot({path:P+'watch.jpg',type:'jpeg',quality:75});
+   report.steps.push('real Watch YouTube reel opened: '+report.videoId);
+   await reel.locator('.reel-topkku').click({timeout:15000});
+   await page.waitForURL(/topkku\\.html/,{timeout:85000});
+   await page.waitForFunction(()=>{const s=window.__NUGU_TOPKKU_FRAME_STATE__?.();return s?.source==='watch'&&s?.sourceSize?.width>64&&s?.sourceSize?.height>64;},null,{timeout:45000});
+   let state=await page.evaluate(()=>window.__NUGU_TOPKKU_FRAME_STATE__());
+   report.frameSource=state.source;report.frameSize=state.sourceSize;
+   report.steps.push('real decoded video frame delivered to editor');
+   await page.locator('#buildPinkCorner').click({timeout:15000});
+   await page.waitForFunction(()=>{const s=window.__NUGU_TOPKKU_FRAME_STATE__?.();return s?.elementCount===14&&s?.presetTags?.includes('pink-corner');},null,{timeout:20000});
+   await page.waitForTimeout(1600);
+   state=await page.evaluate(()=>window.__NUGU_TOPKKU_FRAME_STATE__());
+   report.independentStickers=state.elementCount;
+   report.guide=await page.locator('#stickerGuide').innerText();
+   if(!report.guide.includes('14개'))throw Error('WRONG_PRESET_GUIDE');
+   await page.screenshot({path:P+'editor.jpg',type:'jpeg',quality:85,fullPage:true});
+   await page.locator('#topkkuCanvas').screenshot({path:P+'canvas.jpg',type:'jpeg',quality:85});
+   const [dl]=await Promise.all([page.waitForEvent('download',{timeout:30000}),page.locator('#downloadBtn').click({timeout:15000})]);
+   await dl.saveAs(P+'finished.png');
+   const png=fs.readFileSync(P+'finished.png');
+   if(png.length<35000||png.subarray(0,8).toString('hex')!=='89504e470d0a1a0a')throw Error('INVALID_PNG');
+   report.outputDimensions={width:png.readUInt32BE(16),height:png.readUInt32BE(20)};
+   if(report.outputDimensions.width!==720||report.outputDimensions.height!==1080)throw Error('OUTPUT_DIMENSIONS_BAD');
+   report.pngBytes=png.length;report.downloadName=dl.suggestedFilename();
+   report.steps.push('14 independent editable parts saved by real PNG download button');
+   report.result='PASS';
+   console.log('REAL_PRODUCTION_V2_PASS '+JSON.stringify(report));
+ }catch(e){report.result='FAIL';report.error=String(e?.stack||e);report.currentUrl=page.url();console.error('REAL_PRODUCTION_V2_FAILED '+JSON.stringify(report));throw e}
+ finally{fs.writeFileSync(P+'e2e.json',JSON.stringify(report,null,2));await browser.close();}
+})().catch(()=>process.exit(1));
