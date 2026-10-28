@@ -1,0 +1,32 @@
+{
+  "mode": "real production without route interception or mock",
+  "url": "https://idol.suaveforge.com/",
+  "sourceShaExpected": "3b66747cf9644b0fdb038744a094283758d614d1",
+  "jsBlobShaExpected": "f96c334e8b2ab5190ad8e9bc91ed6b2cd5ec983a",
+  "steps": [
+    "home -> Watch",
+    "real Watch YouTube reel opened: 5pMyI7axHVg",
+    "real decoded video frame delivered to editor",
+    "14 independent editable parts saved by real PNG download button"
+  ],
+  "errors": [
+    "console: Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+  ],
+  "deployedSha": "3b66747cf9644b0fdb038744a094283758d614d1",
+  "scriptBlobSha": "f96c334e8b2ab5190ad8e9bc91ed6b2cd5ec983a",
+  "videoId": "5pMyI7axHVg",
+  "frameSource": "watch",
+  "frameSize": {
+    "width": 720,
+    "height": 1280
+  },
+  "independentStickers": 14,
+  "guide": "Pink Corner · 원본처럼 왼쪽 아래에 14개 스티커를 겹쳐 배치했어요.",
+  "outputDimensions": {
+    "width": 720,
+    "height": 1080
+  },
+  "pngBytes": 756647,
+  "downloadName": "nugu-radar-topkku-DKB-1793158636595.png",
+  "result": "PASS"
+}
