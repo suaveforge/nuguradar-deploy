@@ -1,0 +1,59 @@
+name: Topkku real production Watch-to-PNG v2 (no interception)
+on:
+  push:
+    branches: [qa-topkku-live-v2-20261028]
+    paths: ['.github/workflows/topkku-live-v2.yml']
+permissions:
+  contents: write
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 24
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Wait for exact merged production deployment SHA
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ready=no
+          for i in $(seq 1 80); do
+            if curl -fsS --connect-timeout 8 --max-time 12 "https://idol.suaveforge.com/DEPLOY_SOURCE.txt?qa=$i" -o /tmp/production-stamp; then
+              if grep -Fxq 'source_sha=3b66747cf9644b0fdb038744a094283758d614d1' /tmp/production-stamp; then ready=yes; break; fi
+            fi
+            if [ $((i % 8)) -eq 0 ]; then echo "WAIT_FOR_PRODUCTION_SHA attempt=$i $(grep '^source_sha=' /tmp/production-stamp 2>/dev/null || true)"; fi
+            sleep 8
+          done
+          test "$ready" = yes
+          echo "LIVE_SOURCE_SHA_VERIFIED=yes"
+      - name: Install hosted Chromium for external real-site validation
+        run: |
+          npm install --no-save --ignore-scripts --no-audit --no-fund playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Actual home Watch real frame editor 14 parts PNG
+        shell: bash
+        run: node qa/topkku-real-site-qa.cjs
+      - name: Preserve real proof files in isolated QA branch
+        if: success()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git config user.name suaveforge-qa
+          git config user.email actions@users.noreply.github.com
+          git add live-topkku-20261028-*.png live-topkku-20261028-*.jpg live-topkku-20261028-*.json
+          git diff --cached --quiet || git commit -m 'QA: verified production Pink Corner v2 actual-engine PNG'
+          git push origin HEAD:qa-topkku-live-v2-20261028
+          echo 'REAL_PRODUCTION_PNG_PUBLISHED=yes'
+      - name: Upload trace and production evidence for diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: real-pink-corner-v2
+          path: |
+            live-topkku-20261028-*.png
+            live-topkku-20261028-*.jpg
+            live-topkku-20261028-*.json
+          if-no-files-found: ignore
+          retention-days: 14
