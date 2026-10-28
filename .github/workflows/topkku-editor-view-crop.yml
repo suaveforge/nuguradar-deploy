@@ -1,0 +1,28 @@
+name: QA crop original production editor screenshot for review
+on:
+  push:
+    branches: [qa-topkku-live-v2-20261028]
+    paths: ['.github/workflows/topkku-editor-view-crop.yml']
+permissions:
+  contents: write
+jobs:
+  crop:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Crop actual screenshot without changing its content
+        run: |
+          set -Eeuo pipefail
+          python3 -m pip install -q --user pillow
+          python3 - <<'PY'
+          from PIL import Image
+          im=Image.open('live-topkku-20261028-editor.jpg')
+          print('REAL_EDITOR_SCREENSHOT_DIMENSIONS',im.size)
+          im.crop((0,0,im.width,min(im.height,1000))).save('live-topkku-20261028-editor-top.jpg',quality=90,subsampling=0)
+          PY
+          git config user.name suaveforge-qa
+          git config user.email actions@users.noreply.github.com
+          git add live-topkku-20261028-editor-top.jpg
+          git commit -m 'QA: present actual editor viewport crop from production screenshot'
+          git push origin HEAD:qa-topkku-live-v2-20261028
