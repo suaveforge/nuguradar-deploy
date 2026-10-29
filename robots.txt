@@ -100,6 +100,7 @@ Disallow: /tracks/qid-q51885404/stay/
 Disallow: /tracks/qid-q51885404/to-the-moon/
 Disallow: /tracks/qid-q51885404/narr-84/
 Disallow: /tracks/qid-q109256946/j/
+Disallow: /tracks/qid-q122179261/you/
 Disallow: /tracks/qid-q109375061/looks-can-kill/
 Disallow: /tracks/qid-q127162707/dumb-hot/
 Disallow: /tracks/qid-q127162707/kissing-you/
