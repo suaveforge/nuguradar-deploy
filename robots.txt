@@ -93,6 +93,7 @@ Disallow: /tracks/qid-q124518472/sunflower/
 Disallow: /tracks/qid-q124518472/telescope/
 Disallow: /tracks/qid-q124518472/unhero/
 Disallow: /tracks/qid-q124518472/gravity/
+Disallow: /tracks/qid-q124518472/boy/
 Disallow: /tracks/qid-q124518472/smile/
 Disallow: /tracks/qid-q65053641/got-it/
 Disallow: /tracks/qid-q51885404/i-like-you/
