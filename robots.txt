@@ -28,6 +28,7 @@ Disallow: /tracks/qid-q125200744/wyd/
 Disallow: /tracks/qid-q58376491/that-season-you-were-in/
 Disallow: /tracks/qid-q58376491/farewell-again/
 Disallow: /tracks/qid-q58376491/spring-rain/
+Disallow: /tracks/qid-q100877982/love-riot/
 Disallow: /tracks/qid-q18381188/cheers-to-me/
 Disallow: /tracks/qid-q18381188/half-an-hour/
 Disallow: /tracks/qid-q16097465/track-64u17kcv64si/
@@ -129,6 +130,7 @@ Disallow: /tracks/qid-q114771282/never-again/
 Disallow: /tracks/qid-q114771282/scandalous-love-song/
 Disallow: /tracks/qid-q114771282/thursday-3a-m/
 Disallow: /tracks/qid-q114771282/magdalene/
+Disallow: /tracks/qid-q114771282/i-ain/
 Disallow: /tracks/qid-q114771282/outside-of-eden/
 Disallow: /tracks/qid-q119521803/to-the-moon/
 Disallow: /tracks/qid-q17278068/4-flowers/
@@ -156,6 +158,7 @@ Disallow: /tracks/qid-q225105/est-the-best-album/
 Disallow: /tracks/qid-q19794854/track-66-47jme7isx7j287kea64-e/
 Disallow: /tracks/qid-q60528927/say-yes/
 Disallow: /tracks/qid-q140681359/squeezy/
+Disallow: /tracks/qid-q101529383/blow-up/
 Disallow: /tracks/qid-q23936742/track-6rkb7j-b7j20/
 Disallow: /tracks/qid-q60994549/to-you/
 Disallow: /tracks/qid-q98096705/truth-or-dare/
@@ -205,6 +208,7 @@ Disallow: /tracks/qid-q15979639/the-sun/
 Disallow: /tracks/qid-q15979639/winds-of-time/
 Disallow: /tracks/qid-q60550265/fxxking-star/
 Disallow: /tracks/qid-q61057550/danger/
+Disallow: /tracks/qid-q61057550/shock/
 Disallow: /tracks/qid-q115099831/andless/
 Disallow: /tracks/qid-q28418030/count-down/
 Disallow: /tracks/qid-q141030335/grls/
