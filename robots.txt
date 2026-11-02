@@ -39,6 +39,7 @@ Disallow: /tracks/qid-q125200754/if-i-die-tomorrow/
 Disallow: /tracks/qid-q59793088/drip/
 Disallow: /tracks/qid-q59793088/enough/
 Disallow: /tracks/qid-q483751/d-day/
+Disallow: /tracks/qid-q135904079/replay/
 Disallow: /tracks/qid-q115967938/deserve/
 Disallow: /tracks/qid-q18381082/weird/
 Disallow: /tracks/qid-q18381082/time-for-me/
@@ -231,7 +232,9 @@ Disallow: /tracks/qid-q94615987/voodoo-doll/
 Disallow: /tracks/qid-q117354566/girls-on-fire/
 Disallow: /tracks/qid-q117354566/zzirit-feat-lu-sa-sonza/
 Disallow: /tracks/qid-q65665588/like-always/
+Disallow: /tracks/qid-q117191573/dienamite/
 Disallow: /tracks/qid-q483626/continue/
+Disallow: /tracks/qid-q117808633/run-with/
 Disallow: /tracks/qid-q118178306/animal/
 Sitemap: https://idol.suaveforge.com/sitemap.xml
 Sitemap: https://idol.suaveforge.com/feed.xml
