@@ -193,6 +193,7 @@ Disallow: /tracks/qid-q15979639/all-of-my-life/
 Disallow: /tracks/qid-q15979639/blingy/
 Disallow: /tracks/qid-q15979639/blingy-rom-baawla-remix/
 Disallow: /tracks/qid-q15979639/cheat-code-kenzie-re-works/
+Disallow: /tracks/qid-q15979639/cheetah/
 Disallow: /tracks/qid-q15979639/generation-hrs/
 Disallow: /tracks/qid-q15979639/hey-somebody-english-ver/
 Disallow: /tracks/qid-q15979639/high-beam/
