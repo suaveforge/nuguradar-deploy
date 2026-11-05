@@ -41,6 +41,7 @@ Disallow: /tracks/qid-q59793088/enough/
 Disallow: /tracks/qid-q483751/d-day/
 Disallow: /tracks/qid-q135904079/replay/
 Disallow: /tracks/qid-q115967938/deserve/
+Disallow: /tracks/qid-q115967938/s/
 Disallow: /tracks/qid-q18381082/weird/
 Disallow: /tracks/qid-q18381082/time-for-me/
 Disallow: /tracks/qid-q18381082/accio/
