@@ -106,7 +106,11 @@ Disallow: /tracks/qid-q51885404/to-the-moon/
 Disallow: /tracks/qid-q51885404/narr-84/
 Disallow: /tracks/qid-q109256946/j/
 Disallow: /tracks/qid-q122179261/you/
+Disallow: /tracks/qid-q112074413/anti-hero/
+Disallow: /tracks/qid-q112074413/back-2-the-future/
+Disallow: /tracks/qid-q112074413/dream-residue/
 Disallow: /tracks/qid-q112074413/rebels/
+Disallow: /tracks/qid-q112074413/track-7jew7jwg7is47y-sicjmgyvmhjvntldog54p/
 Disallow: /tracks/qid-q109375061/looks-can-kill/
 Disallow: /tracks/qid-q127162707/dumb-hot/
 Disallow: /tracks/qid-q127162707/kissing-you/
