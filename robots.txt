@@ -39,6 +39,7 @@ Disallow: /tracks/qid-q73795501/say-my-name/
 Disallow: /tracks/qid-q125200754/if-i-die-tomorrow/
 Disallow: /tracks/qid-q59793088/drip/
 Disallow: /tracks/qid-q59793088/enough/
+Disallow: /tracks/qid-q59793088/up/
 Disallow: /tracks/qid-q483751/d-day/
 Disallow: /tracks/qid-q135904079/replay/
 Disallow: /tracks/qid-q115967938/deserve/
@@ -223,6 +224,7 @@ Disallow: /tracks/qid-q60550265/fxxking-star/
 Disallow: /tracks/qid-q61057550/danger/
 Disallow: /tracks/qid-q61057550/shock/
 Disallow: /tracks/qid-q115099831/andless/
+Disallow: /tracks/qid-q115099831/i-want-you-to-know/
 Disallow: /tracks/qid-q28418030/count-down/
 Disallow: /tracks/qid-q141030335/grls/
 Disallow: /tracks/qid-q141030335/sun-kiss/
