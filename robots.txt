@@ -35,6 +35,7 @@ Disallow: /tracks/qid-q18381188/half-an-hour/
 Disallow: /tracks/qid-q16097465/track-64u17kcv64si/
 Disallow: /tracks/qid-q16097465/track-64-m66as6rogioupjoumroqzoa/
 Disallow: /tracks/qid-q16097465/track-66mu7jwe66as/
+Disallow: /tracks/qid-q123458788/king/
 Disallow: /tracks/qid-q73795501/say-my-name/
 Disallow: /tracks/qid-q125200754/if-i-die-tomorrow/
 Disallow: /tracks/qid-q59793088/drip/
@@ -233,6 +234,7 @@ Disallow: /tracks/qid-q124091148/soda-soda/
 Disallow: /tracks/qid-q124091148/track-64k0ioydtoumhoydhcdrtojrn6zspjg/
 Disallow: /tracks/qid-q124362218/milky-way/
 Disallow: /tracks/qid-q124362218/track-7zwy64qy65wfiouzhouvhq/
+Disallow: /tracks/qid-q134540226/max-match/
 Disallow: /tracks/qid-q134540226/mix-match/
 Disallow: /tracks/qid-q134540226/wannabe/
 Disallow: /tracks/qid-q134540226/just-in-love/
