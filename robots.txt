@@ -41,6 +41,7 @@ Disallow: /tracks/qid-q125200754/if-i-die-tomorrow/
 Disallow: /tracks/qid-q59793088/drip/
 Disallow: /tracks/qid-q59793088/enough/
 Disallow: /tracks/qid-q59793088/up/
+Disallow: /tracks/qid-q59793088/up-orchestra-ver/
 Disallow: /tracks/qid-q483751/d-day/
 Disallow: /tracks/qid-q135904079/replay/
 Disallow: /tracks/qid-q115967938/deserve/
@@ -222,6 +223,7 @@ Disallow: /tracks/qid-q15979639/sunburst/
 Disallow: /tracks/qid-q15979639/surfin/
 Disallow: /tracks/qid-q15979639/the-sun/
 Disallow: /tracks/qid-q15979639/winds-of-time/
+Disallow: /tracks/qid-q60550265/angel-bite/
 Disallow: /tracks/qid-q60550265/fxxking-star/
 Disallow: /tracks/qid-q61057550/danger/
 Disallow: /tracks/qid-q61057550/shock/
