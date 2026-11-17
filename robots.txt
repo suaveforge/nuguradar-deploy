@@ -42,6 +42,7 @@ Disallow: /tracks/qid-q59793088/drip/
 Disallow: /tracks/qid-q59793088/enough/
 Disallow: /tracks/qid-q59793088/up/
 Disallow: /tracks/qid-q59793088/up-orchestra-ver/
+Disallow: /tracks/qid-q59793088/thank-u/
 Disallow: /tracks/qid-q483751/d-day/
 Disallow: /tracks/qid-q135904079/replay/
 Disallow: /tracks/qid-q115967938/deserve/
@@ -174,6 +175,7 @@ Disallow: /tracks/qid-q19794854/track-66-47jme7isx7j287kea64-e/
 Disallow: /tracks/qid-q60528927/say-yes/
 Disallow: /tracks/qid-q140681359/squeezy/
 Disallow: /tracks/qid-q101529383/blow-up/
+Disallow: /tracks/qid-q101529383/momentum/
 Disallow: /tracks/qid-q23936742/track-6rkb7j-b7j20/
 Disallow: /tracks/qid-q60994549/to-you/
 Disallow: /tracks/qid-q98096705/truth-or-dare/
