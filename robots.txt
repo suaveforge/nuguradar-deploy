@@ -42,7 +42,9 @@ Disallow: /tracks/qid-q59793088/drip/
 Disallow: /tracks/qid-q59793088/enough/
 Disallow: /tracks/qid-q59793088/up/
 Disallow: /tracks/qid-q59793088/up-h4rdy-ver/
+Disallow: /tracks/qid-q59793088/up-i-hate-models-ver/
 Disallow: /tracks/qid-q59793088/up-orchestra-ver/
+Disallow: /tracks/qid-q59793088/up-r3hab-ver/
 Disallow: /tracks/qid-q59793088/up-spray-ver/
 Disallow: /tracks/qid-q59793088/thank-u/
 Disallow: /tracks/qid-q483751/d-day/
