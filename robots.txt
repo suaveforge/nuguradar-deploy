@@ -89,6 +89,7 @@ Disallow: /tracks/qid-q16097012/we-are/
 Disallow: /tracks/qid-q16097012/track-67ai7j2064ky/
 Disallow: /tracks/qid-q20733515/yes-i-know/
 Disallow: /tracks/qid-q20733515/track-64ii67aa7iwo642yioucoa/
+Disallow: /tracks/qid-q85825168/michael-jackson-jam-dangerous/
 Disallow: /tracks/qid-q99479445/checkmate/
 Disallow: /tracks/qid-q99479445/i-want-you/
 Disallow: /tracks/qid-q140373975/touch/
